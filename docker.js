@@ -11,7 +11,7 @@ runCmd(`docker push 118.195.236.91:5000/chatgpt-web:${version}`)
 console.error(colors('blue', '镜像上传完毕！！！'))
 console.error(colors('blue', '请执行以下命令启动镜像'))
 console.error(colors('blue', `docker pull 127.0.0.1:5000/chatgpt-web:${version}`))
-console.error(colors('blue', `docker run --net=host --name chatgpt-web -d --env HTTPS_PROXY=http://127.0.0.1:15777 --env OPENAI_API_KEY=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 127.0.0.1:5000/chatgpt-web:${version}`))
+console.error(colors('blue', `docker run --net=host --name chatgpt-web -d --env HTTPS_PROXY=http://127.0.0.1:15777 --env OPENAI_API_KEY=sk-XXXX 127.0.0.1:5000/chatgpt-web:${version}`))
 
 function runCmd(cmd) {
   execSync(cmd, { maxBuffer: 1024 * 1024 * 10 }, (error, stdout, stderr) => {
