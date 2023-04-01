@@ -59,6 +59,7 @@ export default {
     name: 'Name',
     description: 'Description',
     role: 'Role',
+    temperature: 'Temperature',
     resetUserInfo: 'Reset UserInfo',
     chatHistory: 'ChatHistory',
     theme: 'Theme',

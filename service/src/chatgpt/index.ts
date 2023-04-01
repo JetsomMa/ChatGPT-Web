@@ -52,7 +52,7 @@ let api: ChatGPTAPI | ChatGPTUnofficialProxyAPI
       // if use 32k model
       if (model.toLowerCase().includes('32k')) {
         options.maxModelTokens = 32768
-        options.maxResponseTokens = 8192
+        options.maxResponseTokens = 16384
       }
       else {
         options.maxModelTokens = 8192
@@ -88,7 +88,7 @@ let api: ChatGPTAPI | ChatGPTUnofficialProxyAPI
 })()
 
 async function chatReplyProcess(options: RequestOptions) {
-  const { message, lastContext, process, systemMessage } = options
+  const { message, lastContext, process, systemMessage, temperature } = options
   try {
     let options: SendMessageOptions = { timeoutMs }
 
@@ -103,6 +103,11 @@ async function chatReplyProcess(options: RequestOptions) {
       else
         options = { ...lastContext }
     }
+
+    console.log('options', options)
+
+    options.completionParams = options.completionParams || {}
+    options.completionParams.temperature = temperature ?? 0.1
 
     const response = await api.sendMessage(message, {
       ...options,
