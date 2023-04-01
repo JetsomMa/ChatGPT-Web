@@ -1,10 +1,35 @@
 import express from 'express'
+import { RDSClient } from 'ali-rds'
 import type { RequestProps } from './types'
 import type { ChatMessage } from './chatgpt'
 import { chatConfig, chatReplyProcess, currentModel } from './chatgpt'
 import { auth } from './middleware/auth'
 import { limiter } from './middleware/limiter'
 import { isNotEmptyString } from './utils/is'
+
+function dateFormat(dataStamp) {
+  const date = new Date(dataStamp)
+  const year = date.getFullYear()
+
+  const month = date.getMonth() + 1 < 10 ? `0${date.getMonth() + 1}` : date.getMonth() + 1
+  const day = date.getDate() < 10 ? `0${date.getDate()}` : date.getDate()
+  const hours = date.getHours() < 10 ? `0${date.getHours()}` : date.getHours()
+  const minutes = date.getMinutes() < 10 ? `0${date.getMinutes()}` : date.getMinutes()
+  const seconds = date.getSeconds() < 10 ? `0${date.getSeconds()}` : date.getSeconds()
+  // 拼接
+  return `${year}${month}${day} ${hours}:${minutes}:${seconds}`
+}
+
+let sqlDB: RDSClient | undefined
+if (process.env.DATASET_MYSQL_USER) {
+  sqlDB = new RDSClient({
+    host: '118.195.236.91',
+    port: 3306,
+    user: process.env.DATASET_MYSQL_USER,
+    password: process.env.DATASET_MYSQL_PASSWORD,
+    database: process.env.DATASET_MYSQL_DATABASE,
+  })
+}
 
 const app = express()
 const router = express.Router()
@@ -22,8 +47,10 @@ app.all('*', (_, res, next) => {
 router.post('/chat-process', [auth, limiter], async (req, res) => {
   res.setHeader('Content-type', 'application/octet-stream')
 
+  let myChat: ChatMessage | undefined
+  const { prompt, options = {}, systemMessage, temperature } = req.body as RequestProps
+
   try {
-    const { prompt, options = {}, systemMessage, temperature } = req.body as RequestProps
     let firstChunk = true
     await chatReplyProcess({
       message: prompt,
@@ -31,6 +58,8 @@ router.post('/chat-process', [auth, limiter], async (req, res) => {
       process: (chat: ChatMessage) => {
         res.write(firstChunk ? JSON.stringify(chat) : `\n${JSON.stringify(chat)}`)
         firstChunk = false
+
+        myChat = chat
       },
       systemMessage,
       temperature,
@@ -40,6 +69,14 @@ router.post('/chat-process', [auth, limiter], async (req, res) => {
     res.write(JSON.stringify(error))
   }
   finally {
+    try {
+      if (sqlDB)
+        sqlDB.insert('chatweb', { prompt, conversation: myChat.text, conversationId: myChat.id, finish_reason: myChat.detail.choices[0].finish_reason, datetime: dateFormat(new Date().getTime()) })
+    }
+    catch (error) {
+      console.error(error)
+    }
+    myChat = undefined
     res.end()
   }
 })

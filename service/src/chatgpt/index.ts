@@ -104,8 +104,6 @@ async function chatReplyProcess(options: RequestOptions) {
         options = { ...lastContext }
     }
 
-    console.log('options', options)
-
     options.completionParams = options.completionParams || {}
     options.completionParams.temperature = temperature ?? 0.1
 
