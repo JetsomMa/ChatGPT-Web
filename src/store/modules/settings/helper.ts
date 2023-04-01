@@ -8,9 +8,8 @@ export interface SettingsState {
 }
 
 export function defaultSetting(): SettingsState {
-  const currentDate = new Date().toISOString().split('T')[0]
   return {
-    systemMessage: `You are ChatGPT, a large language model trained by OpenAI. Answer as concisely as possible.\nKnowledge cutoff: 2021-09-01\nCurrent date: ${currentDate}`,
+    systemMessage: '您是一个知识渊博的学者，有着极其严谨而又风趣的聊天态度，请尽可能准确详细的回答问题。',
     temperature: 0,
   }
 }
