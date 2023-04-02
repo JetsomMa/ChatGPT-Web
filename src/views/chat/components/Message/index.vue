@@ -8,6 +8,7 @@ import { copyText } from '@/utils/format'
 import { useIconRender } from '@/hooks/useIconRender'
 import { t } from '@/locales'
 import { useBasicLayout } from '@/hooks/useBasicLayout'
+import { SpeechSynthesiser } from '@/api/speechSynthesiser'
 
 interface Props {
   dateTime?: string
@@ -48,6 +49,11 @@ const options = computed(() => {
       key: 'delete',
       icon: iconRender({ icon: 'ri:delete-bin-line' }),
     },
+    {
+      label: '播报',
+      key: 'read',
+      icon: iconRender({ icon: 'mdi:broadcast' }),
+    },
   ]
 
   if (!props.inversion) {
@@ -61,13 +67,16 @@ const options = computed(() => {
   return common
 })
 
-function handleSelect(key: 'copyText' | 'delete' | 'toggleRenderType') {
+function handleSelect(key: 'copyText' | 'delete' | 'toggleRenderType' | 'read') {
   switch (key) {
     case 'copyText':
       copyText({ text: props.text ?? '' })
       return
     case 'toggleRenderType':
       asRawText.value = !asRawText.value
+      return
+    case 'read':
+      SpeechSynthesiser.read(props.text || '')
       return
     case 'delete':
       emit('delete')
