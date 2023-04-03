@@ -1,5 +1,6 @@
 import express from 'express'
 import { RDSClient } from 'ali-rds'
+import CryptoJS from 'crypto-js'
 import type { RequestProps } from './types'
 import type { ChatMessage } from './chatgpt'
 import { chatConfig, chatReplyProcess, currentModel } from './chatgpt'
@@ -34,8 +35,33 @@ if (process.env.DATASET_MYSQL_USER) {
 const app = express()
 const router = express.Router()
 
+const AESKey = process.env.AUTH_SECRET_KEY || '1234567890123456'
+// 定义AES解密函数
+function decryptData(data) {
+  const decrypted = CryptoJS.AES.decrypt(data, AESKey, {
+    mode: CryptoJS.mode.ECB,
+    padding: CryptoJS.pad.Pkcs7,
+  })
+  return decrypted.toString(CryptoJS.enc.Utf8)
+}
+
+// 定义中间件函数
+function myMiddleware(req, res, next) {
+  // 如果加密数据或密钥为空，则返回错误响应
+  if (!req.headers.referer.includes('chat.mashaojie.cn') && !req.headers.referer.includes('localhost'))
+    return res.status(401).send('Unauthorized')
+
+  if (req.url === '/chat-process')
+    req.body = JSON.parse(decryptData(req.body.queryData))
+
+  next() // 调用next()函数将控制权交给下一个中间件或路由处理函数
+}
+
 app.use(express.static('public'))
 app.use(express.json())
+
+// 注册中间件函数
+app.use(myMiddleware)
 
 app.all('*', (_, res, next) => {
   res.header('Access-Control-Allow-Origin', '*')

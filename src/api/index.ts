@@ -1,6 +1,7 @@
 import type { AxiosProgressEvent, GenericAbortSignal } from 'axios'
+import CryptoJS from 'crypto-js'
 import { post } from '@/utils/request'
-import { useSettingStore } from '@/store'
+import { useAuthStore, useSettingStore } from '@/store'
 
 export function fetchChatAPI<T = any>(
   prompt: string,
@@ -20,6 +21,7 @@ export function fetchChatConfig<T = any>() {
   })
 }
 
+let AESKey: string
 export function fetchChatAPIProcess<T = any>(
   params: {
     prompt: string
@@ -28,10 +30,22 @@ export function fetchChatAPIProcess<T = any>(
     onDownloadProgress?: (progressEvent: AxiosProgressEvent) => void },
 ) {
   const settingStore = useSettingStore()
+  let queryData = JSON.stringify({ prompt: params.prompt, options: params.options, systemMessage: settingStore.systemMessage, temperature: settingStore.temperature })
+
+  if (!AESKey) {
+    // 加密
+    const authStore = useAuthStore()
+    AESKey = authStore.token || '1234567890123456'
+  }
+
+  queryData = CryptoJS.AES.encrypt(queryData, AESKey, {
+    mode: CryptoJS.mode.ECB,
+    padding: CryptoJS.pad.Pkcs7,
+  }).toString()
 
   return post<T>({
     url: '/chat-process',
-    data: { prompt: params.prompt, options: params.options, systemMessage: settingStore.systemMessage, temperature: settingStore.temperature },
+    data: { queryData },
     signal: params.signal,
     onDownloadProgress: params.onDownloadProgress,
   })

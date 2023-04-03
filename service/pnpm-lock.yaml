@@ -7,6 +7,7 @@ specifiers:
   ali-rds: ^5.1.2
   axios: ^1.3.4
   chatgpt: ^5.1.2
+  crypto-js: ^4.1.1
   dotenv: ^16.0.3
   eslint: ^8.35.0
   esno: ^0.16.3
@@ -24,6 +25,7 @@ dependencies:
   ali-rds: 5.1.2
   axios: 1.3.4
   chatgpt: 5.1.2
+  crypto-js: 4.1.1
   dotenv: 16.0.3
   esno: 0.16.3
   express: 4.18.2
@@ -1060,6 +1062,10 @@ packages:
       shebang-command: 2.0.0
       which: 2.0.2
     dev: true
+
+  /crypto-js/4.1.1:
+    resolution: {integrity: sha512-o2JlM7ydqd3Qk9CA0L4NL6mTzU2sdx96a+oOfPu8Mkl/PK51vSyoi8/rQ8NknZtk44vq15lmhAj9CIAGwgeWKw==}
+    dev: false
 
   /cssesc/3.0.0:
     resolution: {integrity: sha512-/Tb/JcjK111nNScGob5MNtsntNM1aCNUDipB/TkwZFhyDrrE47SOx/18wF2bbjgc3ZzCSKW1T5nt5EbFoAz/Vg==}
