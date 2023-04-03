@@ -51,7 +51,7 @@ function myMiddleware(req, res, next) {
   if (!req.headers.referer.includes('chat.mashaojie.cn') && !req.headers.referer.includes('localhost'))
     return res.status(401).send('Unauthorized')
 
-  if (req.url === '/chat-process')
+  if (req.url.includes('/chat-process'))
     req.body = JSON.parse(decryptData(req.body.queryData))
 
   next() // 调用next()函数将控制权交给下一个中间件或路由处理函数
