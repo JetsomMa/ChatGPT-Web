@@ -458,6 +458,14 @@ onMounted(() => {
   scrollToBottom()
   if (inputRef.value && !isMobile.value)
     inputRef.value?.focus()
+
+  // 开始语音识别插件注册
+  document.dispatchEvent(new CustomEvent('init-speech-ball'))
+  // 当语音识别确认时候触发事件
+  document.addEventListener('speech-comfirm', (e: any) => {
+    prompt.value = e.detail.result
+    handleSubmit()
+  })
 })
 
 onUnmounted(() => {

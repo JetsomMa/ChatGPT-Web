@@ -8,14 +8,10 @@
 	<meta name="viewport"
 		content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, viewport-fit=cover" />
 	<title>ChatGPT Web</title>
-	<!-- <script src="https://www.mashaojie.cn/script/active-key.min.js" charset="UTF-8"></script>
-  <script src="./js/speechrecognizer.js"></script>
-  <script src="https://www.mashaojie.cn/script/operation-ball.min.js" charset="UTF-8"></script> -->
+	<script src="https://www.mashaojie.cn/script/active-key.min.js" charset="UTF-8"></script>
+  <script src="https://www.mashaojie.cn/script/speechrecognizer.js"></script>
+  <script src="https://www.mashaojie.cn/script/operation-ball.js" charset="UTF-8"></script>
 	<script>
-		document.addEventListener('contextmenu', (event) => {
-		  event.preventDefault()
-		})
-
 		window.speechSynthesis.onvoiceschanged = () => {
 		  // 获取语音引擎列表
 		  const voices = window.speechSynthesis.getVoices().filter(voice => voice.lang === 'zh-CN')
@@ -27,15 +23,6 @@
 <body class="dark:bg-black">
 	<div id="app">
 		<style>
-			* {
-				-webkit-touch-callout: none;
-				-webkit-user-select: none;
-				-khtml-user-select: none;
-				-moz-user-select: none;
-				-ms-user-select: none;
-				user-select: none;
-			}
-
 			.loading-wrap {
 				display: flex;
 				justify-content: center;
