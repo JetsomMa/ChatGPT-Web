@@ -9,7 +9,9 @@ export class SpeechSynthesiser {
     const utterance = new SpeechSynthesisUtterance(text)
     utterance.pitch = 1.05
     utterance.rate = 1.05
-    utterance.voice = window.mySpeechSynthesisvoice
+    if (window.mySpeechSynthesisvoice)
+      utterance.voice = window.mySpeechSynthesisvoice
+
     speechSynthesis.speak(utterance)
   }
 }

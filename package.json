@@ -11,8 +11,9 @@
     "vue"
   ],
   "scripts": {
+    "test": "run-p type-check dev",
     "dev": "vite",
-    "build": "vite build",
+    "build": "run-p type-check build-only",
     "preview": "vite preview",
     "build-only": "vite build",
     "type-check": "vue-tsc --noEmit",

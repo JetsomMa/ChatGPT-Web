@@ -20,9 +20,6 @@ import { t } from '@/locales'
 let controller = new AbortController()
 
 const openLongReply = import.meta.env.VITE_GLOB_OPEN_LONG_REPLY === 'true'
-const appId = import.meta.env.VITE_GLOB_XF_APP_ID
-const apiKey = import.meta.env.VITE_GLOB_XF_API_KEY
-const apiSecret = import.meta.env.VITE_GLOB_XF_API_SECRET
 const route = useRoute()
 const dialog = useDialog()
 const ms = useMessage()
