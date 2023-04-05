@@ -35,7 +35,7 @@ if (process.env.DATASET_MYSQL_USER) {
 const app = express()
 const router = express.Router()
 
-const AESKey = process.env.AUTH_SECRET_KEY || '1234567890123456'
+const AESKey = CryptoJS.MD5(process.env.AUTH_SECRET_KEY || '1234567890123456').toString()
 // 定义AES解密函数
 function decryptData(data) {
   const decrypted = CryptoJS.AES.decrypt(data, AESKey, {

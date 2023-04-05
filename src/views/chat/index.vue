@@ -16,8 +16,6 @@ import { useBasicLayout } from '@/hooks/useBasicLayout'
 import { useChatStore, usePromptStore } from '@/store'
 import { fetchChatAPIProcess } from '@/api'
 import { t } from '@/locales'
-import type { StatusChange } from '@/api/IatRecorder'
-import { IatRecorder } from '@/api/IatRecorder'
 
 let controller = new AbortController()
 
@@ -456,121 +454,7 @@ const footerClass = computed(() => {
   return classes
 })
 
-const speechInputVisiable = ref<boolean>(false)
-const speechInput = ref<string>('')
-const speechInputplaceholder = computed(() => {
-  return t('chat.speechInputplaceholder')
-})
-/// ////////////////////// 讯飞语音识别 /////////////////////////
-const iatRecorder = ref<IatRecorder | null>(null) // 讯飞语音识别对象
-const speechSenconds = ref<number>(0) // 语音识别时长
-const speechSencondsInterval = ref<NodeJS.Timeout | null>(null) // 语音识别时长计时器
-function initIatRecorder() {
-  if (!iatRecorder.value) {
-    iatRecorder.value = new IatRecorder({ appId, apiKey, apiSecret })
-    iatRecorder.value.onStatusChange = onStatusChange
-    // 监听识别结果的变化
-    iatRecorder.value.onTextChange = onTextChange
-    iatRecorder.value.finallyFunction = finallyFunction
-    window.iatRecorder = iatRecorder.value
-  }
-  else {
-    iatRecorder.value.recorderInit()
-  }
-}
-
-function finallyFunction(resultText: string) {
-  prompt.value += resultText
-  speechInput.value = ''
-}
-function onTextChange() {
-  speechInput.value = iatRecorder.value?.resultText || ''
-}
-
-function onStatusChange(statusChange: StatusChange) {
-  if (statusChange.status === 'doing') {
-    speechSenconds.value = 59
-    speechSencondsInterval.value = setInterval(() => {
-      speechSenconds.value -= 1
-      if (speechSenconds.value <= 0)
-        speechInputEnd()
-    }, 1000)
-  }
-}
-/// ////////////////////// 讯飞语音识别-结束 /////////////////////////
-
-/// ////////////////////// web speech api /////////////////////////
-// window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
-// window.SpeechRecognitionEvent = window.SpeechRecognitionEvent || window.webkitSpeechRecognitionEvent
-// const recognition = ref<window.SpeechRecognition | null>(null) // SpeechRecognition对象
-
-// function handleStart() {
-//   recognition.value.startStatus = true
-// }
-
-// function handleEnd() {
-//   recognition.value.startStatus = false
-// }
-
-// function handleSpeechResult(event: any) {
-//   for (let i = event.resultIndex; i < event.results.length; i++) {
-//     const transcript = event.results[i][0].transcript
-//     if (event.results[i].isFinal) {
-//       if (!prompt.value)
-//         prompt.value = speechInput.value
-//       else
-//         prompt.value += `，${speechInput.value}`
-
-//       speechInput.value = ''
-//     }
-//     else {
-//       speechInput.value = transcript
-//     }
-//   }
-// }
-/// ////////////////////// web speech api 结束 /////////////////////////
-function speechInputClick() {
-  speechInputVisiable.value = !speechInputVisiable.value
-  // if (!('SpeechRecognition' in window) || isMobile.value) {
-  if (speechInputVisiable.value) {
-    initIatRecorder()
-  }
-  else {
-    if (iatRecorder.value)
-      iatRecorder.value.destroy()
-  }
-  // }
-}
-
-function speechInputStart() {
-  // if (recognition.value && !recognition.value.startStatus)
-  //   recognition.value.start()
-
-  if (iatRecorder.value)
-    iatRecorder.value.start()
-}
-
-function speechInputEnd() {
-  // if (recognition.value && recognition.value.startStatus)
-  //   recognition.value.stop()
-
-  iatRecorder.value && iatRecorder.value.stop()
-  clearInterval(speechSencondsInterval.value as NodeJS.Timeout)
-  speechSencondsInterval.value = null
-  speechSenconds.value = 0
-}
-
 onMounted(() => {
-  // if ('SpeechRecognition' in window && !isMobile.value) {
-  //   recognition.value = new window.SpeechRecognition()
-  //   recognition.value.continuous = true // 是否连续识别
-  //   recognition.value.interimResults = true // 是否返回临时结果
-  //   recognition.value.lang = 'zh-CN' // 识别语言为中文
-  //   recognition.value.onresult = handleSpeechResult // 绑定onresult事件
-  //   recognition.value.onstart = handleStart
-  //   recognition.value.onend = handleEnd
-  // }
-
   scrollToBottom()
   if (inputRef.value && !isMobile.value)
     inputRef.value?.focus()
@@ -579,11 +463,6 @@ onMounted(() => {
 onUnmounted(() => {
   if (loading.value)
     controller.abort()
-
-  if (iatRecorder.value) {
-    iatRecorder.value.destroy()
-    iatRecorder.value.destroyWorker()
-  }
 })
 </script>
 
@@ -678,42 +557,7 @@ onUnmounted(() => {
               </span>
             </template>
           </NButton>
-          <HoverButton style="transform: matrix(0.7, 0, 0, 0.7, 0, 0);" :style="!speechInputVisiable ? 'color:#999999;' : 'color:#9671e3;'" @click="speechInputClick">
-            <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="11" rx="3" /><path d="M5 10a7 7 0 0 0 14 0" /><path d="M8 21h8" /><path d="M12 17v4" /></g></svg>
-          </HoverButton>
         </div>
-        <template v-if="isMobile && speechInputVisiable">
-          <div style="padding: 7px 10px;" class="flex items-center justify-between space-x-2">
-            <NInput
-              v-model:value="speechInput"
-              type="textarea"
-              :placeholder="speechInputplaceholder"
-              :autosize="{ minRows: 1, maxRows: isMobile ? 4 : 8 }"
-              :readonly="true"
-            />
-          </div>
-          <div style="padding: 2px 10px;" class="flex items-center justify-between space-x-2">
-            <NButton v-if="isMobile" :ghost="!speechSenconds" color="#8a2be2" style="width: 100%;" type="primary" @touchstart="speechInputStart" @touchend="speechInputEnd">
-              <span v-if="speechSenconds">开始识别[{{ speechSenconds }}s]</span>
-              <span v-else>启动语音识别</span>
-            </NButton>
-          </div>
-        </template>
-        <template v-if="!isMobile && speechInputVisiable">
-          <div style="padding: 7px 10px;" class="flex items-center justify-between space-x-2">
-            <NInput
-              v-model:value="speechInput"
-              type="textarea"
-              :placeholder="speechInputplaceholder"
-              :autosize="{ minRows: 1, maxRows: isMobile ? 4 : 8 }"
-              :readonly="true"
-            />
-            <NButton v-if="!isMobile" :ghost="!speechSenconds" color="#8a2be2" type="primary" @mousedown="speechInputStart" @mouseup="speechInputEnd">
-              <span v-if="speechSenconds">开始识别[{{ speechSenconds }}s]</span>
-              <span v-else>启动语音识别</span>
-            </NButton>
-          </div>
-        </template>
       </div>
     </footer>
   </div>

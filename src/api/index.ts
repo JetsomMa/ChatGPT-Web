@@ -35,7 +35,7 @@ export function fetchChatAPIProcess<T = any>(
   if (!AESKey) {
     // 加密
     const authStore = useAuthStore()
-    AESKey = authStore.token || '1234567890123456'
+    AESKey = CryptoJS.MD5(authStore.token || '1234567890123456').toString()
   }
 
   queryData = CryptoJS.AES.encrypt(queryData, AESKey, {
