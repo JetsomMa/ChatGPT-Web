@@ -48,7 +48,7 @@ function decryptData(data) {
 // 定义中间件函数
 function myMiddleware(req, res, next) {
   // 如果加密数据或密钥为空，则返回错误响应
-  if (!req.headers.referer.includes('chat.mashaojie.cn') && !req.headers.referer.includes('localhost'))
+  if (!req.headers.referer.includes('mashaojie.cn') && !req.headers.referer.includes('localhost') && !req.headers.referer.includes('192.168.'))
     return res.status(401).send('Unauthorized')
 
   if (req.url.includes('/chat-process'))
@@ -120,6 +120,8 @@ router.post('/config', auth, async (req, res) => {
 router.post('/session', async (req, res) => {
   try {
     const AUTH_SECRET_KEY = process.env.AUTH_SECRET_KEY
+    console.error('AUTH_SECRET_KEY', AUTH_SECRET_KEY)
+
     const hasAuth = isNotEmptyString(AUTH_SECRET_KEY)
     res.send({ status: 'Success', message: '', data: { auth: hasAuth, model: currentModel() } })
   }

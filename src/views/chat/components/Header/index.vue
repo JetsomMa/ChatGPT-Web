@@ -59,7 +59,7 @@ function toggleUsingContext() {
         class="flex-1 px-4 pr-6 overflow-hidden cursor-pointer select-none text-ellipsis whitespace-nowrap"
         @dblclick="onScrollToTop"
       >
-        {{ currentChatHistory?.title ?? '' }}
+        {{ (currentChatHistory || {}).title || '' }}
       </h1>
       <div class="flex items-center space-x-2">
         <HoverButton @click="toggleUsingContext">

@@ -37,15 +37,15 @@ function http<T = any>(
   }
 
   const failHandler = (error: Response<Error>) => {
-    afterRequest?.()
-    throw new Error(error?.message || 'Error')
+    afterRequest && afterRequest()
+    throw new Error((error || {}).message || 'Error')
   }
 
-  beforeRequest?.()
+  beforeRequest && beforeRequest()
 
   method = method || 'GET'
 
-  const params = Object.assign(typeof data === 'function' ? data() : data ?? {}, {})
+  const params = Object.assign(typeof data === 'function' ? data() : (data || {}), {})
 
   return method === 'GET'
     ? request.get(url, { params, signal, onDownloadProgress }).then(successHandler, failHandler)

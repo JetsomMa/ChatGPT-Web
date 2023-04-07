@@ -34,7 +34,7 @@ async function handleVerify() {
     window.location.reload()
   }
   catch (error: any) {
-    ms.error(error.message ?? 'error')
+    ms.error(error.message || 'error')
     authStore.removeToken()
     token.value = ''
   }

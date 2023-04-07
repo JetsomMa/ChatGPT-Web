@@ -26,7 +26,7 @@ const mdi = new MarkdownIt({
   highlight(code, language) {
     const validLang = !!(language && hljs.getLanguage(language))
     if (validLang) {
-      const lang = language ?? ''
+      const lang = language || ''
       return highlightBlock(hljs.highlight(code, { language: lang }).value, lang)
     }
     return highlightBlock(hljs.highlightAuto(code).value, '')
@@ -50,7 +50,7 @@ const wrapClass = computed(() => {
 })
 
 const text = computed(() => {
-  const value = props.text ?? ''
+  const value = props.text || ''
   if (!props.asRawText)
     return mdi.render(value)
   return value

@@ -5,19 +5,19 @@ const setupScrollbarStyle = () => {
   const styleContent = `
     ::-webkit-scrollbar {
       background-color: transparent;
-      width: ${lightTheme.Scrollbar.common?.scrollbarWidth};
+      width: ${(lightTheme.Scrollbar.common || {}).scrollbarWidth};
     }
     ::-webkit-scrollbar-thumb {
-      background-color: ${lightTheme.Scrollbar.common?.scrollbarColor};
-      border-radius: ${lightTheme.Scrollbar.common?.scrollbarBorderRadius};
+      background-color: ${(lightTheme.Scrollbar.common || {}).scrollbarColor};
+      border-radius: ${(lightTheme.Scrollbar.common || {}).scrollbarBorderRadius};
     }
     html.dark ::-webkit-scrollbar {
       background-color: transparent;
-      width: ${darkTheme.Scrollbar.common?.scrollbarWidth};
+      width: ${(darkTheme.Scrollbar.common || {}).scrollbarWidth};
     }
     html.dark ::-webkit-scrollbar-thumb {
-      background-color: ${darkTheme.Scrollbar.common?.scrollbarColor};
-      border-radius: ${darkTheme.Scrollbar.common?.scrollbarBorderRadius};
+      background-color: ${(darkTheme.Scrollbar.common || {}).scrollbarColor};
+      border-radius: ${(darkTheme.Scrollbar.common || {}).scrollbarBorderRadius};
     }
   `
 

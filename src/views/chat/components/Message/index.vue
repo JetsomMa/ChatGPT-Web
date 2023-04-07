@@ -70,7 +70,7 @@ const options = computed(() => {
 function handleSelect(key: 'copyText' | 'delete' | 'toggleRenderType' | 'read') {
   switch (key) {
     case 'copyText':
-      copyText({ text: props.text ?? '' })
+      copyText({ text: props.text || '' })
       return
     case 'toggleRenderType':
       asRawText.value = !asRawText.value
@@ -84,7 +84,7 @@ function handleSelect(key: 'copyText' | 'delete' | 'toggleRenderType' | 'read') 
 }
 
 function handleRegenerate() {
-  messageRef.value?.scrollIntoView()
+  messageRef.value && messageRef.value.scrollIntoView && messageRef.value.scrollIntoView()
   emit('regenerate')
 }
 </script>

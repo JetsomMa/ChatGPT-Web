@@ -20,11 +20,11 @@ const theme = computed(() => appStore.theme)
 
 const userInfo = computed(() => userStore.userInfo)
 
-const avatar = ref(userInfo.value.avatar ?? '')
+const avatar = ref(userInfo.value.avatar || '')
 
-const name = ref(userInfo.value.name ?? '')
+const name = ref(userInfo.value.name || '')
 
-const description = ref(userInfo.value.description ?? '')
+const description = ref(userInfo.value.description || '')
 
 const language = computed({
   get() {

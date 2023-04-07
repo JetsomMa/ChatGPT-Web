@@ -9,8 +9,8 @@ const settingStore = useSettingStore()
 
 const ms = useMessage()
 
-const systemMessage = ref(settingStore.systemMessage ?? '')
-const temperature = ref(settingStore.temperature ?? 0.2)
+const systemMessage = ref(settingStore.systemMessage || '')
+const temperature = ref(settingStore.temperature || 0)
 
 function updateSettings(options: Partial<SettingsState>) {
   settingStore.updateSetting(options)

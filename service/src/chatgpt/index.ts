@@ -105,12 +105,12 @@ async function chatReplyProcess(options: RequestOptions) {
     }
 
     options.completionParams = options.completionParams || {}
-    options.completionParams.temperature = temperature ?? 0.1
+    options.completionParams.temperature = temperature || 0
 
     const response = await api.sendMessage(message, {
       ...options,
       onProgress: (partialResponse) => {
-        process?.(partialResponse)
+        process && process(partialResponse)
       },
     })
 
@@ -121,7 +121,7 @@ async function chatReplyProcess(options: RequestOptions) {
     global.console.log(error)
     if (Reflect.has(ErrorCodeMessage, code))
       return sendResponse({ type: 'Fail', message: ErrorCodeMessage[code] })
-    return sendResponse({ type: 'Fail', message: error.message ?? 'Please check the back-end console' })
+    return sendResponse({ type: 'Fail', message: error.message || 'Please check the back-end console' })
   }
 }
 
@@ -139,7 +139,7 @@ async function fetchBalance() {
   try {
     const headers = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${OPENAI_API_KEY}` }
     const response = await axios.get(`${API_BASE_URL}/dashboard/billing/credit_grants`, { headers })
-    const balance = response.data.total_available ?? 0
+    const balance = response.data.total_available || 0
     return Promise.resolve(balance.toFixed(3))
   }
   catch {
@@ -149,8 +149,8 @@ async function fetchBalance() {
 
 async function chatConfig() {
   const balance = await fetchBalance()
-  const reverseProxy = process.env.API_REVERSE_PROXY ?? '-'
-  const httpsProxy = (process.env.HTTPS_PROXY || process.env.ALL_PROXY) ?? '-'
+  const reverseProxy = process.env.API_REVERSE_PROXY || '-'
+  const httpsProxy = (process.env.HTTPS_PROXY || process.env.ALL_PROXY) || '-'
   const socksProxy = (process.env.SOCKS_PROXY_HOST && process.env.SOCKS_PROXY_PORT)
     ? (`${process.env.SOCKS_PROXY_HOST}:${process.env.SOCKS_PROXY_PORT}`)
     : '-'

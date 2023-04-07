@@ -9,10 +9,10 @@ export function useCopyCode() {
       const codeBlock = wrapper.querySelector('.code-block-body')
       if (copyBtn && codeBlock) {
         copyBtn.addEventListener('click', () => {
-          if (navigator.clipboard?.writeText)
-            navigator.clipboard.writeText(codeBlock.textContent ?? '')
+          if (navigator.clipboard && navigator.clipboard.writeText)
+            navigator.clipboard.writeText(codeBlock.textContent || '')
           else
-            copyText({ text: codeBlock.textContent ?? '', origin: true })
+            copyText({ text: codeBlock.textContent || '', origin: true })
         })
       }
     })

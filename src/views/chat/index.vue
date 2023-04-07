@@ -86,7 +86,7 @@ async function onConversation() {
   prompt.value = ''
 
   let options: Chat.ConversationRequest = {}
-  const lastContext = conversationList.value[conversationList.value.length - 1]?.conversationOptions
+  const lastContext = (conversationList.value[conversationList.value.length - 1] || {}).conversationOptions
 
   if (lastContext && usingContext.value)
     options = { ...lastContext }
@@ -127,7 +127,7 @@ async function onConversation() {
               dataSources.value.length - 1,
               {
                 dateTime: new Date().toLocaleString(),
-                text: lastText + data.text ?? '',
+                text: lastText + data.text || '',
                 inversion: false,
                 error: false,
                 loading: false,
@@ -155,7 +155,7 @@ async function onConversation() {
     await fetchChatAPIOnce()
   }
   catch (error: any) {
-    const errorMessage = error?.message ?? t('common.wrong')
+    const errorMessage = (error || {}).message || t('common.wrong')
 
     if (error.message === 'canceled') {
       updateChatSome(
@@ -171,7 +171,7 @@ async function onConversation() {
 
     const currentChat = getChatByUuidAndIndex(+uuid, dataSources.value.length - 1)
 
-    if (currentChat?.text && currentChat.text !== '') {
+    if (currentChat && currentChat.text && currentChat.text !== '') {
       updateChatSome(
         +uuid,
         dataSources.value.length - 1,
@@ -212,7 +212,7 @@ async function onRegenerate(index: number) {
 
   const { requestOptions } = dataSources.value[index]
 
-  let message = requestOptions?.prompt ?? ''
+  let message = (requestOptions || {}).prompt || ''
 
   let options: Chat.ConversationRequest = {}
 
@@ -257,7 +257,7 @@ async function onRegenerate(index: number) {
               index,
               {
                 dateTime: new Date().toLocaleString(),
-                text: lastText + data.text ?? '',
+                text: lastText + data.text || '',
                 inversion: false,
                 error: false,
                 loading: false,
@@ -293,7 +293,7 @@ async function onRegenerate(index: number) {
       return
     }
 
-    const errorMessage = error?.message ?? t('common.wrong')
+    const errorMessage = (error || {}).message || t('common.wrong')
 
     updateChat(
       +uuid,
@@ -454,7 +454,7 @@ const footerClass = computed(() => {
 onMounted(() => {
   scrollToBottom()
   if (inputRef.value && !isMobile.value)
-    inputRef.value?.focus()
+    inputRef.value.focus()
 
   // 开始语音识别插件注册
   document.dispatchEvent(new CustomEvent('init-speech-ball'))

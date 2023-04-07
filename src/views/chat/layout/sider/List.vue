@@ -26,12 +26,12 @@ async function handleSelect({ uuid }: Chat.History) {
 }
 
 function handleEdit({ uuid }: Chat.History, isEdit: boolean, event?: MouseEvent) {
-  event?.stopPropagation()
+  event && event.stopPropagation && event.stopPropagation()
   chatStore.updateHistory(uuid, { isEdit })
 }
 
 function handleDelete(index: number, event?: MouseEvent | TouchEvent) {
-  event?.stopPropagation()
+  event && event.stopPropagation && event.stopPropagation()
   chatStore.deleteHistory(index)
   if (isMobile.value)
     appStore.setSiderCollapsed(true)
@@ -40,7 +40,7 @@ function handleDelete(index: number, event?: MouseEvent | TouchEvent) {
 const handleDeleteDebounce = debounce(handleDelete, 600)
 
 function handleEnter({ uuid }: Chat.History, isEdit: boolean, event: KeyboardEvent) {
-  event?.stopPropagation()
+  event && event.stopPropagation && event.stopPropagation()
   if (event.key === 'Enter')
     chatStore.updateHistory(uuid, { isEdit })
 }
