@@ -6,6 +6,7 @@ declare global {
 		$dialog?: import('naive-ui').DialogProviderInst;
 		$message?: import('naive-ui').MessageProviderInst;
 		$notification?: import('naive-ui').NotificationProviderInst;
-		mySpeechSynthesisvoice?: SpeechSynthesisVoice
+		mySpeechSynthesisvoice?: SpeechSynthesisVoice;
+		UAParser?: any;
 	}
 }

@@ -22,6 +22,9 @@ export function fetchChatConfig<T = any>() {
 }
 
 let AESKey: string
+let parser = new window.UAParser(navigator.userAgent);
+let parserResults = parser.getResult();
+let device = `device: ${parserResults.device.vendor || ''} ${parserResults.device.type || ''} ${parserResults.device.model || ''}| os: ${parserResults.os.name || ''} ${parserResults.os.version || ''}| browser: ${parserResults.browser.name || ''} ${parserResults.browser.version || ''}| engine: ${parserResults.engine.name || ''} ${parserResults.engine.version || ''}`
 export function fetchChatAPIProcess<T = any>(
   params: {
     prompt: string
@@ -30,7 +33,7 @@ export function fetchChatAPIProcess<T = any>(
     onDownloadProgress?: (progressEvent: AxiosProgressEvent) => void },
 ) {
   const settingStore = useSettingStore()
-  let queryData = JSON.stringify({ prompt: params.prompt, options: params.options, systemMessage: settingStore.systemMessage, temperature: settingStore.temperature })
+  let queryData = JSON.stringify({ prompt: params.prompt, options: params.options, systemMessage: settingStore.systemMessage, temperature: settingStore.temperature, device })
 
   if (!AESKey) {
     // 加密

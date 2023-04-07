@@ -74,7 +74,7 @@ router.post('/chat-process', [auth, limiter], async (req, res) => {
   res.setHeader('Content-type', 'application/octet-stream')
 
   let myChat: ChatMessage | undefined
-  const { prompt, options = {}, systemMessage, temperature } = req.body as RequestProps
+  const { prompt, options = {}, systemMessage, temperature, device } = req.body as RequestProps
 
   try {
     let firstChunk = true
@@ -97,7 +97,7 @@ router.post('/chat-process', [auth, limiter], async (req, res) => {
   finally {
     try {
       if (sqlDB)
-        sqlDB.insert('chatweb', { prompt, conversation: myChat.text, conversationId: myChat.id, finish_reason: myChat.detail.choices[0].finish_reason, datetime: dateFormat(new Date().getTime()) })
+        sqlDB.insert('chatweb', { prompt, device, conversation: myChat.text, conversationId: myChat.id, finish_reason: myChat.detail.choices[0].finish_reason, datetime: dateFormat(new Date().getTime()) })
     }
     catch (error) {
       console.error(error)
