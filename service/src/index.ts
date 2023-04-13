@@ -74,10 +74,22 @@ router.post('/chat-process', [auth, limiter], async (req, res) => {
   res.setHeader('Content-type', 'application/octet-stream')
 
   let myChat: ChatMessage | undefined
-  const { prompt, options = {}, systemMessage, temperature, device } = req.body as RequestProps
+  let { prompt, options = {}, systemMessage, temperature, device } = req.body as RequestProps
 
+  const dbRecord: any = { prompt, device, datetime: dateFormat(new Date().getTime()) }
   try {
+    prompt = prompt.trim()
+
     if (prompt) {
+      try {
+        if (sqlDB) {
+          const dbresult = await sqlDB.insert('chatweb', dbRecord)
+          dbRecord.id = dbresult.insertId
+        }
+      }
+      catch (error) {
+        console.error(error)
+      }
       let firstChunk = true
       await chatReplyProcess({
         message: prompt,
@@ -93,6 +105,7 @@ router.post('/chat-process', [auth, limiter], async (req, res) => {
       })
     }
     else {
+      console.error('请输入您的会话内容')
       res.write('请输入您的会话内容')
     }
   }
@@ -101,8 +114,12 @@ router.post('/chat-process', [auth, limiter], async (req, res) => {
   }
   finally {
     try {
-      if (sqlDB)
-        sqlDB.insert('chatweb', { prompt, device, conversation: myChat.text, conversationId: myChat.id, finish_reason: myChat.detail.choices[0].finish_reason, datetime: dateFormat(new Date().getTime()) })
+      if (sqlDB) {
+        dbRecord.conversation = myChat.text
+        dbRecord.conversationId = myChat.id
+        dbRecord.finish_reason = myChat.detail.choices[0].finish_reason
+        sqlDB.update('chatweb', dbRecord)
+      }
     }
     catch (error) {
       console.error(error)
@@ -125,7 +142,6 @@ router.post('/config', auth, async (req, res) => {
 router.post('/session', async (req, res) => {
   try {
     const AUTH_SECRET_KEY = process.env.AUTH_SECRET_KEY
-    console.error('AUTH_SECRET_KEY', AUTH_SECRET_KEY)
 
     const hasAuth = isNotEmptyString(AUTH_SECRET_KEY)
     res.send({ status: 'Success', message: '', data: { auth: hasAuth, model: currentModel() } })

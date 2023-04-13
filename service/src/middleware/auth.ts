@@ -2,7 +2,6 @@ import { isNotEmptyString } from '../utils/is'
 
 const auth = async (req, res, next) => {
   const AUTH_SECRET_KEY = process.env.AUTH_SECRET_KEY
-  console.error('AUTH_SECRET_KEY', AUTH_SECRET_KEY)
   if (isNotEmptyString(AUTH_SECRET_KEY)) {
     try {
       const Authorization = req.header('Authorization')
