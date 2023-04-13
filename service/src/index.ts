@@ -77,19 +77,24 @@ router.post('/chat-process', [auth, limiter], async (req, res) => {
   const { prompt, options = {}, systemMessage, temperature, device } = req.body as RequestProps
 
   try {
-    let firstChunk = true
-    await chatReplyProcess({
-      message: prompt,
-      lastContext: options,
-      process: (chat: ChatMessage) => {
-        res.write(firstChunk ? JSON.stringify(chat) : `\n${JSON.stringify(chat)}`)
-        firstChunk = false
+    if (prompt) {
+      let firstChunk = true
+      await chatReplyProcess({
+        message: prompt,
+        lastContext: options,
+        process: (chat: ChatMessage) => {
+          res.write(firstChunk ? JSON.stringify(chat) : `\n${JSON.stringify(chat)}`)
+          firstChunk = false
 
-        myChat = chat
-      },
-      systemMessage,
-      temperature,
-    })
+          myChat = chat
+        },
+        systemMessage,
+        temperature,
+      })
+    }
+    else {
+      res.write('请输入您的会话内容')
+    }
   }
   catch (error) {
     res.write(JSON.stringify(error))
