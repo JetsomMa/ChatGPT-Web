@@ -29,6 +29,7 @@ if (process.env.DATASET_MYSQL_USER) {
     user: process.env.DATASET_MYSQL_USER,
     password: process.env.DATASET_MYSQL_PASSWORD,
     database: process.env.DATASET_MYSQL_DATABASE,
+    charset: 'utf8mb4',
   })
 }
 
@@ -114,7 +115,7 @@ router.post('/chat-process', [auth, limiter], async (req, res) => {
   }
   finally {
     try {
-      if (sqlDB) {
+      if (sqlDB && dbRecord.id) {
         dbRecord.conversation = myChat.text
         dbRecord.conversationId = myChat.id
         dbRecord.finish_reason = myChat.detail.choices[0].finish_reason
