@@ -159,17 +159,18 @@ interface VerifyProps {
 router.post('/verify', async (req, res) => {
   try {
     const { token, username, telephone } = req.body as VerifyProps
+
     if (!token)
       throw new Error('Secret key is empty')
-
-    if (process.env.AUTH_SECRET_KEY !== token)
-      throw new Error('密钥无效 | Secret key is invalid')
 
     const userList = await sqlDB.select('userinfo', { where: { username, telephone, status: 1 } })
     if (userList.length === 0) {
       await sqlDB.insert('userinfo', { username, telephone, status: 0 })
       throw new Error('用户不存在，请联系管理员')
     }
+
+    if (process.env.AUTH_SECRET_KEY !== token)
+      throw new Error('密钥无效 | Secret key is invalid')
 
     res.send({ status: 'Success', message: 'Verify successfully', data: null })
   }
