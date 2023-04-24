@@ -9,19 +9,7 @@ import { auth } from './middleware/auth'
 import { limiter } from './middleware/limiter'
 import { isNotEmptyString } from './utils/is'
 
-function dateFormat(dataStamp) {
-  const date = new Date(dataStamp)
-  const year = date.getFullYear()
-
-  const month = date.getMonth() + 1 < 10 ? `0${date.getMonth() + 1}` : date.getMonth() + 1
-  const day = date.getDate() < 10 ? `0${date.getDate()}` : date.getDate()
-  const hours = date.getHours() < 10 ? `0${date.getHours()}` : date.getHours()
-  const minutes = date.getMinutes() < 10 ? `0${date.getMinutes()}` : date.getMinutes()
-  const seconds = date.getSeconds() < 10 ? `0${date.getSeconds()}` : date.getSeconds()
-  // 拼接
-  return `${year}${month}${day} ${hours}:${minutes}:${seconds}`
-}
-
+const port = process.env.PORT || 3002
 let sqlDB: RDSClient | undefined
 if (process.env.DATASET_MYSQL_USER) {
   sqlDB = new RDSClient({
@@ -76,9 +64,9 @@ router.post('/chat-process', [auth, limiter], async (req, res) => {
   res.setHeader('Content-type', 'application/octet-stream')
 
   let myChat: ChatMessage | undefined
-  let { prompt, options = {}, systemMessage, temperature, device } = req.body as RequestProps
+  let { prompt, options = {}, systemMessage, temperature, device, username } = req.body as RequestProps
 
-  const dbRecord: any = { prompt, device, datetime: dateFormat(new Date().getTime()) }
+  const dbRecord: any = { prompt, device, username }
   try {
     prompt = prompt.trim()
 
@@ -163,11 +151,23 @@ router.post('/session', async (req, res) => {
   }
 })
 
+interface VerifyProps {
+  token: string
+  username: string
+  telephone: string
+}
 router.post('/verify', async (req, res) => {
   try {
-    const { token } = req.body as { token: string }
+    const { token, username, telephone } = req.body as VerifyProps
+
     if (!token)
       throw new Error('Secret key is empty')
+
+    const userList = await sqlDB.select('userinfo', { where: { username, telephone, status: 1 } })
+    if (userList.length === 0) {
+      await sqlDB.insert('userinfo', { username, telephone, status: 0 })
+      throw new Error('用户不存在，请联系管理员')
+    }
 
     if (process.env.AUTH_SECRET_KEY !== token)
       throw new Error('密钥无效 | Secret key is invalid')
@@ -183,4 +183,4 @@ app.use('', router)
 app.use('/api', router)
 app.set('trust proxy', 1)
 
-app.listen(3002, () => globalThis.console.log('Server is running on port 3002'))
+app.listen(port, () => globalThis.console.log(`Server is running on port ${port}`))

@@ -1,15 +1,24 @@
 import { ss } from '@/utils/storage'
 
-const LOCAL_NAME = 'SECRET_TOKEN'
+const SECRET_TOKEN = 'SECRET_TOKEN'
+const LOCAL_NAME = 'LOCAL_NAME'
+const LOCAL_PHONE = 'LOCAL_PHONE'
 
 export function getToken() {
-  return ss.get(LOCAL_NAME)
+  const token = ss.get(SECRET_TOKEN)
+  const username = ss.get(LOCAL_NAME)
+  const telephone = ss.get(LOCAL_PHONE)
+  return { token, username, telephone }
 }
 
-export function setToken(token: string) {
-  return ss.set(LOCAL_NAME, token)
+export function setToken(token: string, username: string, telephone: string) {
+  ss.set(SECRET_TOKEN, token)
+  ss.set(LOCAL_NAME, username)
+  ss.set(LOCAL_PHONE, telephone)
 }
 
 export function removeToken() {
-  return ss.remove(LOCAL_NAME)
+  ss.remove(SECRET_TOKEN)
+  ss.remove(LOCAL_NAME)
+  ss.remove(LOCAL_PHONE)
 }

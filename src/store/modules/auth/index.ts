@@ -10,14 +10,16 @@ interface SessionResponse {
 
 export interface AuthState {
   token: string | undefined
+  username: string | undefined
   session: SessionResponse | null
 }
 
 export const useAuthStore = defineStore('auth-store', {
-  state: (): AuthState => ({
-    token: getToken(),
-    session: null,
-  }),
+  state: (): AuthState => {
+    const { token, username } = getToken()
+
+    return { token, username, session: null }
+  },
 
   getters: {
     isChatGPTAPI(state): boolean {
@@ -37,11 +39,10 @@ export const useAuthStore = defineStore('auth-store', {
       }
     },
 
-    setToken(token: string) {
+    setToken(token: string, username: string, telephone: string) {
       this.token = token
-      setToken(token)
+      setToken(token, username, telephone)
     },
-
     removeToken() {
       this.token = undefined
       removeToken()
