@@ -16,7 +16,7 @@ const authStore = useAuthStore()
 const ms = useMessage()
 
 const loading = ref(false)
-const token = ref('')
+const token = ref('true')
 const username = ref('')
 const telephone = ref('')
 
@@ -40,7 +40,7 @@ async function handleVerify() {
   catch (error: any) {
     ms.error(error.message || 'error')
     authStore.removeToken()
-    token.value = ''
+    // token.value = ''
     username.value = ''
     telephone.value = ''
   }
@@ -70,8 +70,8 @@ function handlePress(event: KeyboardEvent) {
           </p>
           <Icon403 class="w-[200px] m-auto" />
         </header>
-        <div>因发现访问路径外泄，导致访问量巨增，我比较担心成本问题，现实行密码验证访问，请联系我本人获取密码，获取密码后不要外泄。</div>
-        <NInput v-model:value="token" type="password" placeholder="请输入密码" @keypress="handlePress" />
+        <div>请实名使用，勿向外扩散。发现冒名用户或者使用不规范者，请禁号！</div>
+        <!-- <NInput v-model:value="token" type="password" placeholder="请输入密码" @keypress="handlePress" /> -->
         <NInput v-model:value="username" type="text" placeholder="请输入姓名" @keypress="handlePress" />
         <NInput v-model:value="telephone" type="text" placeholder="请输入手机号" @keypress="handlePress" />
         <NButton

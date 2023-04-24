@@ -11,14 +11,15 @@ interface SessionResponse {
 export interface AuthState {
   token: string | undefined
   username: string | undefined
+  telephone: string | undefined
   session: SessionResponse | null
 }
 
 export const useAuthStore = defineStore('auth-store', {
   state: (): AuthState => {
-    const { token, username } = getToken()
+    const { token, username, telephone } = getToken()
 
-    return { token, username, session: null }
+    return { token, username, telephone, session: null }
   },
 
   getters: {

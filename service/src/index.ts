@@ -64,39 +64,52 @@ router.post('/chat-process', [auth, limiter], async (req, res) => {
   res.setHeader('Content-type', 'application/octet-stream')
 
   let myChat: ChatMessage | undefined
-  let { prompt, options = {}, systemMessage, temperature, device, username } = req.body as RequestProps
+  let { prompt, options = {}, systemMessage, temperature, device, username, telephone } = req.body as RequestProps
 
-  const dbRecord: any = { prompt, device, username }
+  const dbRecord: any = { prompt, device, username, modeltype: 'gpt-3.5' }
   try {
-    prompt = prompt.trim()
+    const userList = await sqlDB.select('userinfo', { where: { username, telephone } })
+    if (userList.length) {
+      if (userList[0].status === '3') {
+        console.error('用户已被禁用，请联系管理员！')
+        res.write(JSON.stringify({ message: '用户已被禁用，请联系管理员！' }))
+      }
+      else {
+        prompt = prompt.trim()
 
-    if (prompt) {
-      try {
-        if (sqlDB) {
-          const dbresult = await sqlDB.insert('chatweb', dbRecord)
-          dbRecord.id = dbresult.insertId
+        if (prompt) {
+          try {
+            if (sqlDB) {
+              const dbresult = await sqlDB.insert('chatweb', dbRecord)
+              dbRecord.id = dbresult.insertId
+            }
+          }
+          catch (error) {
+            console.error(error)
+          }
+          let firstChunk = true
+          await chatReplyProcess({
+            message: prompt,
+            lastContext: options,
+            process: (chat: ChatMessage) => {
+              res.write(firstChunk ? JSON.stringify(chat) : `\n${JSON.stringify(chat)}`)
+              firstChunk = false
+
+              myChat = chat
+            },
+            systemMessage,
+            temperature,
+          })
+        }
+        else {
+          console.error('请输入您的会话内容')
+          res.write(JSON.stringify({ message: '请输入您的会话内容' }))
         }
       }
-      catch (error) {
-        console.error(error)
-      }
-      let firstChunk = true
-      await chatReplyProcess({
-        message: prompt,
-        lastContext: options,
-        process: (chat: ChatMessage) => {
-          res.write(firstChunk ? JSON.stringify(chat) : `\n${JSON.stringify(chat)}`)
-          firstChunk = false
-
-          myChat = chat
-        },
-        systemMessage,
-        temperature,
-      })
     }
     else {
-      console.error('请输入您的会话内容')
-      res.write('请输入您的会话内容')
+      console.error('用户不存在，请联系管理员！')
+      res.write(JSON.stringify({ message: '用户不存在，请联系管理员！' }))
     }
   }
   catch (error) {
@@ -163,11 +176,12 @@ router.post('/verify', async (req, res) => {
     if (!token)
       throw new Error('Secret key is empty')
 
-    const userList = await sqlDB.select('userinfo', { where: { username, telephone, status: 1 } })
-    if (userList.length === 0) {
+    const userList = await sqlDB.select('userinfo', { where: { username, telephone } })
+
+    if (userList.length === 0)
       await sqlDB.insert('userinfo', { username, telephone, status: 0 })
-      throw new Error('用户不存在，请联系管理员')
-    }
+    else if (userList[0].status === '3')
+      throw new Error('用户已被禁用 | User has been disabled')
 
     if (process.env.AUTH_SECRET_KEY !== token)
       throw new Error('密钥无效 | Secret key is invalid')

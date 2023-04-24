@@ -35,7 +35,7 @@ export function fetchChatAPIProcess<T = any>(
   const settingStore = useSettingStore()
   const authStore = useAuthStore()
 
-  let queryData = JSON.stringify({ username: authStore.username, prompt: params.prompt, options: params.options, systemMessage: settingStore.systemMessage, temperature: settingStore.temperature, device })
+  let queryData = JSON.stringify({ username: authStore.username, telephone: authStore.telephone, prompt: params.prompt, options: params.options, systemMessage: settingStore.systemMessage, temperature: settingStore.temperature, device })
 
   if (!AESKey)
     AESKey = CryptoJS.MD5(authStore.token || '1234567890123456').toString()
