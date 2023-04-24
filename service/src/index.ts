@@ -9,6 +9,7 @@ import { auth } from './middleware/auth'
 import { limiter } from './middleware/limiter'
 import { isNotEmptyString } from './utils/is'
 
+const port = process.env.PORT || 3002
 let sqlDB: RDSClient | undefined
 if (process.env.DATASET_MYSQL_USER) {
   sqlDB = new RDSClient({
@@ -181,4 +182,4 @@ app.use('', router)
 app.use('/api', router)
 app.set('trust proxy', 1)
 
-app.listen(3002, () => globalThis.console.log('Server is running on port 3002'))
+app.listen(port, () => globalThis.console.log(`Server is running on port ${port}`))
