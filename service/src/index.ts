@@ -1,6 +1,7 @@
 import express from 'express'
 import { RDSClient } from 'ali-rds'
 import CryptoJS from 'crypto-js'
+import axios from 'axios'
 import type { RequestProps } from './types'
 import type { ChatMessage } from './chatgpt'
 import { chatConfig, chatReplyProcess, currentModel } from './chatgpt'
@@ -121,9 +122,19 @@ router.post('/chat-process', [auth, limiter], async (req, res) => {
         dbRecord.finish_reason = myChat.detail.choices[0].finish_reason
         sqlDB.update('chatweb', dbRecord)
       }
+
+      try {
+        const response = await axios.post('http://118.195.236.91:3010/api/wxPusher', dbRecord)
+
+        if (response.status !== 200)
+          console.error('response --> ', response)
+      }
+      catch (error) {
+        console.error('error.message --> ', error.message)
+      }
     }
     catch (error) {
-      console.error(error)
+      console.error(error.message)
     }
     myChat = undefined
     res.end()
