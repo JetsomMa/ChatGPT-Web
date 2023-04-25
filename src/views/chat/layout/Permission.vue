@@ -70,7 +70,12 @@ function handlePress(event: KeyboardEvent) {
           </p>
           <Icon403 class="w-[200px] m-auto" />
         </header>
-        <div>请实名使用，勿向外扩散。发现冒名用户或者使用不规范者，请禁号！</div>
+        <div>请实名使用，勿向外扩散，我会在我能力范围内让您长期免费使用。</div>
+        <div>使用前，请先阅读左下角的使用指南。</div>
+        <div>发现使用不规范者，将禁号！</div>
+        <div>陌生人使用前，最好先于我联系核实身份[wx:18514665919]</div>
+        <div>如果我无法识别出您，且又我联系不上您，我将进行禁号处理。</div>
+        <div>如果您觉得我是在侵犯您的隐私，您可以选择不用。</div>
         <!-- <NInput v-model:value="token" type="password" placeholder="请输入密码" @keypress="handlePress" /> -->
         <NInput v-model:value="username" type="text" placeholder="请输入姓名" @keypress="handlePress" />
         <NInput v-model:value="telephone" type="text" placeholder="请输入手机号" @keypress="handlePress" />

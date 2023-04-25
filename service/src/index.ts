@@ -66,7 +66,7 @@ router.post('/chat-process', [auth, limiter], async (req, res) => {
   let myChat: ChatMessage | undefined
   let { prompt, options = {}, systemMessage, temperature, device, username, telephone } = req.body as RequestProps
 
-  const dbRecord: any = { prompt, device, username, modeltype: 'gpt-3.5' }
+  const dbRecord: any = { prompt, device, username, modeltype: 'gpt-3.5', telephone }
   try {
     const userList = await sqlDB.select('userinfo', { where: { username, telephone } })
     if (userList.length) {
