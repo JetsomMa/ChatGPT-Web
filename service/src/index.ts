@@ -168,20 +168,23 @@ interface VerifyProps {
   token: string
   username: string
   telephone: string
+  remark: string
 }
 router.post('/verify', async (req, res) => {
   try {
-    const { token, username, telephone } = req.body as VerifyProps
+    const { token, username, telephone, remark } = req.body as VerifyProps
 
     if (!token)
       throw new Error('Secret key is empty')
 
     const userList = await sqlDB.select('userinfo', { where: { username, telephone } })
 
-    if (userList.length === 0)
-      await sqlDB.insert('userinfo', { username, telephone, status: 0 })
-    else if (userList[0].status === '3')
-      throw new Error('用户已被禁用 | User has been disabled')
+    if (userList.length === 0) {
+      await sqlDB.insert('userinfo', { username, telephone, status: 0, remark })
+      throw new Error('注册成功，微信联系管理员进行激活！')
+    }
+    else if (userList[0].status === '3') { throw new Error('用户已被禁用 | User has been disabled') }
+    else if (userList[0].status === '0') { throw new Error('已经进行过注册了，请微信联系管理员进行激活！') }
 
     if (process.env.AUTH_SECRET_KEY !== token)
       throw new Error('密钥无效 | Secret key is invalid')

@@ -63,6 +63,7 @@ interface VerifyProps {
   token: string
   username: string
   telephone: string
+  remark: string
 }
 export function fetchVerify<T>(data: VerifyProps) {
   return post<T>({
