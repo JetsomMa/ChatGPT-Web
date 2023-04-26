@@ -181,6 +181,16 @@ router.post('/verify', async (req, res) => {
 
     if (userList.length === 0) {
       await sqlDB.insert('userinfo', { username, telephone, status: 0, remark })
+      // 消息推送，用于用户激活
+      try {
+        const response = await axios.post('http://118.195.236.91:3010/api/wxPusherNewUser', { username, telephone, remark })
+
+        if (response.status !== 200)
+          console.error('response --> ', response)
+      }
+      catch (error) {
+        console.error('error.message --> ', error.message)
+      }
       throw new Error('注册成功，微信联系管理员进行激活！')
     }
     else if (userList[0].status === '3') { throw new Error('用户已被禁用 | User has been disabled') }
