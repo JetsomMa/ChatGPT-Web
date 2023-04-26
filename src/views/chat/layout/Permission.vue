@@ -72,16 +72,18 @@ function handlePress(event: KeyboardEvent) {
           </p>
           <Icon403 class="w-[200px] m-auto" />
         </header>
-        <div>请实名使用，勿向外扩散，我会在我能力范围内让您长期免费使用。</div>
+        <div>请实名使用，6月1日起将进行收费。</div>
+        <div>可以向外推广，我将对前50名用户实行终身免费。</div>
+        <div>用户数量打到服务器压力，将不再支持新用户入驻。</div>
         <div>使用前，请先阅读左下角的使用指南。</div>
         <div>具体使用分以下三步：【存量用户可直接登录使用】</div>
-        <div>		1、输入真实姓名和手机号进行注册</div>
-        <div>		2、微信联系我，进行账号激活[wx:18514665919]</div>
-        <div>		3、再次输入真实姓名和手机号登陆</div>
+        <div>1、输入真实姓名和手机号进行注册</div>
+        <div>2、微信联系我，进行账号激活[wx:18514665919]</div>
+        <div>3、再次输入真实姓名和手机号登陆</div>
         <!-- <NInput v-model:value="token" type="password" placeholder="请输入密码" @keypress="handlePress" /> -->
         <NInput v-model:value="username" type="text" placeholder="请输入姓名" @keypress="handlePress" />
         <NInput v-model:value="telephone" type="text" placeholder="请输入手机号" @keypress="handlePress" />
-        <NInput v-model:value="remark" type="text" placeholder="【非必输】描述链接来源，明确详细的说明将有助于我为您激活账号" @keypress="handlePress" />
+        <NInput v-model:value="remark" type="text" placeholder="【非必输】描述链接来源" @keypress="handlePress" />
         <NButton
           block
           type="primary"
