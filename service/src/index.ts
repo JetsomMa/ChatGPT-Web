@@ -60,6 +60,26 @@ app.all('*', (_, res, next) => {
   next()
 })
 
+function dateFormat(date, fmt) { // author: meizz
+  fmt = fmt || 'yyyy-MM-dd hh:mm:ss'
+  const o = {
+    'M+': date.getMonth() + 1, // 月份
+    'd+': date.getDate(), // 日
+    'h+': date.getHours(), // 小时
+    'm+': date.getMinutes(), // 分
+    's+': date.getSeconds(), // 秒
+    'q+': Math.floor((date.getMonth() + 3) / 3), // 季度
+    'S': date.getMilliseconds(), // 毫秒
+  }
+  if (/(y+)/.test(fmt))
+    fmt = fmt.replace(RegExp.$1, (`${date.getFullYear()}`).substr(4 - RegExp.$1.length))
+  for (const k in o) {
+    if (new RegExp(`(${k})`).test(fmt))
+      fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : ((`00${o[k]}`).substr((`${o[k]}`).length)))
+  }
+  return fmt
+}
+
 router.post('/chat-process', [auth, limiter], async (req, res) => {
   res.setHeader('Content-type', 'application/octet-stream')
 
@@ -70,9 +90,13 @@ router.post('/chat-process', [auth, limiter], async (req, res) => {
   try {
     const userList = await sqlDB.select('userinfo', { where: { username, telephone } })
     if (userList.length) {
+      const nowDate = dateFormat(new Date(), 'yyyyMMdd')
       if (userList[0].status === '3') {
         console.error('用户已被禁用，请联系管理员！')
         res.write(JSON.stringify({ message: '用户已被禁用，请联系管理员！' }))
+      }
+      else if (userList[0].expired <= nowDate) {
+        res.write(JSON.stringify({ message: '账户已过期，请联系管理员进行充值服务！微信：18514665919' }))
       }
       else {
         prompt = prompt.trim()
@@ -174,6 +198,8 @@ router.post('/verify', async (req, res) => {
   try {
     const { token, username, telephone, remark } = req.body as VerifyProps
 
+    const nowDate = dateFormat(new Date(), 'yyyyMMdd')
+
     if (!token)
       throw new Error('Secret key is empty')
 
@@ -195,6 +221,7 @@ router.post('/verify', async (req, res) => {
     }
     else if (userList[0].status === '3') { throw new Error('用户已被禁用 | User has been disabled') }
     else if (userList[0].status === '0') { throw new Error('已经进行过注册了，请微信联系管理员进行激活！') }
+    else if (userList[0].expired <= nowDate) { throw new Error('账户已过期，请联系管理员进行充值服务！微信：18514665919') }
 
     if (process.env.AUTH_SECRET_KEY !== token)
       throw new Error('密钥无效 | Secret key is invalid')
