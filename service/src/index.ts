@@ -80,6 +80,88 @@ function dateFormat(date, fmt) { // author: meizz
   return fmt
 }
 
+const systemMessage = `您将扮演一个接口参数生成器的角色，请保持严谨，不要伪造信息，用户提出任何问题，返回json，且只返回一个json，不要包含任何额外的解释或说明。
+
+  以下是您需要了解的内容：
+      1、当输入中包含“用户”关键字时，table取值为userinfo；当输入中包含“提问”或“对话”关键字时，table取值为chatweb；
+      2、手机号：telephone；姓名/名字：username；状态：status；过期时间：expired；提问/问题：prompt；回答/答案：conversation；提问时间/创建时间：createtime；
+      3、在table为userinfo中，包含的字段有id、username、telephone、expired、status；
+      4、status状态值：0-未激活，2-已激活，3-已禁用；
+      5、在table为chatweb中，包含的字段有id、username、telephone、prompt、conversation、createtime；
+      6、[查询]/【查询】的operate值为select，[操作]/【操作】的operate值为update；
+
+  问答的示例：[Q: 问题  A: 回答]
+      Q: "[查询]所有用户的信息"
+      A: { "operate": "select", "table": "userinfo", "columns": ["id", "username", "telephone", "expired", "status"], "level": "S" }
+      Q: "【查询】所有用户的名字和手机号信息"
+      A: { "operate": "select", "table": "userinfo", "columns": ["username", "telephone"], "level": "S" }
+      Q: "[查询]手机号为18514665919用户的信息"
+      A: { "operate": "select", "table": "userinfo", "columns": ["id", "username", "telephone", "expired", "status"], "where": { "telephone": "18514665919" }, "level": "S" }
+      Q: "【查询】手机号为12233445566用户的过期时间信息"
+      A: { "operate": "select", "table": "userinfo", "columns": ["expired"], "where": { "telephone": "12233445566" }, "level": "S" }
+      Q: "[查询]我的过期时间信息"
+      A: { "operate": "select", "table": "userinfo", "columns": ["expired"], "where": { "telephone": "$telephone" }, "level": "A" }
+      Q: "【查询】我的提问"
+      A: { "operate": "select", "table": "chatweb", "columns": ["id", "prompt"], "where": { "telephone": "$telephone" }, "level": "A" }
+      Q: "[查询]手机号为12233445566用户的提问"
+      A: { "operate": "select", "table": "chatweb", "columns": ["id", "prompt"], "where": { "telephone": "12233445566" }, "level": "S" }
+      Q: "[查询]第3489的对话内容"
+      A: { "operate": "select", "table": "chatweb", "columns": ["id", "prompt", "conversation", "createtime"], "where": { "id": "3489" }, "level": "A" }
+      Q: "[操作]激活用户12399998888"
+      A: { "operate": "update", "table": "userinfo", "row": { "status": "2" }, "where": { "telephone": "12399998888" }, "level": "S" }
+      Q: "【操作】激活用户12399998888"
+      A: { "operate": "update", "table": "userinfo", "row": { "status": "2" }, "where": { "telephone": "12399998888" }, "level": "S" }
+      Q: "【操作】禁用用户13677776666"
+      A: { "operate": "update", "table": "userinfo", "row": { "status": "3" }, "where": { "telephone": "13677776666" }, "level": "S" }
+  `
+
+async function executeCommand(prompt, telephone) {
+  try {
+    let myChat: ChatMessage | undefined
+
+    await chatReplyProcess({
+      message: prompt,
+      process: (chat: ChatMessage) => {
+        myChat = chat
+      },
+      systemMessage,
+      temperature: 0,
+    })
+
+    const command = JSON.parse(myChat.text)
+    if (command.level === 'S' && telephone !== '18514665919') {
+      return 'error: 您没有权限执行此命令'
+    }
+    else {
+      if (command.operate === 'update') {
+        let userList = await sqlDB.select(command.table, { where: command.where })
+        if (userList.length === 0)
+          return 'error: 用户不存在'
+        else if (userList.length > 1)
+          return 'error: 用户存在多个'
+
+        await sqlDB.update(command.table, command.row, { where: command.where })
+        userList = await sqlDB.select(command.table, { where: command.where })
+        return `操作成功！${JSON.stringify(userList[0])}`
+      }
+      else {
+        if (command.where && command.where.telephone === '$telephone')
+          command.where.telephone = telephone
+
+        const query: any = {}
+        command.where && (query.where = command.where)
+        command.columns && (query.columns = command.columns)
+        const result = await sqlDB.select(command.table, query)
+
+        return JSON.stringify(result)
+      }
+    }
+  }
+  catch (error) {
+    return `error: 指令执行失败：${error.message}`
+  }
+}
+
 router.post('/chat-process', [auth, limiter], async (req, res) => {
   res.setHeader('Content-type', 'application/octet-stream')
 
@@ -111,19 +193,45 @@ router.post('/chat-process', [auth, limiter], async (req, res) => {
           catch (error) {
             console.error(error)
           }
-          let firstChunk = true
-          await chatReplyProcess({
-            message: prompt,
-            lastContext: options,
-            process: (chat: ChatMessage) => {
-              res.write(firstChunk ? JSON.stringify(chat) : `\n${JSON.stringify(chat)}`)
-              firstChunk = false
 
-              myChat = chat
-            },
-            systemMessage,
-            temperature,
-          })
+          if (prompt.startsWith('[操作]') || prompt.startsWith('[查询]') || prompt.startsWith('【操作】') || prompt.startsWith('【查询】')) {
+            const result = await executeCommand(prompt, telephone)
+            if (result.startsWith('error:')) {
+              res.write(JSON.stringify({ message: result }))
+            }
+            else {
+              prompt = `帮我格式化这个输出结果，如果包含json则整理成表格，不要有其他多余的描述和解释：${result}`
+
+              let firstChunk = true
+              await chatReplyProcess({
+                message: prompt,
+                lastContext: options,
+                process: (chat: ChatMessage) => {
+                  res.write(firstChunk ? JSON.stringify(chat) : `\n${JSON.stringify(chat)}`)
+                  firstChunk = false
+
+                  myChat = chat
+                },
+                systemMessage,
+                temperature,
+              })
+            }
+          }
+          else {
+            let firstChunk = true
+            await chatReplyProcess({
+              message: prompt,
+              lastContext: options,
+              process: (chat: ChatMessage) => {
+                res.write(firstChunk ? JSON.stringify(chat) : `\n${JSON.stringify(chat)}`)
+                firstChunk = false
+
+                myChat = chat
+              },
+              systemMessage,
+              temperature,
+            })
+          }
         }
         else {
           console.error('请输入您的会话内容')
