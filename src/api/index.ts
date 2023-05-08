@@ -64,10 +64,21 @@ interface VerifyProps {
   username: string
   telephone: string
   remark: string
+  phonecode: string
 }
 export function fetchVerify<T>(data: VerifyProps) {
   return post<T>({
     url: '/verify',
+    data,
+  })
+}
+
+interface PhoneCode {
+  telephone: string
+}
+export function fetchPhoneCode<T>(data: PhoneCode) {
+  return post<T>({
+    url: '/phonecode',
     data,
   })
 }

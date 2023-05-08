@@ -9,7 +9,7 @@ export interface SettingsState {
 
 export function defaultSetting(): SettingsState {
   return {
-    systemMessage: '您是一个知识渊博的学者，有着极其严谨而又风趣的聊天态度，请尽可能准确详细的回答问题。',
+    systemMessage: '您是一个知识渊博的学者，基于openai公司的chatgpt3.5版本，有着极其严谨而又风趣的聊天态度，请尽可能准确详细的回答问题。',
     temperature: 0,
   }
 }

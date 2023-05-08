@@ -1,7 +1,7 @@
 <script setup lang='ts'>
 import { computed, ref } from 'vue'
-import { NButton, NInput, NModal, useMessage } from 'naive-ui'
-import { fetchVerify } from '@/api'
+import { NButton, NInput, NInputGroup, NModal, useMessage } from 'naive-ui'
+import { fetchPhoneCode, fetchVerify } from '@/api'
 import { useAuthStore } from '@/store'
 
 interface Props {
@@ -18,22 +18,61 @@ const loading = ref(false)
 const token = ref('true')
 const username = ref('')
 const telephone = ref('')
+const phonecode = ref('')
 const remark = ref('')
 
 const disabled = computed(() => !token.value.trim() || loading.value)
+const disabledPhoneCode = ref(true)
+const timer = ref(0)
+async function getPhoneCode() {
+  const telephoneText = telephone.value.trim()
+  if (!telephoneText)
+    return
+
+  try {
+    disabledPhoneCode.value = true
+    timer.value = 120
+    const myInterval = setInterval(() => {
+      timer.value--
+      if (timer.value <= 0) {
+        clearInterval(myInterval)
+        disabledPhoneCode.value = false
+      }
+      else {
+        disabledPhoneCode.value = true
+      }
+    }, 1000)
+
+    await fetchPhoneCode({ telephone: telephoneText })
+    ms.success('success')
+  }
+  catch (error: any) {
+    ms.error(error.message || 'error')
+  }
+}
+
+function telephoneChage() {
+  const telephoneText = telephone.value.trim()
+
+  if (telephoneText.length === 11)
+    disabledPhoneCode.value = false
+  else
+    disabledPhoneCode.value = true
+}
 
 async function handleVerify() {
   const tokenText = token.value.trim()
   const usernameText = username.value.trim()
   const telephoneText = telephone.value.trim()
   const remarkText = remark.value.trim()
+  const phonecodeText = phonecode.value.trim()
 
-  if (!tokenText || !usernameText || !telephoneText)
+  if (!tokenText || !usernameText || !telephoneText || !phonecodeText)
     return
 
   try {
     loading.value = true
-    await fetchVerify({ token: tokenText, username: usernameText, telephone: telephoneText, remark: remarkText })
+    await fetchVerify({ token: tokenText, username: usernameText, telephone: telephoneText, remark: remarkText, phonecode: phonecodeText })
     authStore.setToken(tokenText, usernameText, telephoneText)
     ms.success('success')
     window.location.reload()
@@ -41,9 +80,6 @@ async function handleVerify() {
   catch (error: any) {
     ms.error(error.message || 'error')
     authStore.removeToken()
-    // token.value = ''
-    // username.value = ''
-    // telephone.value = ''
   }
   finally {
     loading.value = false
@@ -75,19 +111,29 @@ function handlePress(event: KeyboardEvent) {
           <img src="https://download.mashaojie.cn/image/%E5%8A%A0%E6%88%91%E5%A5%BD%E5%8F%8B.jpg" alt="扫码加好友">
           <img src="https://download.mashaojie.cn/image/%E7%BE%A4%E4%BA%8C%E7%BB%B4%E7%A0%81.jpeg" alt="扫码进群">
         </div>
-        <div>
-          <div>请实名使用，6月1日起将进行收费【¥20/月】。</div>
-          <div>求推广扩散，我将对前50名用户实行长期免费。</div>
-          <div>用户数量打到服务器压力位，将不再支持新用户入驻。</div>
-          <div>使用前，请先阅读左下角的使用指南。</div>
-          <div>具体使用分以下三步：【存量用户可直接登录使用】</div>
-          <div>1、输入真实姓名和手机号进行注册</div>
-          <div>2、微信联系我，进行账号激活[wx:18514665919]</div>
-          <div>3、再次输入真实姓名和手机号登陆</div>
+        <div style="text-align: center;">
+          <div>求推广扩散，好用的chatgpt，不需要梯子。</div>
+          <div>添加书签或手机“添加到主屏幕”，方便实用。</div>
+          <!-- <div>openai接口有成本，6月1日起收费¥20/月。</div> -->
+          <div>加我微信，提供售后和服务保障和技术。</div>
+          <div>扫码进群，一起探讨chatgpt的科学用法。</div>
+          <div>使用前，请先阅读<a href="https://blog.mashaojie.cn/9999/09/08/ChatGPT%E4%BD%BF%E7%94%A8%E6%8C%87%E5%8D%97" class="text-blue-500" target="_blank">ChatGPT使用指南</a></div>
         </div>
         <!-- <NInput v-model:value="token" type="password" placeholder="请输入密码" @keypress="handlePress" /> -->
         <NInput v-model:value="username" type="text" placeholder="请输入姓名" @keypress="handlePress" />
-        <NInput v-model:value="telephone" type="text" placeholder="请输入手机号" @keypress="handlePress" />
+        <NInputGroup>
+          <NInput v-model:value="telephone" type="text" placeholder="请输入手机号" :style="{ width: '70%' }" @input="telephoneChage" @keypress="handlePress" />
+          <NButton
+            :style="{ width: '40%' }"
+            block
+            type="primary"
+            :disabled="disabledPhoneCode"
+            @click="getPhoneCode"
+          >
+            获取验证码{{ timer ? `(${timer})` : '' }}
+          </NButton>
+        </NInputGroup>
+        <NInput v-model:value="phonecode" type="text" placeholder="手机验证码" @keypress="handlePress" />
         <NInput v-model:value="remark" type="text" placeholder="【非必输】描述链接来源" @keypress="handlePress" />
         <NButton
           block
