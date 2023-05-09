@@ -214,6 +214,7 @@ router.post('/chat-process', [auth, limiter], async (req, res) => {
 
   const dbRecord: any = { prompt, device, username, modeltype: 'gpt-3.5', telephone }
   try {
+    systemMessage = `${systemMessage}。现在是${dateFormat(new Date(), 'yyyy年MM月dd日 hh时mm分ss秒')}`
     const userList = await sqlDB.select('userinfo', { where: { username, telephone } })
     if (userList.length || !process.env.AUTH_SECRET_KEY) {
       const nowDate = dateFormat(new Date(), 'yyyyMMdd')
@@ -317,7 +318,7 @@ router.post('/chat-process', [auth, limiter], async (req, res) => {
 
 router.post('/chat-query', async (req, res) => {
   const temperature = 0.5
-  const systemMessage = '您是一个知识渊博的学者，基于openai公司的chatgpt3.5版本，有着极其严谨而又风趣的聊天态度，请尽可能准确详细的回答问题。'
+  const systemMessage = `您是一个知识渊博的学者，基于openai公司的chatgpt3.5版本，有着极其严谨而又风趣的聊天态度，请尽可能准确详细的回答问题。现在是${dateFormat(new Date(), 'yyyy年MM月dd日 hh时mm分ss秒')}`
   const device = 'wechat'
   let { prompt, username, telephone } = req.body as RequestProps
 
