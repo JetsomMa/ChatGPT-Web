@@ -3,14 +3,12 @@ import type { Ref } from 'vue'
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { storeToRefs } from 'pinia'
-import { NAutoComplete, NButton, NInput, useDialog, useMessage } from 'naive-ui'
+import { NAutoComplete, NButton, NInput, NRadioButton, NRadioGroup, useDialog, useMessage } from 'naive-ui'
 import html2canvas from 'html2canvas'
 import { Message } from './components'
 import { useScroll } from './hooks/useScroll'
 import { useChat } from './hooks/useChat'
 import { useCopyCode } from './hooks/useCopyCode'
-import { useUsingContext } from './hooks/useUsingContext'
-import HeaderComponent from './components/Header/index.vue'
 import { HoverButton, SvgIcon } from '@/components/common'
 import { useBasicLayout } from '@/hooks/useBasicLayout'
 import { useChatStore, usePromptStore } from '@/store'
@@ -31,13 +29,15 @@ useCopyCode()
 const { isMobile } = useBasicLayout()
 const { addChat, updateChat, updateChatSome, getChatByUuidAndIndex } = useChat()
 const { scrollRef, scrollToBottom, scrollToBottomIfAtBottom } = useScroll()
-const { usingContext, toggleUsingContext } = useUsingContext()
+// const { usingContext, toggleUsingContext } = useUsingContext()
 
 const { uuid } = route.params as { uuid: string }
 
 const dataSources = computed(() => chatStore.getChatByUuid(+uuid))
 const conversationList = computed(() => dataSources.value.filter(item => (!item.inversion && !item.error)))
 
+const querymethods = ref(['ChatGPT', 'ChatGPT Browser'])
+const querymethod = ref('ChatGPT')
 const prompt = ref<string>('')
 const loading = ref<boolean>(false)
 const inputRef = ref<Ref | null>(null)
@@ -88,7 +88,9 @@ async function onConversation() {
   let options: Chat.ConversationRequest = {}
   const lastContext = (conversationList.value[conversationList.value.length - 1] || {}).conversationOptions
 
-  if (lastContext && usingContext.value)
+  console.log('lastContext', lastContext)
+
+  if (lastContext)
     options = { ...lastContext }
 
   addChat(
@@ -110,6 +112,7 @@ async function onConversation() {
     const fetchChatAPIOnce = async () => {
       await fetchChatAPIProcess<Chat.ConversationResponse>({
         prompt: message,
+        querymethod: querymethod.value,
         options,
         signal: controller.signal,
         onDownloadProgress: ({ event }) => {
@@ -240,6 +243,7 @@ async function onRegenerate(index: number) {
     const fetchChatAPIOnce = async () => {
       await fetchChatAPIProcess<Chat.ConversationResponse>({
         prompt: message,
+        querymethod: querymethod.value,
         options,
         signal: controller.signal,
         onDownloadProgress: ({ event }) => {
@@ -479,8 +483,12 @@ onMounted(() => {
   // - 访问我们的学习资源和知识分享文章
   // - 获得我们专业的支持和指导，解决您在使用中遇到的问题
 
-// 我们致力于为您提供最好的学习体验和服务。加入我们的会员，开始您的学习之旅吧！`)
-//   }, 2000)
+  // 我们致力于为您提供最好的学习体验和服务。加入我们的会员，开始您的学习之旅吧！`)
+  //   }, 2000)
+
+  setTimeout(() => {
+    querymethod.value = 'ChatGPT'
+  })
 })
 
 onUnmounted(() => {
@@ -491,17 +499,29 @@ onUnmounted(() => {
 
 <template>
   <div class="flex flex-col w-full h-full">
-    <HeaderComponent
+    <!-- <HeaderComponent
       v-if="isMobile"
       :using-context="usingContext"
       @export="handleExport"
       @toggle-using-context="toggleUsingContext"
-    />
-    <main class="flex-1 overflow-hidden">
+    /> -->
+    <main class="flex-1 overflow-hidden" style="position: relative;">
+      <div style="position: absolute; background-color: #fff; left: 50%; transform: translateX(-50%); top: 0px; padding: 10px; z-index: 100;">
+        <NRadioGroup v-model:value="querymethod" size="medium" default-value="ChatGPT">
+          <NRadioButton
+            v-for="method of querymethods"
+            :key="method"
+            :value="method"
+          >
+            {{ method }}
+          </NRadioButton>
+        </NRadioGroup>
+      </div>
       <div
         id="scrollRef"
         ref="scrollRef"
         class="h-full overflow-hidden overflow-y-auto"
+        style="padding-top: 40px;"
       >
         <div
           id="image-wrapper"
@@ -553,11 +573,11 @@ onUnmounted(() => {
               <SvgIcon icon="ri:download-2-line" />
             </span>
           </HoverButton>
-          <HoverButton v-if="!isMobile" @click="toggleUsingContext">
+          <!-- <HoverButton v-if="!isMobile" @click="toggleUsingContext">
             <span class="text-xl" :class="{ 'text-[#4b9e5f]': usingContext, 'text-[#a8071a]': !usingContext }">
               <SvgIcon icon="ri:chat-history-line" />
             </span>
-          </HoverButton>
+          </HoverButton> -->
           <NAutoComplete v-model:value="prompt" :options="searchOptions" :render-label="renderOption">
             <template #default="{ handleInput, handleBlur, handleFocus }">
               <NInput
@@ -585,3 +605,9 @@ onUnmounted(() => {
     </footer>
   </div>
 </template>
+
+<style>
+.n-radio-group .n-radio-button.n-radio-button--checked {
+    background: #efefef;
+}
+</style>

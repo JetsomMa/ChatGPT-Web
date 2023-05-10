@@ -28,6 +28,7 @@ const device = `device: ${parserResults.device.vendor || ''} ${parserResults.dev
 export function fetchChatAPIProcess<T = any>(
   params: {
     prompt: string
+    querymethod: string
     options?: { conversationId?: string; parentMessageId?: string }
     signal?: GenericAbortSignal
     onDownloadProgress?: (progressEvent: AxiosProgressEvent) => void },
@@ -35,7 +36,9 @@ export function fetchChatAPIProcess<T = any>(
   const settingStore = useSettingStore()
   const authStore = useAuthStore()
 
-  let queryData = JSON.stringify({ username: authStore.username, telephone: authStore.telephone, prompt: params.prompt, options: params.options, systemMessage: settingStore.systemMessage, temperature: settingStore.temperature, device })
+  let queryData = JSON.stringify({ username: authStore.username, telephone: authStore.telephone, prompt: params.prompt, querymethod: params.querymethod, options: params.options, systemMessage: settingStore.systemMessage, temperature: settingStore.temperature, device })
+
+  console.log('queryData -> ', queryData)
 
   if (!AESKey)
     AESKey = CryptoJS.MD5(authStore.token || '1234567890123456').toString()
