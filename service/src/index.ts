@@ -278,8 +278,8 @@ async function APIQuery(query, resp = '') {
   if (match) {
     const json_data = match[1]
     const result = JSON.parse(json_data)
-    result.calls.push({ API: 'Google', query })
-    result.calls.push({ API: 'WikiSearch', query })
+    // result.calls.push({ API: 'Google', query })
+    // result.calls.push({ API: 'WikiSearch', query })
     // APICallList.push(result)
     return result
   }
