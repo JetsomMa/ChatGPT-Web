@@ -34,4 +34,12 @@ export interface ModelConfig {
   balance?: string
 }
 
+export interface VerifyProps {
+  token: string
+  username: string
+  telephone: string
+  remark: string
+  phonecode: string
+}
+
 export type ApiModel = 'ChatGPTAPI' | 'ChatGPTUnofficialProxyAPI' | string | undefined
