@@ -6,6 +6,8 @@ import { storeToRefs } from 'pinia'
 import { NAutoComplete, NButton, NInput, NRadioButton, NRadioGroup, useDialog, useMessage } from 'naive-ui'
 import html2canvas from 'html2canvas'
 import { Message } from './components'
+import HeaderComponent from './components/Header/index.vue'
+import { querymethodsOptions } from './components/Header/options'
 import { useScroll } from './hooks/useScroll'
 import { useChat } from './hooks/useChat'
 import { useCopyCode } from './hooks/useCopyCode'
@@ -29,14 +31,13 @@ useCopyCode()
 const { isMobile } = useBasicLayout()
 const { addChat, updateChat, updateChatSome, getChatByUuidAndIndex } = useChat()
 const { scrollRef, scrollToBottom, scrollToBottomIfAtBottom } = useScroll()
-// const { usingContext, toggleUsingContext } = useUsingContext()
 
 const { uuid } = route.params as { uuid: string }
 
 const dataSources = computed(() => chatStore.getChatByUuid(+uuid))
 const conversationList = computed(() => dataSources.value.filter(item => (!item.inversion && !item.error)))
 
-const querymethods = ref(['ChatGPT', 'ChatGPT Browser'])
+const querymethods = ref(querymethodsOptions)
 const querymethod = ref('ChatGPT')
 const prompt = ref<string>('')
 const loading = ref<boolean>(false)
@@ -495,25 +496,31 @@ onUnmounted(() => {
   if (loading.value)
     controller.abort()
 })
+
+const querymethodChange = (value: string) => {
+  querymethod.value = value
+}
 </script>
 
 <template>
   <div class="flex flex-col w-full h-full">
-    <!-- <HeaderComponent
+    <HeaderComponent
       v-if="isMobile"
-      :using-context="usingContext"
+      :querymethod="querymethod"
       @export="handleExport"
-      @toggle-using-context="toggleUsingContext"
-    /> -->
+      @querymethodChange="querymethodChange"
+    />
     <main class="flex-1 overflow-hidden" style="position: relative;">
-      <div style="position: absolute; background-color: #fff; left: 50%; transform: translateX(-50%); top: 0px; padding: 10px; z-index: 100;">
+      <div v-if="!isMobile" style="position: absolute; background-color: #fff; left: 50%; transform: translateX(-50%); top: 0px; padding: 10px; z-index: 100;">
         <NRadioGroup v-model:value="querymethod" size="medium" default-value="ChatGPT">
           <NRadioButton
             v-for="method of querymethods"
-            :key="method"
-            :value="method"
+            :key="method.value"
+            style="width: 85px; text-align: center;"
+            :value="method.value"
+            :disabled="method.disabled"
           >
-            {{ method }}
+            {{ method.label }}
           </NRadioButton>
         </NRadioGroup>
       </div>

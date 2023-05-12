@@ -279,7 +279,6 @@ export async function replyChatGPTBrowser(prompt, dbRecord, res) {
   else {
     try {
       const systemMessage = 'You are a web-based large language model, Respond conversationally.Remember to specify the programming language after the first set of three backticks (```) in your code block. Additionally, wrap mathematical formulas in either $$ or $$$$.'
-      const qianzhui = '【ChatGPT Browser】'
 
       let firstChunk = true
       let myChat: ChatMessage | undefined
@@ -287,7 +286,6 @@ export async function replyChatGPTBrowser(prompt, dbRecord, res) {
         message: prompt,
         process: (chat: ChatMessage) => {
           if (firstChunk) {
-            chat.text = `${qianzhui}${chat.text}`
             res.write(JSON.stringify(chat))
             firstChunk = false
           }

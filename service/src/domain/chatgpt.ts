@@ -6,7 +6,6 @@ export async function replyChatGPT(prompt, dbRecord, res, options, systemMessage
   try {
     systemMessage = `${systemMessagePix}${systemMessage}。`
 
-    const qianzhui = '【ChatGPT】'
     let firstChunk = true
     let myChat: ChatMessage | undefined
     await chatReplyProcess({
@@ -14,7 +13,7 @@ export async function replyChatGPT(prompt, dbRecord, res, options, systemMessage
       lastContext: options,
       process: (chat: ChatMessage) => {
         if (firstChunk) {
-          chat.text = `${qianzhui}${chat.text}`
+          chat.text = `${chat.text}`
           res.write(JSON.stringify(chat))
           firstChunk = false
         }

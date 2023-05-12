@@ -94,7 +94,7 @@ router.post('/chat-process', [auth, limiter], async (req, res) => {
           if (prompt.startsWith('/') || prompt.startsWith('！'))
             await replyCommand(prompt, dbRecord, res)
 
-          else if (querymethod === 'ChatGPT Browser')
+          else if (querymethod === '浏览器')
             await replyChatGPTBrowser(prompt, dbRecord, res)
 
           else
