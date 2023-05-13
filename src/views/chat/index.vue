@@ -528,7 +528,7 @@ const querymethodChange = (value: string) => {
         id="scrollRef"
         ref="scrollRef"
         class="h-full overflow-hidden overflow-y-auto"
-        style="padding-top: 40px;"
+        :style="isMobile ? 'padding-top: 0;' : 'padding-top: 40px;'"
       >
         <div
           id="image-wrapper"

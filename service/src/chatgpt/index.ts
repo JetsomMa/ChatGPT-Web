@@ -24,7 +24,7 @@ const ErrorCodeMessage: Record<string, string> = {
   500: '[OpenAI] 服务器繁忙，请稍后再试 | Internal Server Error',
 }
 
-const timeoutMs: number = !isNaN(+process.env.TIMEOUT_MS) ? +process.env.TIMEOUT_MS : 120 * 1000
+const timeoutMs: number = !isNaN(+process.env.TIMEOUT_MS) ? +process.env.TIMEOUT_MS : 300 * 1000
 
 let apiModel: ApiModel
 
@@ -55,8 +55,8 @@ let api: ChatGPTAPI | ChatGPTUnofficialProxyAPI
         options.maxResponseTokens = 16384
       }
       else {
-        options.maxModelTokens = 8192
-        options.maxResponseTokens = 4096
+        options.maxModelTokens = 8000
+        options.maxResponseTokens = 4000
       }
     }
     else {

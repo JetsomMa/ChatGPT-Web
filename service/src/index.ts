@@ -1,14 +1,17 @@
 import express from 'express'
 import CryptoJS from 'crypto-js'
 import axios from 'axios'
+import type { ChatMessage } from './chatgpt'
 import type { RequestProps, VerifyProps } from './types'
 import { chatConfig, chatReplyProcess, currentModel } from './chatgpt'
 import { auth } from './middleware/auth'
 import { limiter } from './middleware/limiter'
 import { isNotEmptyString } from './utils/is'
-import { replyCommand } from './domain/command'
+import { executeCommand, replyCommand, resultCommandMessage } from './domain/command'
 import { replyChatGPTBrowser } from './domain/chatgpt-browser'
 import { replyChatGPT } from './domain/chatgpt'
+import { replyMovie } from './domain/movie'
+import { replyWolframalpha } from './domain/wolframalpha'
 import { dateFormat, getNthDayAfterToday, sqlDB } from './utils'
 
 const port = process.env.PORT || 3002
@@ -97,6 +100,18 @@ router.post('/chat-process', [auth, limiter], async (req, res) => {
           else if (querymethod === '浏览器')
             await replyChatGPTBrowser(prompt, dbRecord, res)
 
+          else if (querymethod === '影视')
+            await replyMovie(prompt, dbRecord, res)
+
+          // else if (querymethod === '音乐')
+          //   await replyMusic(prompt, dbRecord, res)
+
+          // else if (querymethod === '论文')
+          //   await replyArxiv(prompt, dbRecord, res)
+
+          else if (querymethod === '运算')
+            await replyWolframalpha(prompt, dbRecord, res, options)
+
           else
             await replyChatGPT(prompt, dbRecord, res, options, systemMessage, temperature)
         }
@@ -138,8 +153,7 @@ router.post('/chat-process', [auth, limiter], async (req, res) => {
 })
 
 router.post('/chat-query', async (req, res) => {
-  const temperature = 0.5
-  const systemMessage = `current Time: ${dateFormat(new Date(new Date().getTime() + 8 * 60 * 60 * 1000), 'yyyy年MM月dd日 hh时mm分ss秒')}\n\n这个网站的提供者: 马少杰，他是一个为人友善、热爱技术、喜欢小动物的人，他的联系方式[手机号/微信]：18514665919\n\n您是一个知识渊博的学者，基于openai公司的chatgpt3.5版本，有着极其严谨而又风趣的聊天态度，请尽可能准确详细的回答问题。`
+  const systemMessage = `current Time: ${dateFormat(new Date(new Date().getTime() + 8 * 60 * 60 * 1000), 'yyyy年MM月dd日 hh时mm分ss秒')}\n\n您是一个知识渊博的学者，基于openai公司的chatgpt3.5版本，有着极其严谨而又风趣的聊天态度，请尽可能准确详细的回答问题。`
   const device = 'wechat'
   let { prompt, username, telephone } = req.body as RequestProps
 
@@ -158,21 +172,37 @@ router.post('/chat-query', async (req, res) => {
         console.error(error)
       }
 
+      let mySystemMessage = ''
+
       if (telephone === '18514665919' && prompt.startsWith('/')) {
         const result = await executeCommand(prompt, dbRecord)
-        dbRecord.conversation = result
-        dbRecord.finish_reason = 'stop'
+        if (result.startsWith('error:')) {
+          dbRecord.conversation = result
+          dbRecord.finish_reason = 'stop'
+        }
+        else {
+          prompt = result
+          mySystemMessage = resultCommandMessage
+        }
       }
       else {
-        const result = await chatReplyProcess({
-          message: prompt,
-          systemMessage,
-          temperature,
-        })
+        mySystemMessage = systemMessage
+      }
 
-     		dbRecord.conversation = result.data.text
-        dbRecord.conversationId = result.data.id
-        dbRecord.finish_reason = result.data.detail.choices[0].finish_reason
+      let myChat: ChatMessage | undefined
+      await chatReplyProcess({
+        message: prompt,
+        process: (chat: ChatMessage) => {
+          myChat = chat
+        },
+        systemMessage: mySystemMessage,
+        temperature: 0,
+      })
+
+      if (myChat) {
+        dbRecord.conversation = myChat.text
+        dbRecord.conversationId = myChat.id
+        dbRecord.finish_reason = myChat.detail.choices[0].finish_reason
       }
     }
     else {
@@ -197,6 +227,7 @@ router.post('/chat-query', async (req, res) => {
       catch (error) {
         console.error('error.message --> ', error.message)
       }
+
       res.send(dbRecord.conversation)
     }
     catch (error) {

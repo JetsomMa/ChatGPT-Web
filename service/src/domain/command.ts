@@ -1,4 +1,4 @@
-import { sqlDB, systemMessagePix } from '../utils'
+import { sqlDB } from '../utils'
 import type { ChatMessage } from '../chatgpt'
 import { chatReplyProcess } from '../chatgpt'
 
@@ -58,7 +58,7 @@ export const resultCommandMessage = `您将扮演一个翻译员的角色，帮�
     Q: "[{"expired":"99999999"}]"
     A: "| expired |\n|-----------|\n| 2023-06-30|"
 `
-async function executeCommand(prompt, record) {
+export async function executeCommand(prompt, record) {
   try {
     let myChat: ChatMessage | undefined
 
@@ -67,13 +67,13 @@ async function executeCommand(prompt, record) {
       process: (chat: ChatMessage) => {
         myChat = chat
       },
-      systemMessage: systemMessagePix + systemMessage,
+      systemMessage,
       temperature: 0,
     })
 
     const command = JSON.parse(myChat.text)
 
-    console.log('command --> ', command)
+    console.log('指令生成的结果 --> ', command)
 
     if (command.level === 'S' && record.telephone !== '18514665919') {
       return 'error: 您没有权限执行此命令'
