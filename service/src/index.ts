@@ -8,9 +8,8 @@ import { auth } from './middleware/auth'
 import { limiter } from './middleware/limiter'
 import { isNotEmptyString } from './utils/is'
 import { executeCommand, replyCommand, resultCommandMessage } from './domain/command'
-import { replyChatGPTBrowser } from './domain/chatgpt-browser'
+import { replyBing } from './domain/bing'
 import { replyChatGPT } from './domain/chatgpt'
-import { replyMovie } from './domain/movie'
 import { replyWolframalpha } from './domain/wolframalpha'
 import { dateFormat, getNthDayAfterToday, sqlDB } from './utils'
 
@@ -60,7 +59,7 @@ app.all('*', (_, res, next) => {
 
 router.post('/chat-process', [auth, limiter], async (req, res) => {
   res.setHeader('Content-type', 'application/octet-stream')
-  console.error('req.body -> ', req.body)
+  // console.error('req.body -> ', req.body)
 
   let { prompt, querymethod, options = {}, systemMessage, temperature, device, username, telephone } = req.body as RequestProps
   const dbRecord: any = { prompt, querymethod, device, username, modeltype: 'gpt-3.5', telephone }
@@ -80,8 +79,8 @@ router.post('/chat-process', [auth, limiter], async (req, res) => {
     if (userList.length || !process.env.AUTH_SECRET_KEY) {
       const nowDate = dateFormat(new Date(), 'yyyyMMdd')
       if (process.env.AUTH_SECRET_KEY && userList[0].status === '3') {
-        console.error('用户已被禁用，请联系管理员！')
-        dbRecord.conversation = '用户已被禁用，请联系管理员！'
+        console.error('用户已被禁用，请联系管理员，微信：18514665919！')
+        dbRecord.conversation = '用户已被禁用，请联系管理员，微信：18514665919！'
         dbRecord.finish_reason = 'stop'
         res.write(JSON.stringify({ message: dbRecord.conversation }))
       }
@@ -98,10 +97,11 @@ router.post('/chat-process', [auth, limiter], async (req, res) => {
             await replyCommand(prompt, dbRecord, res)
 
           else if (querymethod === '浏览器')
-            await replyChatGPTBrowser(prompt, dbRecord, res)
+            await replyBing(prompt, dbRecord, res)
+            // await replyChatGPTBrowser(prompt, dbRecord, res)
 
-          else if (querymethod === '影视')
-            await replyMovie(prompt, dbRecord, res)
+          // else if (querymethod === '影视')
+          //   await replyMovie(prompt, dbRecord, res)
 
           // else if (querymethod === '音乐')
           //   await replyMusic(prompt, dbRecord, res)
@@ -122,8 +122,8 @@ router.post('/chat-process', [auth, limiter], async (req, res) => {
       }
     }
     else {
-      console.error('用户不存在，请联系管理员！')
-      res.write(JSON.stringify({ message: '用户不存在，请联系管理员！' }))
+      console.error('用户不存在，请联系管理员，微信：18514665919！')
+      res.write(JSON.stringify({ message: '用户不存在，请联系管理员，微信：18514665919！' }))
     }
   }
   catch (error) {
@@ -148,6 +148,7 @@ router.post('/chat-process', [auth, limiter], async (req, res) => {
     catch (error) {
       console.error(error.message)
     }
+    console.log('res.end()')
     res.end()
   }
 })
@@ -291,8 +292,8 @@ router.post('/verify', async (req, res) => {
         console.error('error.message --> ', error.message)
       }
     }
-    else if (userList[0].status === '3') { throw new Error('用户已被禁用，请联系管理员！') }
-    else if (userList[0].expired < nowDate) { throw new Error('账户已过期，请联系管理员进行充值服务！微信：18514665919') }
+    else if (userList[0].status === '3') { throw new Error('用户已被禁用，请联系管理员，微信：18514665919！') }
+    else if (userList[0].expired < nowDate) { throw new Error('账户已过期，请联系管理员进行充值服务，微信：18514665919！') }
 
     if (process.env.AUTH_SECRET_KEY !== token)
       throw new Error('密钥无效 | Secret key is invalid')
@@ -313,29 +314,29 @@ router.post('/phonecode', async (req, res) => {
   try {
     const { telephone } = req.body as PhoneCode
 
-    const nowTime = new Date().getTime()
-    const rows = await sqlDB.query(`SELECT * FROM phonecode where expired > '${nowTime}' and telephone = '${telephone}' and status = 0`)
-    if (rows && rows.length > 0) {
-      throw new Error('验证码已发送，请勿重复发送！')
-    }
-    else {
-      const min = 100000
-      const max = 999999
-      const phonecode = Math.floor(Math.random() * (max - min + 1)) + min
-      await sqlDB.insert('phonecode', { telephone, phonecode, status: 0 })
+    // const nowTime = new Date().getTime()
+    // const rows = await sqlDB.query(`SELECT * FROM phonecode where expired > '${nowTime}' and telephone = '${telephone}' and status = 0`)
+    // if (rows && rows.length > 0) {
+    //   throw new Error('验证码已发送，请勿重复发送！')
+    // }
+    // else {
+    const min = 100000
+    const max = 999999
+    const phonecode = Math.floor(Math.random() * (max - min + 1)) + min
+    await sqlDB.insert('phonecode', { telephone, phonecode, status: 0 })
 
-      try {
-        const response = await axios.post('http://118.195.236.91:3010/api/sendMessage', { phone: telephone, codeText: `${phonecode}` })
+    try {
+      const response = await axios.post('http://118.195.236.91:3010/api/sendMessage', { phone: telephone, codeText: `${phonecode}` })
 
-        if (response.status !== 200)
-          console.error('response --> ', response)
-        else
-          res.send({ status: 'Success', message: 'phonecode successfully', data: null })
-      }
-      catch (error) {
-        console.error('error.message --> ', error.message)
-      }
+      if (response.status !== 200)
+        console.error('response --> ', response)
+      else
+        res.send({ status: 'Success', message: 'phonecode successfully', data: null })
     }
+    catch (error) {
+      console.error('error.message --> ', error.message)
+    }
+    // }
   }
   catch (error) {
     res.send({ status: 'Fail', message: error.message, data: null })

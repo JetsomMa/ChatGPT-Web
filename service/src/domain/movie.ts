@@ -84,20 +84,20 @@ function clean_string(inputStr) {
   return res
 }
 
-async function WikiQuery(prompt, num) {
-  const queryUrl = `https://en.wikipedia.org/w/api.php?action=query&format=json&list=search&srsearch=${encodeURIComponent(prompt)}`
-  console.log('queryUrl --> ', queryUrl)
-  const response: any = await getWebsitContent(queryUrl)
-  if (response) {
-    const data = (response.query.search || []).slice(0, num)
-    const results = data.map(d => ({ title: `[维基百科]${d.title}`, src: `https://zh.wikipedia.org/wiki/${encodeURIComponent(d.title)}`, content: clean_string(d.snippet) }))
+// async function WikiQuery(prompt, num) {
+//   const queryUrl = `https://en.wikipedia.org/w/api.php?action=query&format=json&list=search&srsearch=${encodeURIComponent(prompt)}`
+//   console.log('queryUrl --> ', queryUrl)
+//   const response: any = await getWebsitContent(queryUrl)
+//   if (response) {
+//     const data = (response.query.search || []).slice(0, num)
+//     const results = data.map(d => ({ title: `[维基百科]${d.title}`, src: `https://zh.wikipedia.org/wiki/${encodeURIComponent(d.title)}`, content: clean_string(d.snippet) }))
 
-    return results
-  }
-  else {
-    return []
-  }
-}
+//     return results
+//   }
+//   else {
+//     return []
+//   }
+// }
 
 async function executeCommand(prompt) {
   try {
@@ -155,11 +155,11 @@ async function executeCommand(prompt) {
         })
 
         const itemObject: any = {}
-        itemObject.title = `[豆瓣]${item['电影名']}`
-        itemObject.src = `https://www.douban.com/search?q=${encodeURIComponent(item['电影名'])}`
+        itemObject.title = `${item['电影名']}`
+        // itemObject.src = `https://www.douban.com/search?q=${encodeURIComponent(item['电影名'])}`
         itemObject.content = clean_string(itemString)
         return itemObject
-      }).slice(0, 3)
+      }).slice(0, 2)
 
       // const wikiList = await WikiQuery(prompt, 1)
 
@@ -178,27 +178,16 @@ async function executeCommand(prompt) {
 }
 
 export async function replyMovie(prompt, dbRecord, res) {
-  const replySystemMessage = `请你扮演一个内容编辑角色，用户将输入一个json数组。请将内容按照下面示例转换成markdown格式输出。
+  const systemMessage = `请你扮演一个信息整理专员，将我输入的json字符串转换为markdown格式输出，概述剧情简介部分，使全文输出不要超过800字，不要有额外的解释和说明。
 
-以下是一些内容生成的示例：
+以下是转换的例子：
 
-输入：[{"title":"[豆瓣]电影名称","src":"https://www.douban.com/search?q=电影名称","content":"评分xx导演xx作者xxx/xxx/xxx/xxx国家xxxx语言xx/xx/xx/xx/xx上映时间xxxxxxxxxx影片时长xxxx剧情简介xxxxxxxxxxxxx演员名单xxxxxxxxxxx"}]
-输出：### [[豆瓣]电影名称](https://www.douban.com/search?q=电影名称)
-评分：xx
-导演：xx
-作者：xxx/xxx/xxx/xxx
-国家：xxxx
-语言：xx/xx/xx/xx/xx
-上映时间：xxxxxxxxxx
-影片时长：xxxx
-剧情简介：xxxxxxxxxxxxx
-演员名单：xxxxxxxxxxx
-
-
-如果文中出现了英语，请将其转换成为中文输出。
+输入：[{"title":"电影名称","content":"评分xx导演xx作者xxx/xxx/xxx/xxx国家xxxx语言xx/xx/xx/xx/xx上映时间xxxxxxxxxx影片时长xxxx剧情简介xxxxxxxxxxxxx演员名单xxxxxxxxxxx"}]
+输出：### 电影名称\n评分：xx\n导演：xx\n作者：xxx/xxx/xxx/xxx\n国家：xxxx\n语言：xx/xx/xx/xx/xx\n上映时间：xxxxxxxxxx\n影片时长：xxxx\n剧情简介：xxxxxxxxxxxxx\n演员名单：xxxxxxxxxxx
 `
 
   const result = await executeCommand(prompt)
+  console.log('result --> ', result)
 
   if (result.startsWith('error:')) {
     dbRecord.conversation = result
@@ -210,14 +199,14 @@ export async function replyMovie(prompt, dbRecord, res) {
       let firstChunk = true
       let myChat: ChatMessage | undefined
       await chatReplyProcess({
-        message: result,
+        message: `我的输入为：${result}`,
         process: (chat: ChatMessage) => {
           res.write(firstChunk ? JSON.stringify(chat) : `\n${JSON.stringify(chat)}`)
           firstChunk = false
           myChat = chat
         },
-        systemMessage: replySystemMessage,
         temperature: 0,
+        systemMessage,
       })
 
       if (myChat) {

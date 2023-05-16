@@ -16,9 +16,9 @@ console.error(colors('blue', '请执行以下命令启动镜像'))
 console.error(colors('blue', `docker pull 127.0.0.1:5000/chatgpt-web-service1:${packageJsonConfig.version}`))
 
 // 不用注册用户的服务版本
-console.error(colors('blue', `docker run --net=host --name chatgpt-web-service1 -d --env PORT=13002 --env HTTPS_PROXY=http://127.0.0.1:15777 --env DATASET_MYSQL_USER=dataset --env DATASET_MYSQL_PASSWORD=dataset2023 --env DATASET_MYSQL_DATABASE=dataset --env SOCKS_PROXY_HOST=127.0.0.1 --env SOCKS_PROXY_PORT=15778 --env OPENAI_API_KEY=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 127.0.0.1:5000/chatgpt-web-service1:${packageJsonConfig.version}`))
+// console.error(colors('blue', `docker run --net=host --name chatgpt-web-service1 -d --env PORT=13002 --env HTTPS_PROXY=http://127.0.0.1:15777 --env DATASET_MYSQL_USER=dataset --env DATASET_MYSQL_PASSWORD=dataset2023 --env DATASET_MYSQL_DATABASE=dataset --env SOCKS_PROXY_HOST=127.0.0.1 --env SOCKS_PROXY_PORT=15778 --env OPENAI_API_KEY=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 127.0.0.1:5000/chatgpt-web-service1:${packageJsonConfig.version}`))
 // 注册用户的服务版本
-// console.error(colors('blue', `docker run --net=host --name chatgpt-web-service12 -d --env PORT=13002 --env AUTH_SECRET_KEY=true --env HTTPS_PROXY=http://127.0.0.1:15777 --env DATASET_MYSQL_USER=dataset --env DATASET_MYSQL_PASSWORD=dataset2023 --env DATASET_MYSQL_DATABASE=dataset --env SOCKS_PROXY_HOST=127.0.0.1 --env SOCKS_PROXY_PORT=15778 --env OPENAI_API_KEY=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 127.0.0.1:5000/chatgpt-web-service1:${packageJsonConfig.version}`))
+console.error(colors('blue', `docker run --net=host --name chatgpt-web-service12 -d --env PORT=13002 --env AUTH_SECRET_KEY=true --env HTTPS_PROXY=http://127.0.0.1:15777 --env DATASET_MYSQL_USER=dataset --env DATASET_MYSQL_PASSWORD=dataset2023 --env DATASET_MYSQL_DATABASE=dataset --env SOCKS_PROXY_HOST=127.0.0.1 --env SOCKS_PROXY_PORT=15778 --env OPENAI_API_KEY=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 127.0.0.1:5000/chatgpt-web-service1:${packageJsonConfig.version}`))
 
 // 临时切换至https://openai-sb.com/版本
 // 不用注册用户的服务版本

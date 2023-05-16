@@ -11,6 +11,7 @@ import { querymethodsOptions } from './components/Header/options'
 import { useScroll } from './hooks/useScroll'
 import { useChat } from './hooks/useChat'
 import { useCopyCode } from './hooks/useCopyCode'
+import { useQueryMethod } from './hooks/useQueryMethod'
 import { HoverButton, SvgIcon } from '@/components/common'
 import { useBasicLayout } from '@/hooks/useBasicLayout'
 import { useChatStore, usePromptStore } from '@/store'
@@ -25,6 +26,7 @@ const dialog = useDialog()
 const ms = useMessage()
 
 const chatStore = useChatStore()
+const { querymethod, setQueryMethod } = useQueryMethod()
 
 useCopyCode()
 
@@ -38,7 +40,7 @@ const dataSources = computed(() => chatStore.getChatByUuid(+uuid))
 const conversationList = computed(() => dataSources.value.filter(item => (!item.inversion && !item.error)))
 
 const querymethods = ref(querymethodsOptions)
-const querymethod = ref('ChatGPT')
+
 const prompt = ref<string>('')
 const loading = ref<boolean>(false)
 const inputRef = ref<Ref | null>(null)
@@ -89,8 +91,6 @@ async function onConversation() {
   let options: Chat.ConversationRequest = {}
   const lastContext = (conversationList.value[conversationList.value.length - 1] || {}).conversationOptions
 
-  console.log('lastContext', lastContext)
-
   if (lastContext)
     options = { ...lastContext }
 
@@ -140,7 +140,7 @@ async function onConversation() {
               },
             )
 
-            if (openLongReply && data.detail.choices[0].finish_reason === 'length') {
+            if (openLongReply && (querymethod.value !== '浏览器' && data.detail.choices[0].finish_reason === 'length')) {
               options.parentMessageId = data.id
               lastText = data.text
               message = ''
@@ -486,10 +486,6 @@ onMounted(() => {
 
   // 我们致力于为您提供最好的学习体验和服务。加入我们的会员，开始您的学习之旅吧！`)
   //   }, 2000)
-
-  setTimeout(() => {
-    querymethod.value = 'ChatGPT'
-  })
 })
 
 onUnmounted(() => {
@@ -497,9 +493,9 @@ onUnmounted(() => {
     controller.abort()
 })
 
-const querymethodChange = (value: string) => {
-  querymethod.value = value
-}
+// const querymethodChange = (value: string) => {
+//   setQueryMethod(value)
+// }
 </script>
 
 <template>
@@ -508,11 +504,11 @@ const querymethodChange = (value: string) => {
       v-if="isMobile"
       :querymethod="querymethod"
       @export="handleExport"
-      @querymethodChange="querymethodChange"
+      @querymethodChange="setQueryMethod"
     />
     <main class="flex-1 overflow-hidden" style="position: relative;">
       <div v-if="!isMobile" style="position: absolute; background-color: #fff; left: 50%; transform: translateX(-50%); top: 0px; padding: 10px; z-index: 100;">
-        <NRadioGroup v-model:value="querymethod" size="medium" default-value="ChatGPT">
+        <NRadioGroup :value="querymethod" size="medium" default-value="ChatGPT" @update:value="setQueryMethod">
           <NRadioButton
             v-for="method of querymethods"
             :key="method.value"
