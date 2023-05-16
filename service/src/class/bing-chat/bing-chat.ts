@@ -219,8 +219,8 @@ export class BingChat {
                 type: 4,
               }
 
-              if (this._debug)
-                console.log(chatWebsocketUrl, JSON.stringify(params, null, 2))
+              // if (this._debug)
+              //   console.log(chatWebsocketUrl, JSON.stringify(params, null, 2))
 
               ws.send(`${JSON.stringify(params)}${terminalChar}`)
 

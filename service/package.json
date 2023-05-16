@@ -1,6 +1,6 @@
 {
   "name": "chatgpt-web-service",
-  "version": "1.0.19",
+  "version": "1.0.21",
   "private": false,
   "description": "ChatGPT Web Service",
   "author": "ChenZhaoYu <chenzhaoyu1994@gmail.com>",
@@ -36,7 +36,9 @@
     "isomorphic-fetch": "^3.0.0",
     "node-fetch": "^3.3.0",
     "ora": "^6.1.2",
+    "proxy-agent": "^5.0.0",
     "socks-proxy-agent": "^7.0.0",
+    "utils-lib-js": "^1.7.8",
     "ws": "^8.13.0"
   },
   "devDependencies": {

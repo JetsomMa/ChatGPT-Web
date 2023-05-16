@@ -148,13 +148,13 @@ router.post('/chat-process', [auth, limiter], async (req, res) => {
     catch (error) {
       console.error(error.message)
     }
-    console.log('res.end()')
+
     res.end()
   }
 })
 
 router.post('/chat-query', async (req, res) => {
-  const systemMessage = `current Time: ${dateFormat(new Date(new Date().getTime() + 8 * 60 * 60 * 1000), 'yyyy年MM月dd日 hh时mm分ss秒')}\n\n您是一个知识渊博的学者，基于openai公司的chatgpt3.5版本，有着极其严谨而又风趣的聊天态度，请尽可能准确详细的回答问题。`
+  const systemMessage = `当前时间为: ${dateFormat(new Date(new Date().getTime() + 8 * 60 * 60 * 1000), 'yyyy年MM月dd日 hh时mm分ss秒')}\n\n您是一个知识渊博的学者，基于openai公司的chatgpt3.5版本，有着极其严谨而又风趣的聊天态度，请尽可能准确详细的回答问题。`
   const device = 'wechat'
   let { prompt, username, telephone } = req.body as RequestProps
 
