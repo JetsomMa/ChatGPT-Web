@@ -95,8 +95,10 @@ export class NewBingSocket extends MessageCenter {
     else if (__type === 'object')
       str = jsonToString(message as IObject<unknown>)
 
-    this.emit('send-message', str)
-    ws.send(str + fixStr)
+    if (ws) {
+      this.emit('send-message', str)
+      ws.send(str + fixStr)
+    }
   }
 
   // 收到消息
@@ -164,10 +166,10 @@ export function onMessage(e: MessageEvent) {
       break
     case 2:// 对话完成
       this.emit('message:finish', data.item?.messages?.[1])
-      this.clearWs()
+      // this.clearWs()
       break
     case 6:// 断线检测
-      // console.log(data);
+      // console.log(data)
       break
     case 7:// Connection closed with an error
       console.log(data)
