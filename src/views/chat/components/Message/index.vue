@@ -50,7 +50,7 @@ const options = computed(() => {
       icon: iconRender({ icon: 'ri:delete-bin-line' }),
     },
     {
-      label: '播报',
+      label: '朗读',
       key: 'read',
       icon: iconRender({ icon: 'mdi:broadcast' }),
     },

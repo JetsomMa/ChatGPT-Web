@@ -58,11 +58,47 @@ app.all('*', (_, res, next) => {
   next()
 })
 
+async function chatProcess(prompt, querymethod, dbRecord, res, options, systemMessage, temperature) {
+  prompt = prompt.trim()
+
+  if (prompt) {
+    if (prompt.startsWith('/') || prompt.startsWith('！'))
+      await replyCommand(prompt, dbRecord, res)
+
+    else if (querymethod === '浏览器')
+      await replyBing(prompt, dbRecord, res)
+
+    else if (querymethod === '画画')
+      await replyDalle(prompt, dbRecord, res)
+
+    // await replyChatGPTBrowser(prompt, dbRecord, res)
+
+    // else if (querymethod === '影视')
+    //   await replyMovie(prompt, dbRecord, res)
+
+    // else if (querymethod === '音乐')
+    //   await replyMusic(prompt, dbRecord, res)
+
+    // else if (querymethod === '论文')
+    //   await replyArxiv(prompt, dbRecord, res)
+
+    else if (querymethod === '运算')
+      await replyWolframalpha(prompt, dbRecord, res, options)
+
+    else
+      await replyChatGPT(prompt, dbRecord, res, options, systemMessage, temperature)
+  }
+  else {
+    console.error('请输入您的会话内容')
+    res.write(JSON.stringify({ message: '请输入您的会话内容' }))
+  }
+}
+
 router.post('/chat-process', [auth, limiter], async (req, res) => {
   res.setHeader('Content-type', 'application/octet-stream')
-  // console.error('req.body -> ', req.body)
+  console.error('req.body -> ', req.body)
 
-  let { prompt, querymethod, options = {}, systemMessage, temperature, device, username, telephone } = req.body as RequestProps
+  const { prompt, querymethod, options = {}, systemMessage, temperature, device, username, telephone } = req.body as RequestProps
   const dbRecord: any = { prompt, querymethod, device, username, modeltype: 'gpt-3.5', telephone }
   try {
     // 保存会话记录
@@ -78,51 +114,57 @@ router.post('/chat-process', [auth, limiter], async (req, res) => {
 
     const userList = await sqlDB.select('userinfo', { where: { username, telephone } })
     if (userList.length || !process.env.AUTH_SECRET_KEY) {
+      const userinfo = userList[0]
       const nowDate = dateFormat(new Date(), 'yyyyMMdd')
-      if (process.env.AUTH_SECRET_KEY && userList[0].status === '3') {
+      if (process.env.AUTH_SECRET_KEY && userinfo.status === '3') {
         console.error('用户已被禁用，请联系管理员，微信：18514665919！')
         dbRecord.conversation = '用户已被禁用，请联系管理员，微信：18514665919！'
         dbRecord.finish_reason = 'stop'
         res.write(JSON.stringify({ message: dbRecord.conversation }))
       }
-      else if (process.env.AUTH_SECRET_KEY && userList[0].expired <= nowDate) {
-        dbRecord.conversation = '账户已过期，请联系管理员进行充值服务！微信：18514665919'
-        dbRecord.finish_reason = 'stop'
-        res.write(JSON.stringify({ message: dbRecord.conversation }))
-      }
-      else {
-        prompt = prompt.trim()
-
-        if (prompt) {
-          if (prompt.startsWith('/') || prompt.startsWith('！'))
-            await replyCommand(prompt, dbRecord, res)
-
-          else if (querymethod === '浏览器')
-            await replyBing(prompt, dbRecord, res)
-
-          else if (querymethod === '画画')
-            await replyDalle(prompt, dbRecord, res)
-
-          // await replyChatGPTBrowser(prompt, dbRecord, res)
-
-          // else if (querymethod === '影视')
-          //   await replyMovie(prompt, dbRecord, res)
-
-          // else if (querymethod === '音乐')
-          //   await replyMusic(prompt, dbRecord, res)
-
-          // else if (querymethod === '论文')
-          //   await replyArxiv(prompt, dbRecord, res)
-
-          else if (querymethod === '运算')
-            await replyWolframalpha(prompt, dbRecord, res, options)
-
-          else
-            await replyChatGPT(prompt, dbRecord, res, options, systemMessage, temperature)
+      else if (process.env.AUTH_SECRET_KEY && userinfo.expired <= nowDate) {
+        // 如果用户已过期
+        if (querymethod === '画画') {
+          if (userinfo.dalleday <= 0) {
+            dbRecord.conversation = '画画功能超过每日1张免费限额，请联系管理员进行充值(包月20元，包含30张画画额度)！微信：18514665919'
+            res.write(JSON.stringify({ message: dbRecord.conversation }))
+          }
+          else {
+            userinfo.dalleday--
+            await chatProcess(prompt, querymethod, dbRecord, res, options, systemMessage, temperature)
+            sqlDB.update('userinfo', userinfo)
+          }
+        }
+        else if (querymethod === 'ChatGPT') {
+          if (userinfo.chatgptday <= 0) {
+            dbRecord.conversation = 'ChatGPT功能超过每日3次免费限额，请联系管理员进行充值(包月20元，包含30张画画额度)！微信：18514665919'
+            res.write(JSON.stringify({ message: dbRecord.conversation }))
+          }
+          else {
+            userinfo.chatgptday--
+            await chatProcess(prompt, querymethod, dbRecord, res, options, systemMessage, temperature)
+            sqlDB.update('userinfo', userinfo)
+          }
         }
         else {
-          console.error('请输入您的会话内容')
-          res.write(JSON.stringify({ message: '请输入您的会话内容' }))
+          await chatProcess(prompt, querymethod, dbRecord, res, options, systemMessage, temperature)
+        }
+      }
+      else {
+        // 如果用户未过期
+        if (querymethod === '画画') {
+          if (userinfo.dallemonth <= 0) {
+            dbRecord.conversation = '画画功能超过每月30张限额，请联系管理员进行充值(40张/10元)！微信：18514665919'
+            res.write(JSON.stringify({ message: dbRecord.conversation }))
+          }
+          else {
+            userinfo.dallemonth--
+            await chatProcess(prompt, querymethod, dbRecord, res, options, systemMessage, temperature)
+            sqlDB.update('userinfo', userinfo)
+          }
+        }
+        else {
+          await chatProcess(prompt, querymethod, dbRecord, res, options, systemMessage, temperature)
         }
       }
     }
