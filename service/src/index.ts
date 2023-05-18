@@ -11,6 +11,7 @@ import { executeCommand, replyCommand, resultCommandMessage } from './domain/com
 import { replyBing } from './domain/bing'
 import { replyChatGPT } from './domain/chatgpt'
 import { replyWolframalpha } from './domain/wolframalpha'
+import { replyDalle } from './domain/dalle'
 import { dateFormat, getNthDayAfterToday, sqlDB } from './utils'
 
 const port = process.env.PORT || 3002
@@ -98,7 +99,11 @@ router.post('/chat-process', [auth, limiter], async (req, res) => {
 
           else if (querymethod === '浏览器')
             await replyBing(prompt, dbRecord, res)
-            // await replyChatGPTBrowser(prompt, dbRecord, res)
+
+          else if (querymethod === '画画')
+            await replyDalle(prompt, dbRecord, res)
+
+          // await replyChatGPTBrowser(prompt, dbRecord, res)
 
           // else if (querymethod === '影视')
           //   await replyMovie(prompt, dbRecord, res)
