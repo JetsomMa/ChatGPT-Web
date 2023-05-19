@@ -328,7 +328,7 @@ router.post('/verify', async (req, res) => {
       if (expired < '20230531')
         expired = '20230531'
 
-      await sqlDB.insert('userinfo', { username, telephone, status: 2, remark, expired })
+      await sqlDB.insert('userinfo', { username, telephone, status: 2, remark, expired, chatgptday: 3, dallemonth: 30, dalleday: 1 })
       // 消息推送，用于用户激活
       try {
         const response = await axios.post('http://118.195.236.91:3010/api/wxPusherNewUser', { username, telephone, remark })
