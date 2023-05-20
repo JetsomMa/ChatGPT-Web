@@ -507,12 +507,12 @@ onUnmounted(() => {
       @querymethodChange="setQueryMethod"
     />
     <main class="flex-1 overflow-hidden" style="position: relative;">
-      <div v-if="!isMobile" style="position: absolute; background-color: #fff; left: 50%; transform: translateX(-50%); top: 0px; padding: 10px; z-index: 100;">
+      <div v-if="!isMobile" style="position: absolute; background-color: #efefef; left: 50%; transform: translateX(-50%); top: 0px; padding: 10px; z-index: 100;">
         <NRadioGroup :value="querymethod" size="medium" default-value="ChatGPT" @update:value="setQueryMethod">
           <NRadioButton
             v-for="method of querymethods"
             :key="method.value"
-            style="width: 85px; text-align: center;"
+            style="width: 145px; text-align: center;"
             :value="method.value"
             :disabled="method.disabled"
           >
@@ -610,7 +610,21 @@ onUnmounted(() => {
 </template>
 
 <style>
+.n-radio-group .n-radio-button {
+  background-color: violet;
+  color: #666;
+}
 .n-radio-group .n-radio-button.n-radio-button--checked {
-    background: #efefef;
+  background: blue;
+  color: #ffffff;
+}
+.n-base-selection .n-base-selection-label {
+  background-color: fuchsia !important;
+}
+.n-base-selection .n-base-selection-label .n-base-selection-input {
+  color: #ffffff;
+}
+.n-base-selection .n-base-suffix .n-base-suffix__arrow {
+  color: #ffffff;
 }
 </style>

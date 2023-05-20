@@ -64,7 +64,7 @@ function querymethodChange(value: string) {
         {{ (currentChatHistory || {}).title || '' }}
       </h1>
       <div class="flex items-center space-x-2">
-        <NSelect style="width: 120px;" :value="querymethod" :options="querymethodsOptions" @update:value="querymethodChange" />
+        <NSelect style="width: 170px;" :value="querymethod" :options="querymethodsOptions" @update:value="querymethodChange" />
         <HoverButton @click="handleExport">
           <span class="text-xl text-[#4f555e] dark:text-white">
             <SvgIcon icon="ri:download-2-line" />
