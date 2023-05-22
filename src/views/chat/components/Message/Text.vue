@@ -4,6 +4,7 @@ import MarkdownIt from 'markdown-it'
 import mdKatex from '@traptitech/markdown-it-katex'
 import mila from 'markdown-it-link-attributes'
 import hljs from 'highlight.js'
+import { useMessage } from 'naive-ui'
 import { useBasicLayout } from '@/hooks/useBasicLayout'
 import { t } from '@/locales'
 
@@ -11,15 +12,26 @@ interface Props {
   inversion?: boolean
   error?: boolean
   text?: string
+  querymethod?: string
   loading?: boolean
   asRawText?: boolean
 }
 
+interface Emit {
+  (ev: 'regenerate'): void
+  (ev: 'variationImage', data: string): void
+  (ev: 'upscaleImage', data: string): void
+}
+
 const props = defineProps<Props>()
+
+const emit = defineEmits<Emit>()
 
 const { isMobile } = useBasicLayout()
 
 const textRef = ref<HTMLElement>()
+
+const ms = useMessage()
 
 const mdi = new MarkdownIt({
   linkify: true,
@@ -49,7 +61,9 @@ const wrapClass = computed(() => {
   ]
 })
 
+let orgText = props.text || ''
 const text = computed(() => {
+  orgText = props.text || ''
   const value = props.text || ''
   if (!props.asRawText)
     return mdi.render(value)
@@ -61,6 +75,45 @@ function highlightBlock(str: string, lang?: string) {
 }
 
 defineExpose({ textRef })
+
+function handleRegenerate() {
+  emit('regenerate')
+}
+
+function getImageUrl() {
+  const regex = /!\[(?:imagine|variation|upscale)\]\((.*?)\)/
+  const match = orgText.match(regex)
+  if (match)
+    return match[1]
+
+  return ''
+}
+
+function download() {
+  const url = getImageUrl()
+  if (url) {
+    const link = document.createElement('a')
+    link.download = `chat_mashaojie_cn_${new Date().getTime()}.png`
+    link.href = url
+    link.target = '_blank'
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+  }
+  else {
+    ms.error('没有图片可以下载哦~')
+  }
+}
+
+function variationImage(index: number) {
+  const url = getImageUrl()
+  emit('variationImage', `variation,${url},${index}`)
+}
+
+function upscaleImage(index: number) {
+  const url = getImageUrl()
+  emit('upscaleImage', `upscale,${url},${index}`)
+}
 </script>
 
 <template>
@@ -75,6 +128,42 @@ defineExpose({ textRef })
           <div v-else class="whitespace-pre-wrap" v-text="text" />
         </div>
         <div v-else class="whitespace-pre-wrap" v-text="text" />
+        <div v-if="!asRawText && querymethod === '画画' && (orgText.startsWith('![imagine](') || orgText.startsWith('![variation](') || orgText.startsWith('![upscale]('))" style="padding-top: 10px;">
+          <div class="button-row">
+            <button v-if="orgText.startsWith('![imagine](') || orgText.startsWith('![variation](')" class="button" @click="variationImage(1)">
+              演变图1
+            </button>
+            <button v-if="orgText.startsWith('![imagine](') || orgText.startsWith('![variation](')" class="button" @click="variationImage(2)">
+              演变图2
+            </button>
+            <button v-if="orgText.startsWith('![imagine](') || orgText.startsWith('![variation](')" class="button" @click="variationImage(3)">
+              演变图3
+            </button>
+            <button v-if="orgText.startsWith('![imagine](') || orgText.startsWith('![variation](')" class="button" @click="variationImage(4)">
+              演变图4
+            </button>
+            <button class="button" @click="download">
+              下载图片
+            </button>
+          </div>
+          <div class="button-row">
+            <button v-if="orgText.startsWith('![imagine](') || orgText.startsWith('![variation](')" class="button" @click="upscaleImage(1)">
+              放大图1
+            </button>
+            <button v-if="orgText.startsWith('![imagine](') || orgText.startsWith('![variation](')" class="button" @click="upscaleImage(2)">
+              放大图2
+            </button>
+            <button v-if="orgText.startsWith('![imagine](') || orgText.startsWith('![variation](')" class="button" @click="upscaleImage(3)">
+              放大图3
+            </button>
+            <button v-if="orgText.startsWith('![imagine](') || orgText.startsWith('![variation](')" class="button" @click="upscaleImage(4)">
+              放大图4
+            </button>
+            <button v-if="orgText.startsWith('![imagine](') || orgText.startsWith('![variation](')" class="button" @click="handleRegenerate">
+              重新生成
+            </button>
+          </div>
+        </div>
       </div>
     </template>
   </div>
@@ -82,4 +171,23 @@ defineExpose({ textRef })
 
 <style lang="less">
 @import url(./style.less);
+.button-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  .button {
+    padding: 5px 10px;
+    font-size: 14px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-right: 10px;
+  }
+  .button:last-child {
+    margin-right: 0;
+  }
 </style>

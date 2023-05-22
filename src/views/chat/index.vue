@@ -79,6 +79,7 @@ async function onConversation() {
       text: message,
       inversion: true,
       error: false,
+      querymethod: querymethod.value,
       conversationOptions: null,
       requestOptions: { prompt: message, options: null },
     },
@@ -102,6 +103,7 @@ async function onConversation() {
       loading: true,
       inversion: false,
       error: false,
+      querymethod: querymethod.value,
       conversationOptions: null,
       requestOptions: { prompt: message, options: { ...options } },
     },
@@ -132,6 +134,7 @@ async function onConversation() {
               {
                 dateTime: new Date().toLocaleString(),
                 text: lastText + data.text || '',
+                querymethod: querymethod.value,
                 inversion: false,
                 error: false,
                 loading: false,
@@ -197,6 +200,7 @@ async function onConversation() {
         inversion: false,
         error: true,
         loading: false,
+        querymethod: querymethod.value,
         conversationOptions: null,
         requestOptions: { prompt: message, options: { ...options } },
       },
@@ -234,6 +238,7 @@ async function onRegenerate(index: number) {
       inversion: false,
       error: false,
       loading: true,
+      querymethod: querymethod.value,
       conversationOptions: null,
       requestOptions: { prompt: message, ...options },
     },
@@ -266,6 +271,7 @@ async function onRegenerate(index: number) {
                 inversion: false,
                 error: false,
                 loading: false,
+                querymethod: querymethod.value,
                 conversationOptions: { conversationId: data.conversationId, parentMessageId: data.id },
                 requestOptions: { prompt: message, ...options },
               },
@@ -309,6 +315,7 @@ async function onRegenerate(index: number) {
         inversion: false,
         error: true,
         loading: false,
+        querymethod: querymethod.value,
         conversationOptions: null,
         requestOptions: { prompt: message, ...options },
       },
@@ -488,6 +495,16 @@ onMounted(() => {
   //   }, 2000)
 })
 
+function handleVariationImage(data: string) {
+  prompt.value = data
+  handleSubmit()
+}
+
+function handleUpscaleImage(data: string) {
+  prompt.value = data
+  handleSubmit()
+}
+
 onUnmounted(() => {
   if (loading.value)
     controller.abort()
@@ -545,10 +562,13 @@ onUnmounted(() => {
                 :date-time="item.dateTime"
                 :text="item.text"
                 :inversion="item.inversion"
+                :querymethod="item.querymethod"
                 :error="item.error"
                 :loading="item.loading"
                 @regenerate="onRegenerate(index)"
                 @delete="handleDelete(index)"
+                @variation-image="handleVariationImage"
+                @upscale-image="handleUpscaleImage"
               />
               <div class="sticky bottom-0 left-0 flex justify-center">
                 <NButton v-if="loading" type="warning" @click="handleStop">

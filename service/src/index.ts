@@ -11,9 +11,10 @@ import { executeCommand, replyCommand, resultCommandMessage } from './domain/com
 import { replyBing } from './domain/bing'
 import { replyChatGPT } from './domain/chatgpt'
 import { replyWolframalpha } from './domain/wolframalpha'
-import { replyDalle } from './domain/dalle'
+import { replyMidjourney } from './domain/midjourney'
 import { dateFormat, getNthDayAfterToday, sqlDB } from './utils'
 
+// const MidjourneyQueue = []
 const port = process.env.PORT || 3002
 const app = express()
 const router = express.Router()
@@ -62,14 +63,20 @@ async function chatProcess(prompt, querymethod, dbRecord, res, options, systemMe
   prompt = prompt.trim()
 
   if (prompt) {
-    if (prompt.startsWith('/') || prompt.startsWith('！'))
-      await replyCommand(prompt, dbRecord, res)
+    if (prompt.startsWith('/') || prompt.startsWith('！')) { await replyCommand(prompt, dbRecord, res) }
 
-    else if (querymethod === '浏览器')
-      await replyBing(prompt, dbRecord, res)
+    else if (querymethod === '浏览器') { await replyBing(prompt, dbRecord, res) }
 
-    else if (querymethod === '画画')
-      await replyDalle(prompt, dbRecord, res)
+    else if (querymethod === '画画') {
+      // if (MidjourneyQueue.length >= 3) {
+      //   res.write(JSON.stringify({ message: '会话队列已满，请稍后重试！' }))
+      // }
+      // else {
+      //   MidjourneyQueue.push({ prompt, dbRecord, res })
+      await replyMidjourney(prompt, dbRecord, res)
+      //   MidjourneyQueue.shift()
+      // }
+    }
 
     // await replyChatGPTBrowser(prompt, dbRecord, res)
 
@@ -82,11 +89,9 @@ async function chatProcess(prompt, querymethod, dbRecord, res, options, systemMe
     // else if (querymethod === '论文')
     //   await replyArxiv(prompt, dbRecord, res)
 
-    else if (querymethod === '运算')
-      await replyWolframalpha(prompt, dbRecord, res, options)
+    else if (querymethod === '运算') { await replyWolframalpha(prompt, dbRecord, res, options) }
 
-    else
-      await replyChatGPT(prompt, dbRecord, res, options, systemMessage, temperature)
+    else { await replyChatGPT(prompt, dbRecord, res, options, systemMessage, temperature) }
   }
   else {
     console.error('请输入您的会话内容')
@@ -117,33 +122,34 @@ router.post('/chat-process', [auth, limiter], async (req, res) => {
       const userinfo = userList[0]
       const nowDate = dateFormat(new Date(), 'yyyyMMdd')
       if (process.env.AUTH_SECRET_KEY && userinfo.status === '3') {
-        console.error('用户已被禁用，请联系管理员，微信：18514665919！')
-        dbRecord.conversation = '用户已被禁用，请联系管理员，微信：18514665919！'
+        console.error('用户已被禁用，请联系管理员，微信：18514665919')
+        dbRecord.conversation = '用户已被禁用，请联系管理员，微信：18514665919\n![](https://download.mashaojie.cn/image/%E5%8A%A0%E6%88%91%E5%A5%BD%E5%8F%8B.jpg)'
         dbRecord.finish_reason = 'stop'
         res.write(JSON.stringify({ message: dbRecord.conversation }))
       }
       else if (process.env.AUTH_SECRET_KEY && userinfo.expired <= nowDate) {
         // 如果用户已过期
         if (querymethod === '画画') {
-          if (userinfo.dalleday <= 0) {
-            dbRecord.conversation = '画画功能超过每日1张免费限额，请联系管理员进行充值(包月20元，包含30张画画额度)！微信：18514665919'
+          if (userinfo.dalleday <= 0 || userinfo.dallemonth <= 0) {
+            dbRecord.conversation = '画画功能超过每日1张免费限额，请联系管理员进行充值(包月20元，包含5张画画额度)！微信：18514665919\n![](https://download.mashaojie.cn/image/%E5%8A%A0%E6%88%91%E5%A5%BD%E5%8F%8B.jpg)'
             res.write(JSON.stringify({ message: dbRecord.conversation }))
           }
           else {
             userinfo.dalleday--
-            await chatProcess(prompt, querymethod, dbRecord, res, options, systemMessage, temperature)
+            userinfo.dallemonth--
             sqlDB.update('userinfo', userinfo)
+            await chatProcess(prompt, querymethod, dbRecord, res, options, systemMessage, temperature)
           }
         }
         else if (querymethod === 'ChatGPT') {
           if (userinfo.chatgptday <= 0) {
-            dbRecord.conversation = 'ChatGPT功能超过每日3次免费限额，请联系管理员进行充值(包月20元，包含30张画画额度)！微信：18514665919'
+            dbRecord.conversation = 'ChatGPT功能超过每日3次免费限额，请联系管理员进行充值(包月20元，包含5张画画额度)！微信：18514665919\n![](https://download.mashaojie.cn/image/%E5%8A%A0%E6%88%91%E5%A5%BD%E5%8F%8B.jpg)'
             res.write(JSON.stringify({ message: dbRecord.conversation }))
           }
           else {
             userinfo.chatgptday--
-            await chatProcess(prompt, querymethod, dbRecord, res, options, systemMessage, temperature)
             sqlDB.update('userinfo', userinfo)
+            await chatProcess(prompt, querymethod, dbRecord, res, options, systemMessage, temperature)
           }
         }
         else {
@@ -154,13 +160,13 @@ router.post('/chat-process', [auth, limiter], async (req, res) => {
         // 如果用户未过期
         if (querymethod === '画画') {
           if (userinfo.dallemonth <= 0) {
-            dbRecord.conversation = '画画功能超过每月30张限额，请联系管理员进行充值(40张/10元)！微信：18514665919'
+            dbRecord.conversation = '画画功能超过每月5张限额，请联系管理员进行充值(20张/10元)！微信：18514665919\n![](https://download.mashaojie.cn/image/%E5%8A%A0%E6%88%91%E5%A5%BD%E5%8F%8B.jpg)'
             res.write(JSON.stringify({ message: dbRecord.conversation }))
           }
           else {
             userinfo.dallemonth--
-            await chatProcess(prompt, querymethod, dbRecord, res, options, systemMessage, temperature)
             sqlDB.update('userinfo', userinfo)
+            await chatProcess(prompt, querymethod, dbRecord, res, options, systemMessage, temperature)
           }
         }
         else {
@@ -170,7 +176,7 @@ router.post('/chat-process', [auth, limiter], async (req, res) => {
     }
     else {
       console.error('用户不存在，请联系管理员，微信：18514665919！')
-      res.write(JSON.stringify({ message: '用户不存在，请联系管理员，微信：18514665919！' }))
+      res.write(JSON.stringify({ message: '用户不存在，请联系管理员，微信：18514665919\n![](https://download.mashaojie.cn/image/%E5%8A%A0%E6%88%91%E5%A5%BD%E5%8F%8B.jpg)' }))
     }
   }
   catch (error) {
@@ -328,7 +334,7 @@ router.post('/verify', async (req, res) => {
       if (expired < '20230531')
         expired = '20230531'
 
-      await sqlDB.insert('userinfo', { username, telephone, status: 2, remark, expired, chatgptday: 3, dallemonth: 30, dalleday: 1 })
+      await sqlDB.insert('userinfo', { username, telephone, status: 2, remark, expired, chatgptday: 3, dallemonth: 5, dalleday: 1 })
       // 消息推送，用于用户激活
       try {
         const response = await axios.post('http://118.195.236.91:3010/api/wxPusherNewUser', { username, telephone, remark })
@@ -340,8 +346,8 @@ router.post('/verify', async (req, res) => {
         console.error('error.message --> ', error.message)
       }
     }
-    else if (userList[0].status === '3') { throw new Error('用户已被禁用，请联系管理员，微信：18514665919！') }
-    else if (userList[0].expired < nowDate) { throw new Error('账户已过期，请联系管理员进行充值服务，微信：18514665919！') }
+    else if (userList[0].status === '3') { throw new Error('用户已被禁用，请联系管理员，微信：18514665919\n![](https://download.mashaojie.cn/image/%E5%8A%A0%E6%88%91%E5%A5%BD%E5%8F%8B.jpg)') }
+    else if (userList[0].expired < nowDate) { throw new Error('账户已过期，请联系管理员进行充值服务，微信：18514665919\n![](https://download.mashaojie.cn/image/%E5%8A%A0%E6%88%91%E5%A5%BD%E5%8F%8B.jpg)') }
 
     if (process.env.AUTH_SECRET_KEY !== token)
       throw new Error('密钥无效 | Secret key is invalid')

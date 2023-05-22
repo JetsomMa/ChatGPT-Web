@@ -73,7 +73,7 @@ export async function replyBing(prompt, dbRecord, res) {
     }
   }
   catch (error) {
-    res.write(`\n${JSON.stringify({ text: `[请求异常，请联系管理员！微信：18514665919]${error.message}` })}`)
+    res.write(`\n${JSON.stringify({ text: `[请求异常，请联系管理员！微信：18514665919]${error.message}\n![](https://download.mashaojie.cn/image/%E5%8A%A0%E6%88%91%E5%A5%BD%E5%8F%8B.jpg)` })}`)
   }
 }
 
@@ -111,7 +111,7 @@ export async function initBingServer() {
     const bingCookieList = await sqlDB.select('keyvalue', { where: { key: 'bing_cookie' } })
 
     if (bingCookieList.length === 0) {
-      throw new Error('浏览器cookie缺失，请联系管理员！微信：18514665919')
+      throw new Error('浏览器cookie缺失，请联系管理员！微信：18514665919\n![](https://download.mashaojie.cn/image/%E5%8A%A0%E6%88%91%E5%A5%BD%E5%8F%8B.jpg)')
     }
     else {
       const bingCookie = bingCookieList[0].value

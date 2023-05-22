@@ -13,6 +13,7 @@ import { SpeechSynthesiser } from '@/api/speechSynthesiser'
 interface Props {
   dateTime?: string
   text?: string
+  querymethod?: string
   inversion?: boolean
   error?: boolean
   loading?: boolean
@@ -21,6 +22,8 @@ interface Props {
 interface Emit {
   (ev: 'regenerate'): void
   (ev: 'delete'): void
+  (ev: 'variationImage', data: string): void
+  (ev: 'upscaleImage', data: string): void
 }
 
 const props = defineProps<Props>()
@@ -87,6 +90,14 @@ function handleRegenerate() {
   messageRef.value && messageRef.value.scrollIntoView && messageRef.value.scrollIntoView()
   emit('regenerate')
 }
+
+function handleVariationImage(data: string) {
+  emit('variationImage', data)
+}
+
+function handleUpscaleImage(data: string) {
+  emit('upscaleImage', data)
+}
 </script>
 
 <template>
@@ -115,7 +126,11 @@ function handleRegenerate() {
           :error="error"
           :text="text"
           :loading="loading"
+          :querymethod="querymethod"
           :as-raw-text="asRawText"
+          @regenerate="handleRegenerate"
+          @variation-image="handleVariationImage"
+          @upscale-image="handleUpscaleImage"
         />
         <div class="flex flex-col">
           <button
