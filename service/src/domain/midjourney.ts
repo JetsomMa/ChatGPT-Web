@@ -5,13 +5,19 @@ import { chatReplyProcess } from '../chatgpt'
 import { sqlDB } from '../utils'
 import type { MJMessage } from '../midjourney/interfaces/message'
 
-const client = new Midjourney({
-  ServerId: <string>process.env.SERVER_ID,
-  ChannelId: <string>process.env.CHANNEL_ID,
-  SalaiToken: <string>process.env.SALAI_TOKEN,
-  Debug: false,
-  Ws: true,
-})
+let client
+async function init() {
+  client = new Midjourney({
+    ServerId: <string>process.env.SERVER_ID,
+    ChannelId: <string>process.env.CHANNEL_ID,
+    SalaiToken: <string>process.env.SALAI_TOKEN,
+    Debug: false,
+    Ws: true,
+  })
+  await client.init()
+}
+
+init()
 
 export async function replyMidjourney(prompt, dbRecord, res) {
   try {
@@ -19,6 +25,7 @@ export async function replyMidjourney(prompt, dbRecord, res) {
 
     let response: MJMessage | undefined
     let finalName = 'imagine'
+
     if (prompt.startsWith('variation') || prompt.startsWith('upscale')) {
       const promptArray = prompt.split(',')
       finalName = promptArray[0]

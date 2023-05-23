@@ -11,6 +11,7 @@ export interface HttpOption {
   signal?: GenericAbortSignal
   beforeRequest?: () => void
   afterRequest?: () => void
+  timeout?: number
 }
 
 export interface Response<T = any> {
@@ -20,7 +21,7 @@ export interface Response<T = any> {
 }
 
 function http<T = any>(
-  { url, data, method, headers, onDownloadProgress, signal, beforeRequest, afterRequest }: HttpOption,
+  { url, data, method, headers, onDownloadProgress, signal, beforeRequest, afterRequest, timeout }: HttpOption,
 ) {
   const successHandler = (res: AxiosResponse<Response<T>>) => {
     const authStore = useAuthStore()
@@ -48,12 +49,12 @@ function http<T = any>(
   const params = Object.assign(typeof data === 'function' ? data() : (data || {}), {})
 
   return method === 'GET'
-    ? request.get(url, { params, signal, onDownloadProgress }).then(successHandler, failHandler)
-    : request.post(url, params, { headers, signal, onDownloadProgress }).then(successHandler, failHandler)
+    ? request.get(url, { params, signal, onDownloadProgress, timeout }).then(successHandler, failHandler)
+    : request.post(url, params, { headers, signal, onDownloadProgress, timeout }).then(successHandler, failHandler)
 }
 
 export function get<T = any>(
-  { url, data, method = 'GET', onDownloadProgress, signal, beforeRequest, afterRequest }: HttpOption,
+  { url, data, method = 'GET', onDownloadProgress, signal, beforeRequest, afterRequest, timeout = 30 * 1000 }: HttpOption,
 ): Promise<Response<T>> {
   return http<T>({
     url,
@@ -63,11 +64,12 @@ export function get<T = any>(
     signal,
     beforeRequest,
     afterRequest,
+    timeout,
   })
 }
 
 export function post<T = any>(
-  { url, data, method = 'POST', headers, onDownloadProgress, signal, beforeRequest, afterRequest }: HttpOption,
+  { url, data, method = 'POST', headers, onDownloadProgress, signal, beforeRequest, afterRequest, timeout = 30 * 1000 }: HttpOption,
 ): Promise<Response<T>> {
   return http<T>({
     url,
@@ -78,6 +80,7 @@ export function post<T = any>(
     signal,
     beforeRequest,
     afterRequest,
+    timeout,
   })
 }
 

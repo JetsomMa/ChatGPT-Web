@@ -9,6 +9,10 @@ telephone: 手机号
 status: 状态 [0-未激活，2-已激活，3-已禁用]
 expired: 过期时间
 remark: 备注
+chatgptday: 每日免费chatgpt请求次数
+dallemonth: 每月免费画画次数
+dalleday: 每日免费画画次数
+extenddalle: 充值画画次数
 
 对话信息表：chatweb
 id: 对话id
@@ -24,10 +28,8 @@ const systemMessage = `您将扮演一个数据库管理员的角色，请保持
   问答的示例：[Q: 问题  A: 回答]
       Q: "/查询 前10名用户的信息"
       A: { "operate": "query", sql:"SELECT id,username,telephone,status,expired,remark FROM userinfo LIMIT 10", "level": "S" }
-      Q: "/查询 所有用户的名字和手机号信息"
-      A: { "operate": "query", sql:"SELECT id,username,telephone FROM userinfo", "level": "S" }
       Q: "/查询 用户信息18514665919"
-      A: { "operate": "query", sql:"SELECT id,username,telephone,status,expired,remark FROM userinfo where telephone = '18514665919'", "level": "S" }
+      A: { "operate": "query", sql:"SELECT id,username,telephone,status,expired,remark,chatgptday,dallemonth,dalleday,extenddalle FROM userinfo where telephone = '18514665919'", "level": "S" }
       Q: "/查询 马少杰的电话、状态和过期时间"
       A: { "operate": "query", sql:"SELECT id,telephone,status,expired FROM userinfo where username = '马少杰'", "level": "S" }
       Q: "/查询 李振华的提问"
@@ -35,11 +37,9 @@ const systemMessage = `您将扮演一个数据库管理员的角色，请保持
       Q: "/查询 我的过期时间"
       A: { "operate": "query", sql:"SELECT id,expired FROM userinfo where telephone=:telephone", "level": "A" }
       Q: "/查询 我的信息"
-      A: { "operate": "query", sql:"SELECT id,username,telephone,status,expired,remark FROM userinfo where telephone=:telephone", "level": "A" }
+      A: { "operate": "query", sql:"SELECT id,username,telephone,status,expired,remark,chatgptday,dallemonth,dalleday,extenddalle FROM userinfo where telephone=:telephone", "level": "A" }
       Q: "/查询 我的提问"
       A: { "operate": "query", sql:"SELECT id,prompt FROM chatweb where telephone=:telephone", "level": "A" }
-      Q: "/查询 3456的会话"
-      A: { "operate": "query", sql:"SELECT id,prompt,conversation,createtime FROM chatweb where id=3456", "level": "A" }
 
       Q: "/操作 激活12399998888"
       A: { "operate": "update", "table": "userinfo", "row": { "status": "2" }, "where": { "telephone": "12399998888" }, "level": "S" }
@@ -47,6 +47,8 @@ const systemMessage = `您将扮演一个数据库管理员的角色，请保持
       A: { "operate": "update", "table": "userinfo", "row": { "status": "3" }, "where": { "username": "李振华" }, "level": "S" }
       Q: "/操作 禁用13677776666"
       A: { "operate": "update", "table": "userinfo", "row": { "status": "3" }, "where": { "telephone": "13677776666" }, "level": "S" }
+      Q: "/操作 修改用户13677776666的extenddalle字段为20"
+      A: { "operate": "update", "table": "userinfo", "row": { "extenddalle": 20 }, "where": { "telephone": "13677776666" }, "level": "S" }
       Q: "/操作 充值18514665919"
       A: { "operate": "queryupdate", "sql": "UPDATE userinfo SET expired = DATE_FORMAT(LAST_DAY(DATE_ADD(STR_TO_DATE(expired, '%Y%m%d'), INTERVAL 1 MONTH)), '%Y%m%d') where telephone = '18514665919', "table": "userinfo", "where": { "telephone": "18514665919" }, "level": "S" }
   `

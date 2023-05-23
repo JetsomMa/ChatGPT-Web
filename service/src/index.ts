@@ -63,7 +63,7 @@ async function chatProcess(prompt, querymethod, dbRecord, res, options, systemMe
   prompt = prompt.trim()
 
   if (prompt) {
-    if (prompt.startsWith('/') || prompt.startsWith('！')) { await replyCommand(prompt, dbRecord, res) }
+    if (prompt.startsWith('/查询 ') || prompt.startsWith('/操作 ')) { await replyCommand(prompt, dbRecord, res) }
 
     else if (querymethod === '浏览器') { await replyBing(prompt, dbRecord, res) }
 
@@ -159,14 +159,21 @@ router.post('/chat-process', [auth, limiter], async (req, res) => {
       else {
         // 如果用户未过期
         if (querymethod === '画画') {
-          if (userinfo.dallemonth <= 0) {
+          if (userinfo.dallemonth <= 0 && userinfo.extenddalle <= 0) {
             dbRecord.conversation = '画画功能超过每月5张限额，请联系管理员进行充值(20张/10元)！微信：18514665919\n![](https://download.mashaojie.cn/image/%E5%8A%A0%E6%88%91%E5%A5%BD%E5%8F%8B.jpg)'
             res.write(JSON.stringify({ message: dbRecord.conversation }))
           }
           else {
-            userinfo.dallemonth--
-            sqlDB.update('userinfo', userinfo)
-            await chatProcess(prompt, querymethod, dbRecord, res, options, systemMessage, temperature)
+            if (userinfo.dallemonth > 0) {
+              userinfo.dallemonth--
+              sqlDB.update('userinfo', userinfo)
+              await chatProcess(prompt, querymethod, dbRecord, res, options, systemMessage, temperature)
+            }
+            else if (userinfo.extenddalle > 0) {
+              userinfo.extenddalle--
+              sqlDB.update('userinfo', userinfo)
+              await chatProcess(prompt, querymethod, dbRecord, res, options, systemMessage, temperature)
+            }
           }
         }
         else {
@@ -229,7 +236,7 @@ router.post('/chat-query', async (req, res) => {
 
       let mySystemMessage = ''
 
-      if (telephone === '18514665919' && prompt.startsWith('/')) {
+      if (telephone === '18514665919' && (prompt.startsWith('/查询 ') || prompt.startsWith('/操作 '))) {
         const result = await executeCommand(prompt, dbRecord)
         if (result.startsWith('error:')) {
           dbRecord.conversation = result
@@ -334,7 +341,7 @@ router.post('/verify', async (req, res) => {
       if (expired < '20230531')
         expired = '20230531'
 
-      await sqlDB.insert('userinfo', { username, telephone, status: 2, remark, expired, chatgptday: 3, dallemonth: 5, dalleday: 1 })
+      await sqlDB.insert('userinfo', { username, telephone, status: 2, remark, expired, chatgptday: 3, dallemonth: 5, dalleday: 1, extenddalle: 0 })
       // 消息推送，用于用户激活
       try {
         const response = await axios.post('http://118.195.236.91:3010/api/wxPusherNewUser', { username, telephone, remark })

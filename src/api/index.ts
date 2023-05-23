@@ -38,8 +38,6 @@ export function fetchChatAPIProcess<T = any>(
 
   let queryData = JSON.stringify({ username: authStore.username, telephone: authStore.telephone, prompt: params.prompt, querymethod: params.querymethod, options: params.options, systemMessage: settingStore.systemMessage, temperature: settingStore.temperature, device })
 
-  console.log('queryData -> ', queryData)
-
   if (!AESKey)
     AESKey = CryptoJS.MD5(authStore.token || '1234567890123456').toString()
 
@@ -53,6 +51,7 @@ export function fetchChatAPIProcess<T = any>(
     data: { queryData },
     signal: params.signal,
     onDownloadProgress: params.onDownloadProgress,
+    timeout: 300 * 1000,
   })
 }
 
