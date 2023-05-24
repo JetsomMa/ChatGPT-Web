@@ -63,35 +63,19 @@ async function chatProcess(prompt, querymethod, dbRecord, res, options, systemMe
   prompt = prompt.trim()
 
   if (prompt) {
-    if (prompt.startsWith('/查询 ') || prompt.startsWith('/操作 ')) { await replyCommand(prompt, dbRecord, res) }
+    if (prompt.startsWith('/查询 ') || prompt.startsWith('/操作 '))
+      await replyCommand(prompt, dbRecord, res)
 
-    else if (querymethod === '浏览器') { await replyBing(prompt, dbRecord, res) }
+    else if (querymethod === '浏览器')
+      await replyBing(prompt, dbRecord, res)
 
-    else if (querymethod === '画画') {
-      // if (MidjourneyQueue.length >= 3) {
-      //   res.write(JSON.stringify({ message: '会话队列已满，请稍后重试！' }))
-      // }
-      // else {
-      //   MidjourneyQueue.push({ prompt, dbRecord, res })
+    else if (querymethod === '画画')
       await replyMidjourney(prompt, dbRecord, res)
-      //   MidjourneyQueue.shift()
-      // }
-    }
 
-    // await replyChatGPTBrowser(prompt, dbRecord, res)
+    else if (querymethod === '运算')
+      await replyWolframalpha(prompt, dbRecord, res, options)
 
-    // else if (querymethod === '影视')
-    //   await replyMovie(prompt, dbRecord, res)
-
-    // else if (querymethod === '音乐')
-    //   await replyMusic(prompt, dbRecord, res)
-
-    // else if (querymethod === '论文')
-    //   await replyArxiv(prompt, dbRecord, res)
-
-    else if (querymethod === '运算') { await replyWolframalpha(prompt, dbRecord, res, options) }
-
-    else { await replyChatGPT(prompt, dbRecord, res, options, systemMessage, temperature) }
+    else await replyChatGPT(prompt, dbRecord, res, options, systemMessage, temperature)
   }
   else {
     console.error('请输入您的会话内容')
@@ -135,10 +119,25 @@ router.post('/chat-process', [auth, limiter], async (req, res) => {
             res.write(JSON.stringify({ message: dbRecord.conversation }))
           }
           else {
-            userinfo.dalleday--
-            userinfo.dallemonth--
-            sqlDB.update('userinfo', userinfo)
-            await chatProcess(prompt, querymethod, dbRecord, res, options, systemMessage, temperature)
+            // if (MidjourneyQueue.length >= 1) {
+            //   res.write(JSON.stringify({ message: '画画队列已满，请稍后重试！' }))
+            // }
+            // else {
+            //   MidjourneyQueue.push({ prompt, dbRecord, res })
+
+            try {
+              userinfo.dalleday--
+              userinfo.dallemonth--
+              await chatProcess(prompt, querymethod, dbRecord, res, options, systemMessage, temperature)
+              sqlDB.update('userinfo', userinfo)
+            }
+            catch (error) {
+              throw new Error(error)
+            }
+            // finally {
+            //   MidjourneyQueue.shift()
+            // }
+            // }
           }
         }
         else if (querymethod === 'ChatGPT') {
@@ -164,16 +163,31 @@ router.post('/chat-process', [auth, limiter], async (req, res) => {
             res.write(JSON.stringify({ message: dbRecord.conversation }))
           }
           else {
-            if (userinfo.dallemonth > 0) {
-              userinfo.dallemonth--
-              sqlDB.update('userinfo', userinfo)
-              await chatProcess(prompt, querymethod, dbRecord, res, options, systemMessage, temperature)
+            // if (MidjourneyQueue.length >= 1) {
+            //   res.write(JSON.stringify({ message: '画画队列已满，请稍后重试！' }))
+            // }
+            // else {
+            //   MidjourneyQueue.push({ prompt, dbRecord, res })
+
+            try {
+              if (userinfo.dallemonth > 0) {
+                userinfo.dallemonth--
+                await chatProcess(prompt, querymethod, dbRecord, res, options, systemMessage, temperature)
+                sqlDB.update('userinfo', userinfo)
+              }
+              else if (userinfo.extenddalle > 0) {
+                userinfo.extenddalle--
+                await chatProcess(prompt, querymethod, dbRecord, res, options, systemMessage, temperature)
+                sqlDB.update('userinfo', userinfo)
+              }
             }
-            else if (userinfo.extenddalle > 0) {
-              userinfo.extenddalle--
-              sqlDB.update('userinfo', userinfo)
-              await chatProcess(prompt, querymethod, dbRecord, res, options, systemMessage, temperature)
+            catch (error) {
+              throw new Error(error)
             }
+            // finally {
+            //   MidjourneyQueue.shift()
+            // }
+            // }
           }
         }
         else {

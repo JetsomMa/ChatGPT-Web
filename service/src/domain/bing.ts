@@ -49,20 +49,24 @@ export async function replyBing(prompt, dbRecord, res) {
       if (cankaostring)
         myChat.text = `${myChat.text}\n\n` + `相关资料：\n${cankaostring}`
 
-      const myChatText = myChat.text
-      let index = 0
-      const myChatTextLenth = myChatText.length
+      res.write(`\n${JSON.stringify(myChat)}`)
 
-      console.warn('myChatText -> ', myChatText)
+      // const myChatText = myChat.text
+      // let index = 0
+      // const myChatTextLenth = myChatText.length
 
-      while (true) {
-        index = Math.min(index + 6, myChatTextLenth)
-        myChat.text = myChatText.slice(0, index)
-        res.write(`\n${JSON.stringify(myChat)}`)
-        await new Promise(resolve => setTimeout(resolve, 50))
-        if (index === myChatTextLenth)
-          break
-      }
+      // console.warn('myChatText -> ', myChatText)
+
+      // myChat.text = myChatText
+
+      // while (true) {
+      //   index = Math.min(index + 6, myChatTextLenth)
+      //   myChat.text = myChatText.slice(0, index)
+      //   res.write(`\n${JSON.stringify(myChat)}`)
+      //   await new Promise(resolve => setTimeout(resolve, 50))
+      //   if (index === myChatTextLenth)
+      //     break
+      // }
 
       dbRecord.conversation = myChat.text
       dbRecord.conversationId = myChat.conversationId
@@ -82,24 +86,32 @@ async function queryBing(prompt, res) {
     res.write(`\n${JSON.stringify({ text: '初始化中，请稍后...' })}`)
     const bingSocket = await initBingServer()
 
-    let myChat: any
-    return new Promise((resolve) => {
-      bingSocket.on('init:finish', () => { // socket初始化完成
-        console.warn('bingSocket: 初始化完成')
-        res.write(`\n${JSON.stringify({ text: `开始浏览器查询：${prompt}` })}`)
-        sendConversationMessage.call(bingSocket, { message: prompt })
-      }).on('message:ing', (data) => {
-        myChat = data
-        console.warn('bingSocket: 对话执行中')
-      }).on('message:finish', (data) => {
-        console.warn('bingSocket: 对话执行完成')
-        if (!myChat)
-          myChat = data
+    if (bingSocket) {
+      let myChat: any
+      return new Promise((resolve) => {
+        bingSocket.on('init:finish', () => { // socket初始化完成
+          console.warn('bingSocket: 初始化完成')
+          res.write(`\n${JSON.stringify({ text: `开始浏览器查询：${prompt}` })}`)
+          sendConversationMessage.call(bingSocket, { message: prompt })
+        }).on('message:ing', (data) => {
+          if (data && data.text && data.text.length > 0) {
+            myChat = data
+            res.write(`\n${JSON.stringify(myChat)}`)
+          }
+          console.warn('bingSocket: 对话执行中')
+        }).on('message:finish', (data) => {
+          console.warn('bingSocket: 对话执行完成')
+          if (!myChat)
+            myChat = data
 
-        bingSocket.clearWs()
-        resolve(myChat)
+          bingSocket.clearWs()
+          resolve(myChat)
+        })
       })
-    })
+    }
+    else {
+      Promise.reject(new Error('浏览器初始化失败！'))
+    }
   }
   catch (error) {
     Promise.reject(error)
@@ -140,15 +152,20 @@ export async function initBingServer() {
       }, config)
 
       await bingServer.initConversation()// 重置请求
-      bingSocket.mixBingInfo(bingServer.bingInfo).createWs().initEvent()
+      if (bingServer.bingInfo) {
+        bingSocket.mixBingInfo(bingServer.bingInfo).createWs().initEvent()
 
-      bingSocket.on('close', () => {
-        console.warn('bingSocket: close')
-        bingServer = undefined
-        bingSocket = undefined
-      })
+        bingSocket.on('close', () => {
+          console.warn('bingSocket: close')
+          bingServer = undefined
+          bingSocket = undefined
+        })
 
-      return bingSocket
+        return bingSocket
+      }
+      else {
+        return null
+      }
     }
   }
   catch (error) {

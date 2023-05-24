@@ -156,7 +156,7 @@ export class MidjourneyMessage {
   }
 
   // limit the number of concurrent interactions
-  protected async safeRetrieveMessages(limit = 50) {
+  protected async safeRetrieveMessages(limit = 30) {
     return this.magApiQueue.addTask(() => this.RetrieveMessages(limit))
   }
 

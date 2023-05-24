@@ -196,7 +196,7 @@ export class Midjourney extends MidjourneyMessage {
       message_flags: 0,
       message_id: messageId,
       application_id: '936929561302675456',
-      session_id: '1f3dbdf09efdf93d81a3a6420882c92c',
+      session_id: this.config.SessionId,
       data: {
         component_type: 2,
         custom_id: `MJ::JOB::variation::${index}::${messageHash}`,
@@ -242,7 +242,7 @@ export class Midjourney extends MidjourneyMessage {
       message_flags: 0,
       message_id: messageId,
       application_id: '936929561302675456',
-      session_id: 'ec6524c8d2926e285a8232f7ed1ced98',
+      session_id: this.config.SessionId,
       data: {
         component_type: 2,
         custom_id: `MJ::JOB::upsample::${index}::${messageHash}`,

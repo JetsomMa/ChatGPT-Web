@@ -4,27 +4,20 @@ import type { ChatMessage } from '../chatgpt'
 import { chatReplyProcess } from '../chatgpt'
 import { sqlDB } from '../utils'
 import type { MJMessage } from '../midjourney/interfaces/message'
-
-let client
-async function init() {
-  client = new Midjourney({
-    ServerId: <string>process.env.SERVER_ID,
-    ChannelId: <string>process.env.CHANNEL_ID,
-    SalaiToken: <string>process.env.SALAI_TOKEN,
-    Debug: false,
-    Ws: true,
-  })
-  await client.init()
-}
-
-init()
+const client = new Midjourney({
+  ServerId: <string>process.env.SERVER_ID,
+  ChannelId: <string>process.env.CHANNEL_ID,
+  SalaiToken: <string>process.env.SALAI_TOKEN,
+  Debug: true,
+})
 
 export async function replyMidjourney(prompt, dbRecord, res) {
   try {
-    res.write(`\n${JSON.stringify({ text: '图片生成中，请稍后...' })}`)
+    res.write(`\n${JSON.stringify({ text: '准备生成图片，请耐心等待...' })}`)
 
     let response: MJMessage | undefined
     let finalName = 'imagine'
+    const finalFileName = `mj_${dbRecord.telephone}_${new Date().getTime()}.png`
 
     if (prompt.startsWith('variation') || prompt.startsWith('upscale')) {
       const promptArray = prompt.split(',')
@@ -40,9 +33,10 @@ export async function replyMidjourney(prompt, dbRecord, res) {
             index,
             <string>mjdata.id,
             <string>mjdata.hash,
-            (uri: string, progress: string) => {
-              console.log('loading', uri, 'progress', progress)
-              res.write(`\n${JSON.stringify({ text: `[${progress}]图片生成中\n![](${uri})` })}`)
+            (uri: string) => {
+              console.warn('loading', uri)
+              saveTmpPicture(uri, finalFileName, res)
+              // res.write(`\n${JSON.stringify({ text: `[进行中...]图片生成中，请耐心等待...\n![](${uri})` })}`)
             },
           )
         }
@@ -52,9 +46,10 @@ export async function replyMidjourney(prompt, dbRecord, res) {
             index,
             <string>mjdata.id,
             <string>mjdata.hash,
-            (uri: string, progress: string) => {
-              console.log('loading', uri, 'progress', progress)
-              res.write(`\n${JSON.stringify({ text: `[${progress}]图片生成中\n![](${uri})` })}`)
+            (uri: string) => {
+              console.warn('loading', uri)
+              saveTmpPicture(uri, finalFileName, res)
+              // res.write(`\n${JSON.stringify({ text: `[进行中...]图片生成中，请耐心等待...\n![](${uri})` })}`)
             },
           )
         }
@@ -81,9 +76,10 @@ export async function replyMidjourney(prompt, dbRecord, res) {
       console.warn('newPrompt -> ', newPrompt)
       response = await client.Imagine(
         newPrompt,
-        (uri: string, progress: string) => {
-          console.log('loading', uri, 'progress', progress)
-          res.write(`\n${JSON.stringify({ text: `[${progress}]图片生成中\n![](${uri})` })}`)
+        (uri: string) => {
+          console.warn('loading', uri)
+          saveTmpPicture(uri, finalFileName, res)
+          // res.write(`\n${JSON.stringify({ text: `[进行中...]图片生成中，请耐心等待...\n![](${uri})` })}`)
         },
       )
     }
@@ -93,17 +89,15 @@ export async function replyMidjourney(prompt, dbRecord, res) {
     if (response.progress === 'done') {
       console.warn('response.uri -> ', response.uri)
 
-      const fileName = `mj_${dbRecord.telephone}_${new Date().getTime()}.png`
-      const resp: any = await axios.post('http://118.195.236.91:3011/api/downloadImage', { imageUrl: response.uri, fileName })
+      const resp: any = await axios.post('http://118.195.236.91:3011/api/downloadImage', { imageUrl: response.uri, fileName: finalFileName })
       if (resp.status !== 200) {
         res.write(`\n${JSON.stringify({ text: resp.message })}`)
         return
       }
-      response.localurl = `https://download.mashaojie.cn/images/dalle/${fileName}`
+      response.localurl = `https://download.mashaojie.cn/images/dalle/${finalFileName}?date=${new Date().getTime()}`
 
       await sqlDB.insert('mjdata', { ...response, prompt, username: dbRecord.username, telephone: dbRecord.telephone })
 
-      // const resultText = `图片生成完毕\n![](${response.localurl})[下载文件](${response.localurl})\n\n`
       const resultText = `![${finalName}](${response.localurl})`
       res.write(`\n${JSON.stringify({ text: resultText })}`)
 
@@ -118,5 +112,18 @@ export async function replyMidjourney(prompt, dbRecord, res) {
   }
   catch (error) {
     res.write(JSON.stringify({ message: error.message }))
+    throw new Error(error)
   }
+}
+
+async function saveTmpPicture(uri, finalFileName, res) {
+  const resp: any = await axios.post('http://118.195.236.91:3011/api/downloadImage', { imageUrl: uri, fileName: finalFileName })
+  if (resp.status !== 200) {
+    res.write(`\n${JSON.stringify({ text: resp.message })}`)
+    return
+  }
+  const localurl = `https://download.mashaojie.cn/images/dalle/${finalFileName}?date=${new Date().getTime()}`
+
+  const resultText = `[进行中...]图片生成中，请耐心等待...\n\n![progress](${localurl})`
+  res.write(`\n${JSON.stringify({ text: resultText })}`)
 }
