@@ -33,9 +33,9 @@ export async function replyMidjourney(prompt, dbRecord, res) {
             index,
             <string>mjdata.id,
             <string>mjdata.hash,
-            (uri: string) => {
+            async (uri: string) => {
               console.warn('loading', uri)
-              saveTmpPicture(uri, finalFileName, res)
+              await saveTmpPicture(uri, finalFileName, res)
               // res.write(`\n${JSON.stringify({ text: `[进行中...]图片生成中，请耐心等待...\n![](${uri})` })}`)
             },
           )
@@ -46,9 +46,9 @@ export async function replyMidjourney(prompt, dbRecord, res) {
             index,
             <string>mjdata.id,
             <string>mjdata.hash,
-            (uri: string) => {
+            async (uri: string) => {
               console.warn('loading', uri)
-              saveTmpPicture(uri, finalFileName, res)
+              await saveTmpPicture(uri, finalFileName, res)
               // res.write(`\n${JSON.stringify({ text: `[进行中...]图片生成中，请耐心等待...\n![](${uri})` })}`)
             },
           )
@@ -76,9 +76,9 @@ export async function replyMidjourney(prompt, dbRecord, res) {
       console.warn('newPrompt -> ', newPrompt)
       response = await client.Imagine(
         newPrompt,
-        (uri: string) => {
+        async (uri: string) => {
           console.warn('loading', uri)
-          saveTmpPicture(uri, finalFileName, res)
+          await saveTmpPicture(uri, finalFileName, res)
           // res.write(`\n${JSON.stringify({ text: `[进行中...]图片生成中，请耐心等待...\n![](${uri})` })}`)
         },
       )
@@ -94,7 +94,7 @@ export async function replyMidjourney(prompt, dbRecord, res) {
         res.write(`\n${JSON.stringify({ text: resp.message })}`)
         return
       }
-      response.localurl = `https://download.mashaojie.cn/images/dalle/${finalFileName}?date=${new Date().getTime()}`
+      response.localurl = `https://download.mashaojie.cn/images/dalle/${finalFileName}`
 
       await sqlDB.insert('mjdata', { ...response, prompt, username: dbRecord.username, telephone: dbRecord.telephone })
 
