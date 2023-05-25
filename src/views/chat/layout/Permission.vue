@@ -127,7 +127,7 @@ function handlePress(event: KeyboardEvent) {
           用户注册/登录
         </div>
         <!-- <NInput v-model:value="token" type="password" placeholder="请输入密码" @keypress="handlePress" /> -->
-        <NInput v-model:value="username" type="text" placeholder="请输入用户名(需要你记住)" @keypress="handlePress" />
+        <NInput v-model:value="username" type="text" placeholder="请输入用户名" @keypress="handlePress" />
         <NInputGroup>
           <NInput v-model:value="telephone" type="text" placeholder="请输入手机号" :style="{ width: '70%' }" @input="telephoneChage" @keypress="handlePress" />
           <NButton

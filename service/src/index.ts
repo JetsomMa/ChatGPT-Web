@@ -348,7 +348,7 @@ router.post('/verify', async (req, res) => {
     if (!token)
       throw new Error('Secret key is empty')
 
-    const userList = await sqlDB.select('userinfo', { where: { username, telephone } })
+    const userList = await sqlDB.select('userinfo', { where: { telephone } })
 
     if (userList.length === 0) {
       let expired = dateFormat(getNthDayAfterToday(3), 'yyyyMMdd')
@@ -374,6 +374,8 @@ router.post('/verify', async (req, res) => {
       throw new Error('密钥无效 | Secret key is invalid')
 
     await sqlDB.update('phonecode', { status: 1 }, { where: { telephone, phonecode, status: 0 } })
+    userList[0].username = username
+    await sqlDB.update('userinfo', userList[0], { where: { telephone } })
     res.send({ status: 'Success', message: 'Verify successfully', data: null })
   }
   catch (error) {
