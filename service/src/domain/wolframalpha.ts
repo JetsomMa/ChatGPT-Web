@@ -104,7 +104,7 @@ export async function replyWolframalpha(prompt, dbRecord, res, options) {
   else {
     try {
       let firstChunk = true
-      let myChat: ChatMessage | undefined
+      let myChat: any | undefined
       await chatReplyProcess({
         message: `问题：${prompt}\n\n结果：${result}`,
         lastContext: options,
@@ -116,6 +116,9 @@ export async function replyWolframalpha(prompt, dbRecord, res, options) {
         systemMessage: replySystemMessage,
         temperature: 0,
       })
+
+      myChat.finish = true
+      res.write(`\n${JSON.stringify(myChat)}`)
 
       if (myChat) {
         dbRecord.conversation = myChat.text

@@ -49,6 +49,7 @@ export async function replyBing(prompt, dbRecord, res) {
       if (cankaostring)
         myChat.text = `${myChat.text}\n\n` + `相关资料：\n${cankaostring}`
 
+      myChat.finish = true
       res.write(`\n${JSON.stringify(myChat)}`)
 
       // const myChatText = myChat.text
@@ -73,7 +74,7 @@ export async function replyBing(prompt, dbRecord, res) {
       dbRecord.finish_reason = 'stop'
     }
     else {
-      res.write(`\n${JSON.stringify({ text: '查询异常了！' })}`)
+      res.write(`\n${JSON.stringify({ text: '查询异常了！\n请联系管理员，微信：18514665919\n![](https://download.mashaojie.cn/image/%E5%8A%A0%E6%88%91%E5%A5%BD%E5%8F%8B.jpg)' })}`)
     }
   }
   catch (error) {
@@ -119,56 +120,51 @@ async function queryBing(prompt, res) {
 }
 
 export async function initBingServer() {
-  try {
-    const bingCookieList = await sqlDB.select('keyvalue', { where: { key: 'bing_cookie' } })
+  const bingCookieList = await sqlDB.select('keyvalue', { where: { key: 'bing_cookie' } })
 
-    if (bingCookieList.length === 0) {
-      throw new Error('浏览器cookie缺失，请联系管理员！微信：18514665919\n![](https://download.mashaojie.cn/image/%E5%8A%A0%E6%88%91%E5%A5%BD%E5%8F%8B.jpg)')
+  if (bingCookieList.length === 0) {
+    throw new Error('浏览器cookie缺失，请联系管理员！微信：18514665919\n![](https://download.mashaojie.cn/image/%E5%8A%A0%E6%88%91%E5%A5%BD%E5%8F%8B.jpg)')
+  }
+  else {
+    const bingCookie = bingCookieList[0].value
+
+    const config = {
+      cookie: bingCookie,
+      bingUrl: 'https://www.bing.com',
+      proxyUrl: process.env.HTTPS_PROXY,
+      bingSocketUrl: 'wss://sydney.bing.com',
+    }
+
+    const agent = config.proxyUrl ? ProxyAgent(config.proxyUrl) : undefined // 访问vpn代理地址
+
+    // bing的conversation信息，BingServer请求的结果
+    let bingServer = new NewBingServer({
+      agent,
+    }, config)
+    // 初始化bing的websocket消息
+    const options: any = {}
+    if (agent)
+      options.agent = agent
+
+    let bingSocket = new NewBingSocket({
+      address: '/sydney/ChatHub',
+      options,
+    }, config)
+
+    await bingServer.initConversation()// 重置请求
+    if (bingServer.bingInfo) {
+      bingSocket.mixBingInfo(bingServer.bingInfo).createWs().initEvent()
+
+      bingSocket.on('close', () => {
+        console.warn('bingSocket: close')
+        bingServer = undefined
+        bingSocket = undefined
+      })
+
+      return bingSocket
     }
     else {
-      const bingCookie = bingCookieList[0].value
-
-      const config = {
-        cookie: bingCookie,
-        bingUrl: 'https://www.bing.com',
-        proxyUrl: process.env.HTTPS_PROXY,
-        bingSocketUrl: 'wss://sydney.bing.com',
-      }
-
-      const agent = config.proxyUrl ? ProxyAgent(config.proxyUrl) : undefined // 访问vpn代理地址
-
-      // bing的conversation信息，BingServer请求的结果
-      let bingServer = new NewBingServer({
-        agent,
-      }, config)
-      // 初始化bing的websocket消息
-      const options: any = {}
-      if (agent)
-        options.agent = agent
-
-      let bingSocket = new NewBingSocket({
-        address: '/sydney/ChatHub',
-        options,
-      }, config)
-
-      await bingServer.initConversation()// 重置请求
-      if (bingServer.bingInfo) {
-        bingSocket.mixBingInfo(bingServer.bingInfo).createWs().initEvent()
-
-        bingSocket.on('close', () => {
-          console.warn('bingSocket: close')
-          bingServer = undefined
-          bingSocket = undefined
-        })
-
-        return bingSocket
-      }
-      else {
-        return null
-      }
+      return null
     }
-  }
-  catch (error) {
-    console.warn('initBingServer error -> ', error)
   }
 }

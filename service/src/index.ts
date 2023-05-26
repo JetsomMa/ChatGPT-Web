@@ -101,7 +101,7 @@ router.post('/chat-process', [auth, limiter], async (req, res) => {
       console.error(error)
     }
 
-    const userList = await sqlDB.select('userinfo', { where: { username, telephone } })
+    const userList = await sqlDB.select('userinfo', { where: { telephone } })
     if (userList.length || !process.env.AUTH_SECRET_KEY) {
       const userinfo = userList[0]
       const nowDate = dateFormat(new Date(), 'yyyyMMdd')
@@ -201,7 +201,7 @@ router.post('/chat-process', [auth, limiter], async (req, res) => {
     }
   }
   catch (error) {
-    res.write(JSON.stringify(error))
+    res.write(`${JSON.stringify(error)}\n请联系管理员，微信：18514665919\n![](https://download.mashaojie.cn/image/%E5%8A%A0%E6%88%91%E5%A5%BD%E5%8F%8B.jpg)`)
   }
   finally {
     try {
