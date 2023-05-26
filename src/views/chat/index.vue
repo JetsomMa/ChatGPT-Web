@@ -70,6 +70,11 @@ async function onConversation() {
   if (!message || message.trim() === '')
     return
 
+  if (message.length > 1200) {
+    ms.error('输入字符超长，不能超过1200个字符！')
+    return
+  }
+
   controller = new AbortController()
 
   addChat(

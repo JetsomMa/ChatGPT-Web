@@ -31,7 +31,8 @@ let apiModel: ApiModel
 if (!isNotEmptyString(process.env.OPENAI_API_KEY) && !isNotEmptyString(process.env.OPENAI_ACCESS_TOKEN))
   throw new Error('Missing OPENAI_API_KEY or OPENAI_ACCESS_TOKEN environment variable')
 
-let api: ChatGPTAPI | ChatGPTUnofficialProxyAPI
+let ChatGptApi: ChatGPTAPI | ChatGPTUnofficialProxyAPI
+let ChatGptApi2: ChatGPTAPI | ChatGPTUnofficialProxyAPI
 
 (async () => {
   // More Info: https://github.com/transitive-bullshit/chatgpt-api
@@ -69,7 +70,10 @@ let api: ChatGPTAPI | ChatGPTUnofficialProxyAPI
 
     setupProxy(options)
 
-    api = new ChatGPTAPI({ ...options })
+    ChatGptApi = new ChatGPTAPI({ ...options })
+    if (process.env.OPENAI_API_KEY2)
+      ChatGptApi2 = new ChatGPTAPI({ ...options, apiKey: process.env.OPENAI_API_KEY2 })
+
     apiModel = 'ChatGPTAPI'
   }
   else {
@@ -86,13 +90,13 @@ let api: ChatGPTAPI | ChatGPTUnofficialProxyAPI
 
     setupProxy(options)
 
-    api = new ChatGPTUnofficialProxyAPI({ ...options })
+    ChatGptApi = new ChatGPTUnofficialProxyAPI({ ...options })
     apiModel = 'ChatGPTUnofficialProxyAPI'
   }
 })()
 
-async function chatReplyProcess(options: RequestOptions) {
-  const { message, lastContext, process, systemMessage, temperature } = options
+async function chatReplyProcess(options: RequestOptions, index = 0) {
+  const { message, lastContext, process: processFunction, systemMessage, temperature } = options
   try {
     let options: SendMessageOptions = { timeoutMs }
 
@@ -111,14 +115,26 @@ async function chatReplyProcess(options: RequestOptions) {
     options.completionParams = options.completionParams || {}
     options.completionParams.temperature = temperature || 0
 
-    const response = await api.sendMessage(message, {
-      ...options,
-      onProgress: (partialResponse) => {
-        process && process(partialResponse)
-      },
-    })
+    if (index === 1 && process.env.OPENAI_API_KEY2) {
+      const response = await ChatGptApi2.sendMessage(message, {
+        ...options,
+        onProgress: (partialResponse) => {
+          processFunction && processFunction(partialResponse)
+        },
+      })
 
-    return sendResponse({ type: 'Success', data: response })
+      return sendResponse({ type: 'Success', data: response })
+    }
+    else {
+      const response = await ChatGptApi.sendMessage(message, {
+        ...options,
+        onProgress: (partialResponse) => {
+          processFunction && processFunction(partialResponse)
+        },
+      })
+
+      return sendResponse({ type: 'Success', data: response })
+    }
   }
   catch (error: any) {
     const code = error.statusCode

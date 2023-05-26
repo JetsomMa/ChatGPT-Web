@@ -8,6 +8,7 @@ export async function replyChatGPT(prompt, dbRecord, res, options, systemMessage
 
     let firstChunk = true
     let myChat: any | undefined
+    const index = Number(dbRecord.telephone.slice(-1)) % 2
     await chatReplyProcess({
       message: prompt,
       lastContext: options,
@@ -24,7 +25,7 @@ export async function replyChatGPT(prompt, dbRecord, res, options, systemMessage
       },
       systemMessage,
       temperature,
-    })
+    }, index)
 
     myChat.finish = true
     res.write(`\n${JSON.stringify(myChat)}`)
