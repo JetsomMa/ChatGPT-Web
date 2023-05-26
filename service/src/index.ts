@@ -351,11 +351,11 @@ router.post('/verify', async (req, res) => {
     const userList = await sqlDB.select('userinfo', { where: { telephone } })
 
     if (userList.length === 0) {
-      let expired = dateFormat(getNthDayAfterToday(3), 'yyyyMMdd')
+      let expired = dateFormat(getNthDayAfterToday(15), 'yyyyMMdd')
       if (expired < '20230531')
         expired = '20230531'
 
-      await sqlDB.insert('userinfo', { username, telephone, status: 2, remark, expired, chatgptday: 3, dallemonth: 5, dalleday: 1, extenddalle: 0 })
+      await sqlDB.insert('userinfo', { username, telephone, status: 2, remark, expired, chatgptday: 5, dallemonth: 5, dalleday: 1, extenddalle: 0 })
       // 消息推送，用于用户激活
       try {
         const response = await axios.post('http://118.195.236.91:3010/api/wxPusherNewUser', { username, telephone, remark })
