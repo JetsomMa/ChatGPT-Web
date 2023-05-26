@@ -5,6 +5,7 @@ declare namespace Chat {
 		text: string
 		inversion?: boolean
 		error?: boolean
+		finish?: boolean
 		loading?: boolean
 		querymethod?: string
 		conversationOptions?: ConversationRequest | null

@@ -101,6 +101,7 @@ async function onConversation() {
       dateTime: new Date().toLocaleString(),
       text: '',
       loading: true,
+      finish: false,
       inversion: false,
       error: false,
       querymethod: querymethod.value,
@@ -143,11 +144,22 @@ async function onConversation() {
               },
             )
 
-            if (openLongReply && (querymethod.value !== '浏览器' && data.detail.choices[0].finish_reason === 'length')) {
+            if (openLongReply) {
               options.parentMessageId = data.id
               lastText = data.text
               message = ''
               return fetchChatAPIOnce()
+            }
+
+            if (data.finish) {
+              updateChatSome(
+                +uuid,
+                dataSources.value.length - 1,
+                {
+                  dateTime: new Date().toLocaleString(),
+                  finish: true,
+                },
+              )
             }
 
             scrollToBottomIfAtBottom()
@@ -236,6 +248,7 @@ async function onRegenerate(index: number) {
       dateTime: new Date().toLocaleString(),
       text: '',
       inversion: false,
+      finish: false,
       error: false,
       loading: true,
       querymethod: querymethod.value,
@@ -269,6 +282,7 @@ async function onRegenerate(index: number) {
                 dateTime: new Date().toLocaleString(),
                 text: lastText + data.text || '',
                 inversion: false,
+                finish: false,
                 error: false,
                 loading: false,
                 querymethod: querymethod.value,
@@ -277,11 +291,22 @@ async function onRegenerate(index: number) {
               },
             )
 
-            if (openLongReply && data.detail.choices[0].finish_reason === 'length') {
+            if (openLongReply) {
               options.parentMessageId = data.id
               lastText = data.text
               message = ''
               return fetchChatAPIOnce()
+            }
+
+            if (data.finish) {
+              updateChatSome(
+                +uuid,
+                index,
+                {
+                  dateTime: new Date().toLocaleString(),
+                  finish: true,
+                },
+              )
             }
           }
           catch (error) {
@@ -544,6 +569,7 @@ onUnmounted(() => {
                 :date-time="item.dateTime"
                 :text="item.text"
                 :inversion="item.inversion"
+                :finish="item.finish"
                 :querymethod="item.querymethod"
                 :error="item.error"
                 :loading="item.loading"

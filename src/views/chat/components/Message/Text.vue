@@ -11,6 +11,7 @@ import { t } from '@/locales'
 interface Props {
   inversion?: boolean
   error?: boolean
+  finish?: boolean
   text?: string
   querymethod?: string
   loading?: boolean
@@ -128,38 +129,40 @@ function upscaleImage(index: number) {
           <div v-else class="whitespace-pre-wrap" v-text="text" />
         </div>
         <div v-else class="whitespace-pre-wrap" v-text="text" />
-        <div v-if="!asRawText && querymethod === '画画' && (orgText.startsWith('![imagine](') || orgText.startsWith('![variation](') || orgText.startsWith('![upscale]('))" style="padding-top: 10px;">
+        <div v-if="!inversion && finish">
           <div class="button-row">
-            <button v-if="orgText.startsWith('![imagine](') || orgText.startsWith('![variation](')" class="button" @click="variationImage(1)">
-              演变图1
+            <button v-if="orgText.startsWith('![imagine](') || orgText.startsWith('![variation](')" class="button small-button" @click="variationImage(1)">
+              V1
             </button>
-            <button v-if="orgText.startsWith('![imagine](') || orgText.startsWith('![variation](')" class="button" @click="variationImage(2)">
-              演变图2
+            <button v-if="orgText.startsWith('![imagine](') || orgText.startsWith('![variation](')" class="button small-button" @click="variationImage(2)">
+              V2
             </button>
-            <button v-if="orgText.startsWith('![imagine](') || orgText.startsWith('![variation](')" class="button" @click="variationImage(3)">
-              演变图3
+            <button v-if="orgText.startsWith('![imagine](') || orgText.startsWith('![variation](')" class="button small-button" @click="variationImage(3)">
+              V3
             </button>
-            <button v-if="orgText.startsWith('![imagine](') || orgText.startsWith('![variation](')" class="button" @click="variationImage(4)">
-              演变图4
-            </button>
-            <button class="button" @click="download">
-              下载图片
+            <button v-if="orgText.startsWith('![imagine](') || orgText.startsWith('![variation](')" class="button small-button" @click="variationImage(4)">
+              V4
             </button>
           </div>
           <div class="button-row">
-            <button v-if="orgText.startsWith('![imagine](') || orgText.startsWith('![variation](')" class="button" @click="upscaleImage(1)">
-              放大图1
+            <button v-if="orgText.startsWith('![imagine](') || orgText.startsWith('![variation](')" class="button small-button" @click="upscaleImage(1)">
+              U1
             </button>
-            <button v-if="orgText.startsWith('![imagine](') || orgText.startsWith('![variation](')" class="button" @click="upscaleImage(2)">
-              放大图2
+            <button v-if="orgText.startsWith('![imagine](') || orgText.startsWith('![variation](')" class="button small-button" @click="upscaleImage(2)">
+              U2
             </button>
-            <button v-if="orgText.startsWith('![imagine](') || orgText.startsWith('![variation](')" class="button" @click="upscaleImage(3)">
-              放大图3
+            <button v-if="orgText.startsWith('![imagine](') || orgText.startsWith('![variation](')" class="button small-button" @click="upscaleImage(3)">
+              U3
             </button>
-            <button v-if="orgText.startsWith('![imagine](') || orgText.startsWith('![variation](')" class="button" @click="upscaleImage(4)">
-              放大图4
+            <button v-if="orgText.startsWith('![imagine](') || orgText.startsWith('![variation](')" class="button small-button" @click="upscaleImage(4)">
+              U4
             </button>
-            <button v-if="orgText.startsWith('![imagine](') || orgText.startsWith('![variation](')" class="button" @click="handleRegenerate">
+          </div>
+          <div class="button-row">
+            <button v-if="!asRawText && querymethod === '画画' && (orgText.startsWith('![imagine](') || orgText.startsWith('![variation](') || orgText.startsWith('![upscale]('))" class="button" @click="download">
+              下载图片
+            </button>
+            <button class="button" @click="handleRegenerate">
               重新生成
             </button>
           </div>
@@ -178,15 +181,18 @@ function upscaleImage(index: number) {
     margin-bottom: 10px;
   }
   .button {
-    padding: 5px 10px;
+    padding: 8px 13px;
     font-size: 14px;
     background-color: #4CAF50;
     color: white;
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    margin-right: 10px;
+    margin: 7px 10px;
   }
+	.small-button {
+		width: 60px;
+	}
   .button:last-child {
     margin-right: 0;
   }

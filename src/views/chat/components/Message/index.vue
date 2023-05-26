@@ -16,6 +16,7 @@ interface Props {
   querymethod?: string
   inversion?: boolean
   error?: boolean
+  finish?: boolean
   loading?: boolean
 }
 
@@ -126,6 +127,7 @@ function handleUpscaleImage(data: string) {
           :error="error"
           :text="text"
           :loading="loading"
+          :finish="finish"
           :querymethod="querymethod"
           :as-raw-text="asRawText"
           @regenerate="handleRegenerate"
