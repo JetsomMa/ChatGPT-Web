@@ -336,47 +336,74 @@ router.post('/session', async (req, res) => {
 
 router.post('/verify', async (req, res) => {
   try {
-    const { token, username, telephone, remark, phonecode } = req.body as VerifyProps
-
-    // 验证码校验
-    const nowDate = dateFormat(new Date(), 'yyyyMMdd')
-    const nowTime = new Date().getTime()
-    const rows = await sqlDB.query(`SELECT * FROM phonecode where expired > '${nowTime}' and telephone = '${telephone}' and phonecode = ${phonecode} and status = 0`)
-    if (rows && rows.length === 0)
-      throw new Error('验证码错误！')
+    const { token, username, telephone, remark, phonecode, loginmethod, password } = req.body as VerifyProps
 
     if (!token)
       throw new Error('Secret key is empty')
 
-    const userList = await sqlDB.select('userinfo', { where: { telephone } })
-
-    if (userList.length === 0) {
-      let expired = dateFormat(getNthDayAfterToday(15), 'yyyyMMdd')
-      if (expired < '20230531')
-        expired = '20230531'
-
-      await sqlDB.insert('userinfo', { username, telephone, status: 2, remark, expired, chatgptday: 5, dallemonth: 5, dalleday: 1, extenddalle: 0 })
-      // 消息推送，用于用户激活
-      try {
-        const response = await axios.post('http://118.195.236.91:3010/api/wxPusherNewUser', { username, telephone, remark })
-
-        if (response.status !== 200)
-          console.error('response --> ', response)
-      }
-      catch (error) {
-        console.error('error.message --> ', error.message)
-      }
-    }
-    else if (userList[0].status === '3') { throw new Error('用户已被禁用，请联系管理员，微信：18514665919\n![](https://download.mashaojie.cn/image/%E5%8A%A0%E6%88%91%E5%A5%BD%E5%8F%8B.jpg)') }
-    else if (userList[0].expired < nowDate) { throw new Error('账户已过期，请联系管理员进行充值服务，微信：18514665919\n![](https://download.mashaojie.cn/image/%E5%8A%A0%E6%88%91%E5%A5%BD%E5%8F%8B.jpg)') }
-
     if (process.env.AUTH_SECRET_KEY !== token)
       throw new Error('密钥无效 | Secret key is invalid')
 
-    await sqlDB.update('phonecode', { status: 1 }, { where: { telephone, phonecode, status: 0 } })
-    userList[0].username = username
-    await sqlDB.update('userinfo', userList[0], { where: { telephone } })
-    res.send({ status: 'Success', message: 'Verify successfully', data: null })
+    const nowTime = new Date().getTime()
+    const userList = await sqlDB.select('userinfo', { where: { telephone } })
+    const userInfo = userList[0]
+    if (loginmethod === 'password') {
+      if (userInfo) {
+        if (!userInfo.password) {
+          throw new Error('用户密码不存在，请前往注册页重新注册！')
+        }
+        else {
+          if (userInfo.password === CryptoJS.MD5(password).toString())
+            res.send({ status: 'Success', message: 'Verify successfully', data: { username: userInfo.username } })
+          else
+            throw new Error('手机号或密码错误！')
+        }
+      }
+      else {
+        throw new Error('用户不存在，请进行注册！')
+      }
+    }
+    else {
+      // 验证码校验
+      const rows = await sqlDB.query(`SELECT * FROM phonecode where expired > '${nowTime}' and telephone = '${telephone}' and phonecode = ${phonecode} and status = 0`)
+      if (rows && rows.length === 0) {
+        throw new Error('验证码错误！')
+      }
+      else {
+        if (loginmethod === 'phonecode') {
+          if (userInfo)
+            res.send({ status: 'Success', message: 'Verify successfully', data: { username: userInfo.username } })
+          else
+            throw new Error('用户不存在，请进行注册！')
+        }
+        else {
+          if (userInfo) {
+            userInfo.username = username
+            userInfo.remark = `${userInfo.remark}@${remark}`
+            userInfo.password = CryptoJS.MD5(password).toString()
+            await sqlDB.update('userinfo', userInfo, { where: { telephone } })
+          }
+          else {
+            const expired = dateFormat(getNthDayAfterToday(15), 'yyyyMMdd')
+            await sqlDB.insert('userinfo', { username, telephone, password: CryptoJS.MD5(password).toString(), status: 2, remark, expired, chatgptday: 5, dallemonth: 5, dalleday: 1, extenddalle: 0 })
+
+            // 消息推送，用于用户激活
+            try {
+              const response = await axios.post('http://118.195.236.91:3010/api/wxPusherNewUser', { username, telephone, remark })
+              if (response.status !== 200)
+                console.error('response --> ', response)
+            }
+            catch (error) {
+              console.error('error.message --> ', error.message)
+            }
+          }
+
+          res.send({ status: 'Success', message: 'Verify successfully', data: { username: userInfo.username } })
+        }
+
+        await sqlDB.update('phonecode', { status: 1 }, { where: { telephone, phonecode, status: 0 } })
+      }
+    }
   }
   catch (error) {
     res.send({ status: 'Fail', message: error.message, data: null })

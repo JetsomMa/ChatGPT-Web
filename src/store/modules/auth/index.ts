@@ -42,6 +42,8 @@ export const useAuthStore = defineStore('auth-store', {
 
     setToken(token: string, username: string, telephone: string) {
       this.token = token
+      this.username = username
+      this.telephone = telephone
       setToken(token, username, telephone)
     },
     removeToken() {

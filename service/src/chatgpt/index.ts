@@ -32,7 +32,6 @@ if (!isNotEmptyString(process.env.OPENAI_API_KEY) && !isNotEmptyString(process.e
   throw new Error('Missing OPENAI_API_KEY or OPENAI_ACCESS_TOKEN environment variable')
 
 let ChatGptApi: ChatGPTAPI | ChatGPTUnofficialProxyAPI
-let ChatGptApi2: ChatGPTAPI | ChatGPTUnofficialProxyAPI
 
 (async () => {
   // More Info: https://github.com/transitive-bullshit/chatgpt-api
@@ -71,8 +70,6 @@ let ChatGptApi2: ChatGPTAPI | ChatGPTUnofficialProxyAPI
     setupProxy(options)
 
     ChatGptApi = new ChatGPTAPI({ ...options })
-    if (process.env.OPENAI_API_KEY2)
-      ChatGptApi2 = new ChatGPTAPI({ ...options, apiKey: process.env.OPENAI_API_KEY2 })
 
     apiModel = 'ChatGPTAPI'
   }
@@ -95,7 +92,7 @@ let ChatGptApi2: ChatGPTAPI | ChatGPTUnofficialProxyAPI
   }
 })()
 
-async function chatReplyProcess(options: RequestOptions, index = 0) {
+async function chatReplyProcess(options: RequestOptions) {
   const { message, lastContext, process: processFunction, systemMessage, temperature } = options
   try {
     let options: SendMessageOptions = { timeoutMs }
@@ -115,26 +112,14 @@ async function chatReplyProcess(options: RequestOptions, index = 0) {
     options.completionParams = options.completionParams || {}
     options.completionParams.temperature = temperature || 0
 
-    if (index === 1 && process.env.OPENAI_API_KEY2) {
-      const response = await ChatGptApi2.sendMessage(message, {
-        ...options,
-        onProgress: (partialResponse) => {
-          processFunction && processFunction(partialResponse)
-        },
-      })
+    const response = await ChatGptApi.sendMessage(message, {
+      ...options,
+      onProgress: (partialResponse) => {
+        processFunction && processFunction(partialResponse)
+      },
+    })
 
-      return sendResponse({ type: 'Success', data: response })
-    }
-    else {
-      const response = await ChatGptApi.sendMessage(message, {
-        ...options,
-        onProgress: (partialResponse) => {
-          processFunction && processFunction(partialResponse)
-        },
-      })
-
-      return sendResponse({ type: 'Success', data: response })
-    }
+    return sendResponse({ type: 'Success', data: response })
   }
   catch (error: any) {
     const code = error.statusCode

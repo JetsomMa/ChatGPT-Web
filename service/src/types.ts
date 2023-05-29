@@ -40,6 +40,8 @@ export interface VerifyProps {
   telephone: string
   remark: string
   phonecode: string
+  loginmethod: string
+  password: string
 }
 
 export type ApiModel = 'ChatGPTAPI' | 'ChatGPTUnofficialProxyAPI' | string | undefined

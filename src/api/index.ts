@@ -67,6 +67,8 @@ interface VerifyProps {
   telephone: string
   remark: string
   phonecode: string
+  loginmethod: string
+  password: string
 }
 export function fetchVerify<T>(data: VerifyProps) {
   return post<T>({
