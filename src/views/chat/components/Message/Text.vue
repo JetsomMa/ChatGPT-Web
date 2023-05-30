@@ -178,17 +178,16 @@ function upscaleImage(index: number) {
     display: flex;
     justify-content: center;
     align-items: center;
-    margin-bottom: 10px;
   }
   .button {
-    padding: 8px 13px;
+    padding: 0px 5px;
     font-size: 14px;
     background-color: #4CAF50;
     color: white;
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    margin: 7px 10px;
+    margin: 10px 10px 0px 10px;
   }
 	.small-button {
 		width: 60px;

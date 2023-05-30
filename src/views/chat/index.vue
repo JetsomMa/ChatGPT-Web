@@ -43,6 +43,7 @@ const querymethods = ref(querymethodsOptions)
 
 const prompt = ref<string>('')
 const loading = ref<boolean>(false)
+const notionShow = ref<boolean>(true)
 const inputRef = ref<Ref | null>(null)
 
 // 添加PromptStore
@@ -535,25 +536,35 @@ onUnmounted(() => {
       @export="handleExport"
       @querymethodChange="setQueryMethod"
     />
-    <main class="flex-1 overflow-hidden" style="position: relative;">
-      <div v-if="!isMobile" style="position: absolute; background-color: #efefef; left: 50%; transform: translateX(-50%); top: 0px; padding: 10px; z-index: 100;">
-        <NRadioGroup :value="querymethod" size="medium" default-value="ChatGPT" @update:value="setQueryMethod">
-          <NRadioButton
-            v-for="method of querymethods"
-            :key="method.value"
-            style="width: 145px; text-align: center;"
-            :value="method.value"
-            :disabled="method.disabled"
-          >
-            {{ method.label }}
-          </NRadioButton>
-        </NRadioGroup>
+    <main class="flex-1 overflow-hidden">
+      <div style="width: 100%; display: flex; z-index: 100; align-items: center; flex-direction: column; position: absolute;">
+        <div v-if="notionShow" style="position: relative; padding: 5px; color: green; width: 100%; background-color: #efefef; opacity: 0.85;">
+          <div style="padding-right: 45px;">
+            新注册用户可免费试用一个月的，后将以每月20元人民币收费，过期用户每天可以免费问答3次。请帮我推广传播，使用中有任何问题随时可以联系我，【微信/电话：18514665919】。
+            <a href="https://blog.mashaojie.cn/9999/09/08/ChatGPT%E4%BD%BF%E7%94%A8%E6%8C%87%E5%8D%97" class="text-blue-500" target="_blank">阅读ChatGPT使用指南[更新于2023/05/29]</a>
+          </div>
+          <div style="color: blue; padding-left: 20px; position: absolute; right: 10px; top: 5px;" @click="notionShow = false">
+            关闭
+          </div>
+        </div>
+        <div v-if="!isMobile" style="padding: 10px; background-color: #efefef;">
+          <NRadioGroup :value="querymethod" size="medium" default-value="ChatGPT" @update:value="setQueryMethod">
+            <NRadioButton
+              v-for="method of querymethods"
+              :key="method.value"
+              style="width: 150px; text-align: center;"
+              :value="method.value"
+              :disabled="method.disabled"
+            >
+              {{ method.label }}
+            </NRadioButton>
+          </NRadioGroup>
+        </div>
       </div>
       <div
         id="scrollRef"
         ref="scrollRef"
         class="h-full overflow-hidden overflow-y-auto"
-        :style="isMobile ? 'padding-top: 0;' : 'padding-top: 40px;'"
       >
         <div
           id="image-wrapper"

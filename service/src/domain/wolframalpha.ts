@@ -5,34 +5,27 @@ import { chatReplyProcess } from '../chatgpt'
 const systemMessage = `您将扮演一个指令生成器的角色，请保持严谨，不要伪造信息。按照我提供的接口说明生成指令输出，如果指令转换失败则输出"Error"，不要有额外的解释和说明：
 
 以下是接口说明，其中&matrix&代表矩阵，其输入格式为“{{a,b}{c,d}}”或者“(a,b;c,d)”，输出格式必须是{{a,b}{c,d}}：
-1、矩阵的属性(非必输)：&matrix&
-2、矩阵幂运算：matrixpower(&matrix&,n)
-3、矩阵行列式：det &matrix&
-4、矩阵LU分解：LU decomposition &matrix&
-5、矩阵加、减、乘：&matrix& + &matrix2&、&matrix& - &matrix2&、&matrix& . &matrix2&
-6、矩阵向量积：&matrix& . {x, y, z}
-7、矩阵的迹：tr &matrix&
-8、矩阵行简化：row reduce &matrix&
-9、矩阵对角化：diagonalize &matrix&
-10、矩阵特征值：eigenvalues &matrix&
-11、矩阵特征向量：eigenvectors &matrix&
-12、矩阵特征多项式：characteristic polynomial &matrix&
-13、矩阵奇异值分解：SVD &matrix&
-14、矩阵的逆：inverse &matrix&
-15、矩阵的转置：transpose &matrix&
-16、矩阵的秩：rank &matrix&
-17、矩阵的零：nullity &matrix&
-18、矩阵的辅助：adjugate &matrix&
-19、nxn希尔伯特矩阵：nxn Hilbert matrix
-20、nxn反射矩阵：reflect across a + b + ... + n = 1
+1、矩阵幂运算：matrixpower(&matrix&,n)
+2、矩阵行列式：det &matrix&
+3、矩阵LU分解：LU decomposition &matrix&
+4、矩阵加、减、乘：&matrix& + &matrix2&、&matrix& - &matrix2&、&matrix& . &matrix2&
+5、矩阵向量积：&matrix& . {x, y, z}
+6、矩阵的迹：tr &matrix&
+7、矩阵行简化：row reduce &matrix&
+8、矩阵对角化：diagonalize &matrix&
+9、矩阵特征值：eigenvalues &matrix&
+10、矩阵特征向量：eigenvectors &matrix&
+11、矩阵特征多项式：characteristic polynomial &matrix&
+12、矩阵奇异值分解：SVD &matrix&
+13、矩阵的逆：inverse &matrix&
+14、矩阵的转置：transpose &matrix&
+15、矩阵的秩：rank &matrix&
+16、矩阵的零：nullity &matrix&
+17、矩阵的辅助：adjugate &matrix&
+18、nxn希尔伯特矩阵：nxn Hilbert matrix
+19、nxn反射矩阵：reflect across a + b + ... + n = 1
 
 以下是一些指令生成的示例：
-
-输入：属性{{1, -5, 8}, {1, -2, 1}, {2, -1, -5}}
-输出：{{1, -5, 8}, {1, -2, 1}, {2, -1, -5}}
-
-输入：{{1, -5, 8}, {1, -2, 1}, {2, -1, -5}}
-输出：{{1, -5, 8}, {1, -2, 1}, {2, -1, -5}}
 
 输入：(1,2,6;3,4,7;8,9,10)的5次幂
 输出：matrixpower({{1, 2, 6}, {3, 4, 7}, {8, 9, 10}},5)
