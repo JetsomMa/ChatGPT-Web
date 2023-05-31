@@ -50,7 +50,7 @@ const systemMessage = `您将扮演一个数据库管理员的角色，请保持
       Q: "/操作 修改用户13677776666的extenddalle字段为20"
       A: { "operate": "update", "table": "userinfo", "row": { "extenddalle": 20 }, "where": { "telephone": "13677776666" }, "level": "S" }
       Q: "/操作 充值18514665919"
-      A: { "operate": "queryupdate", "sql": "UPDATE userinfo SET expired = DATE_FORMAT(LAST_DAY(DATE_ADD(STR_TO_DATE(expired, '%Y%m%d'), INTERVAL 1 MONTH)), '%Y%m%d') where telephone = '18514665919', "table": "userinfo", "where": { "telephone": "18514665919" }, "level": "S" }
+      A: { "operate": "queryupdate", "sql": "UPDATE userinfo SET expired = DATE_FORMAT(DATE_ADD(STR_TO_DATE(expired, '%Y%m%d'), INTERVAL 1 MONTH), '%Y%m%d') where telephone = '18514665919', "table": "userinfo", "where": { "telephone": "18514665919" }, "level": "S" }
   `
 
 export const resultCommandMessage = `您将扮演一个翻译员的角色，帮我格式化这个输出结果，如果包含json则整理成表格，请保持严谨，不要伪造信息，不要有额外的解释和说明。

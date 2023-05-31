@@ -1,4 +1,5 @@
 import fetch from 'node-fetch'
+import axios from 'axios'
 import type { ChatMessage } from '../chatgpt'
 import { chatReplyProcess } from '../chatgpt'
 
@@ -42,7 +43,7 @@ const systemMessage = `您将扮演一个指令生成器的角色，请保持严
 // 输入：4x4反射矩阵
 // 输出：reflect across a + b + c + d = 1
 
-async function executeCommand(prompt) {
+async function executeCommand(prompt, dbRecord) {
   try {
     let myChat: ChatMessage | undefined
 
@@ -66,7 +67,7 @@ async function executeCommand(prompt) {
       const url = `https://api.wolframalpha.com/v2/query?appid=59PXUT-YTTHVPWVVP&includepodid=Result&output=json&format=image,moutput&input=${encodeURIComponent(command)}&podstate=Step‐by‐step`
       console.log('url --> ', url)
       const response = await fetch(url)
-      const json = await response.json()
+      const json: any = await response.json()
       console.log('json --> ', json)
       if (json.queryresult.error)
         return `error: 运算失败: ${json.queryresult.error.msg}`
@@ -74,7 +75,17 @@ async function executeCommand(prompt) {
       const pod = json.queryresult.pods[0]
       if (pod && pod.id === 'Result' && pod.subpods && pod.subpods.length > 0) {
         const subpod = pod.subpods[0]
-        return `image: ${subpod.img.src}\ntext: ${subpod.moutput}`
+        if (subpod.img.src) {
+          const fileName = `wolframalpha_${dbRecord.telephone}_${new Date().getTime()}.png`
+          const resp: any = await axios.post('http://118.195.236.91:3011/api/downloadImage', { imageUrl: subpod.img.src, fileName })
+          if (resp.status !== 200)
+            return `error: 文件保存错误${resp.message}`
+
+          return `image: https://download.mashaojie.cn/images/dalle/${fileName}\ntext: ${subpod.moutput}`
+        }
+        else {
+          return `text: ${subpod.moutput}`
+        }
       }
       else {
         return 'error: 运算结果解析失败！'
@@ -86,9 +97,10 @@ async function executeCommand(prompt) {
   }
 }
 
-const replySystemMessage = '请你扮演一个数学老师，请将问题和结果中的text做整合，只描述步骤，不描述计算过程，最终将结果中的image图片和text文本分别转换成markdown格式输出。'
+// const replySystemMessage = '请你扮演一个数学老师，请将问题和结果中的text做整合，只描述步骤，不描述计算过程，最终将结果中的image图片和text文本分别转换成markdown格式输出。'
+const replySystemMessage = '请你扮演一个数学老师，请将问题和结果中的text做整合，只描述步骤，不描述计算过程，最终将结果中的image图片和text文本整理成markdown格式输出。'
 export async function replyWolframalpha(prompt, dbRecord, res, options) {
-  const result = await executeCommand(prompt)
+  const result = await executeCommand(prompt, dbRecord)
   if (result.startsWith('error:')) {
     dbRecord.conversation = result
     dbRecord.finish_reason = 'stop'

@@ -81,8 +81,8 @@ export namespace Conversation {
       type: number
     }
 }
-// 默认使用平衡类型
-const { Balanced } = Conversation.ConversationStr
+// 默认使用精确类型
+const { Precise } = Conversation.ConversationStr
 // 数据文件缓存(暂时没用上，调试的时候用的)
 export function ctrlTemp(path?: string): any
 export function ctrlTemp(path?: string, file?: any): void
@@ -99,7 +99,7 @@ export function ctrlTemp(path = './temp', file?: string) {
 // 配置socket鉴权及消息模板
 export function setConversationTemplate(params: Partial<Conversation.IConversationOpts> = {}): Conversation.IConversationTemplate {
   const {
-    convStyle = Balanced, messageType = 'Chat', conversationId,
+    convStyle = Precise, messageType = 'Chat', conversationId,
     conversationSignature, clientId,
   } = params
   if (!conversationId || !conversationSignature || !clientId)

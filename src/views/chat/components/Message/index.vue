@@ -88,7 +88,7 @@ function handleSelect(key: 'copyText' | 'delete' | 'toggleRenderType' | 'read') 
 }
 
 function handleRegenerate() {
-  messageRef.value && messageRef.value.scrollIntoView && messageRef.value.scrollIntoView()
+  messageRef.value && messageRef.value.scrollIntoView && messageRef.value.scrollIntoView(false)
   emit('regenerate')
 }
 

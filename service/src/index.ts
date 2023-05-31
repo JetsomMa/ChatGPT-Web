@@ -384,7 +384,7 @@ router.post('/verify', async (req, res) => {
             await sqlDB.update('userinfo', userInfo, { where: { telephone } })
           }
           else {
-            const expired = dateFormat(getNthDayAfterToday(15), 'yyyyMMdd')
+            const expired = dateFormat(getNthDayAfterToday(31), 'yyyyMMdd')
             await sqlDB.insert('userinfo', { username, telephone, password: CryptoJS.MD5(password).toString(), status: 2, remark, expired, chatgptday: 5, dallemonth: 5, dalleday: 1, extenddalle: 0 })
 
             // 消息推送，用于用户激活

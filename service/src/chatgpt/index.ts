@@ -24,7 +24,7 @@ const ErrorCodeMessage: Record<string, string> = {
   500: '[OpenAI] 服务器繁忙，请稍后再试 | Internal Server Error',
 }
 
-const timeoutMs: number = !isNaN(+process.env.TIMEOUT_MS) ? +process.env.TIMEOUT_MS : 300 * 1000
+const timeoutMs: number = 300 * 1000
 
 let apiModel: ApiModel
 
@@ -93,7 +93,7 @@ let ChatGptApi: ChatGPTAPI | ChatGPTUnofficialProxyAPI
 })()
 
 async function chatReplyProcess(options: RequestOptions) {
-  const { message, lastContext, process: processFunction, systemMessage, temperature } = options
+  let { message, lastContext, process: processFunction, systemMessage, temperature } = options
   try {
     let options: SendMessageOptions = { timeoutMs }
 
@@ -110,7 +110,10 @@ async function chatReplyProcess(options: RequestOptions) {
     }
 
     options.completionParams = options.completionParams || {}
-    options.completionParams.temperature = temperature || 0
+    if (temperature !== 0 && !temperature)
+      temperature = 0.8
+
+    options.completionParams.temperature = temperature
 
     const response = await ChatGptApi.sendMessage(message, {
       ...options,
