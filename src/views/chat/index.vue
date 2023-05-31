@@ -561,12 +561,6 @@ onUnmounted(() => {
           </NRadioGroup>
         </div>
       </div>
-      <HeaderComponent
-        v-if="isMobile"
-        :querymethod="querymethod"
-        @export="handleExport"
-        @querymethodChange="setQueryMethod"
-      />
       <div
         id="scrollRef"
         ref="scrollRef"
