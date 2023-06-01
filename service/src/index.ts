@@ -12,6 +12,7 @@ import { replyBing } from './domain/bing'
 import { replyChatGPT } from './domain/chatgpt'
 import { replyWolframalpha } from './domain/wolframalpha'
 import { replyMidjourney } from './domain/midjourney'
+import { replyClaude } from './domain/claude'
 import { dateFormat, getNthDayAfterToday, sqlDB } from './utils'
 
 // const MidjourneyQueue = []
@@ -74,6 +75,9 @@ async function chatProcess(prompt, querymethod, dbRecord, res, options, systemMe
 
     else if (querymethod === '运算')
       await replyWolframalpha(prompt, dbRecord, res, options)
+
+    else if (querymethod === 'Claude')
+      await replyClaude(prompt, dbRecord, res)
 
     else await replyChatGPT(prompt, dbRecord, res, options, systemMessage, temperature)
   }

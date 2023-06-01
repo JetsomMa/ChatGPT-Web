@@ -28,7 +28,7 @@ export const DefaultMessageConfig: MessageConfig = {
   SalaiToken: '',
   Debug: false,
   Limit: 50,
-  MaxWait: 60,
+  MaxWait: 100,
 }
 export const DefaultMidjourneyConfig: MidjourneyConfig = {
   ...DefaultMessageConfig,

@@ -1,6 +1,6 @@
 FROM node:lts-alpine as backend
 
-RUN npm install pnpm -g
+RUN npm install -g pnpm@8.5.1
 
 WORKDIR /app
 

@@ -159,11 +159,11 @@ function upscaleImage(index: number) {
             </button>
           </div>
           <div class="button-row">
-            <button v-if="!asRawText && querymethod === '画画' && (orgText.startsWith('![imagine](') || orgText.startsWith('![variation](') || orgText.startsWith('![upscale]('))" class="button" @click="download">
-              下载图片
-            </button>
             <button class="button" @click="handleRegenerate">
               重新生成
+            </button>
+            <button v-if="!asRawText && querymethod === '画画' && (orgText.startsWith('![imagine](') || orgText.startsWith('![variation](') || orgText.startsWith('![upscale]('))" class="button" @click="download">
+              下载图片
             </button>
           </div>
         </div>
