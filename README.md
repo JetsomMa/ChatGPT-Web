@@ -1,9 +1,6 @@
 # ChatGPT Web
 
 ```shell
-docker run --net=host --name chatgpt-web-service -d -v /etc/localtime:/etc/localtime:ro --env PORT=13002 --env AUTH_SECRET_KEY=true --env HTTPS_PROXY=http://127.0.0.1:15777 --env DATASET_MYSQL_USER=dataset --env DATASET_MYSQL_PASSWORD=dataset2023 --env DATASET_MYSQL_DATABASE=dataset --env SOCKS_PROXY_HOST=127.0.0.1 --env SOCKS_PROXY_PORT=15778 --env OPENAI_API_KEY=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 --env SALAI_TOKEN=MTA2MjY3OTYzMTI1NTMxMDMzNw.GRY1Nr.dHPT1Xumivz-90yAucReStOEDiGw3_3Dn3Cxlc --env SERVER_ID=662267976984297473 --env CHANNEL_ID=995431514080813086 127.0.0.1:5000/chatgpt-web-service1:1.0.55
-```
-
 <div style="font-size: 1.5rem;">
   <a href="./README.md">中文</a> |
   <a href="./README.en.md">English</a>

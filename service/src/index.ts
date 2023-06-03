@@ -119,7 +119,7 @@ router.post('/chat-process', [auth, limiter], async (req, res) => {
         // 如果用户已过期
         if (querymethod === '画画') {
           if (userinfo.dalleday <= 0 || userinfo.dallemonth <= 0) {
-            dbRecord.conversation = '画画功能超过每日1张免费限额，请联系管理员进行充值(包月20元，包含5张画画额度)！微信：18514665919\n![](https://download.mashaojie.cn/image/%E5%8A%A0%E6%88%91%E5%A5%BD%E5%8F%8B.jpg)'
+            dbRecord.conversation = '画画功能超过每日1张免费限额，请联系管理员进行充值(单张购买0.5元1张图，包月25元)！微信：18514665919\n![](https://download.mashaojie.cn/image/%E5%8A%A0%E6%88%91%E5%A5%BD%E5%8F%8B.jpg)'
             res.write(JSON.stringify({ message: dbRecord.conversation }))
           }
           else {
@@ -163,7 +163,7 @@ router.post('/chat-process', [auth, limiter], async (req, res) => {
         // 如果用户未过期
         if (querymethod === '画画') {
           if (userinfo.dallemonth <= 0 && userinfo.extenddalle <= 0) {
-            dbRecord.conversation = '画画功能超过每月5张限额，请联系管理员进行充值(20张/10元)！微信：18514665919\n![](https://download.mashaojie.cn/image/%E5%8A%A0%E6%88%91%E5%A5%BD%E5%8F%8B.jpg)'
+            dbRecord.conversation = '画画功能超过每月5张限额，请联系管理员进行充值(单张购买0.5元1张图，包月25元)！微信：18514665919\n![](https://download.mashaojie.cn/image/%E5%8A%A0%E6%88%91%E5%A5%BD%E5%8F%8B.jpg)'
             res.write(JSON.stringify({ message: dbRecord.conversation }))
           }
           else {
@@ -416,6 +416,7 @@ router.post('/verify', async (req, res) => {
 
 interface PhoneCode {
   telephone: string
+  filename?: string
 }
 // 生成验证码
 router.post('/phonecode', async (req, res) => {
@@ -448,6 +449,32 @@ router.post('/phonecode', async (req, res) => {
   }
   catch (error) {
     res.send({ status: 'Fail', message: error.message, data: null })
+  }
+})
+
+// 保存图片信息
+router.post('/addImageFile', async (req, res) => {
+  try {
+    const { telephone, filename } = req.body as PhoneCode
+
+    await sqlDB.insert('filelist', { telephone, filename })
+    res.send({ status: 'Success', message: '文件上传成功！' })
+  }
+  catch (error) {
+    res.send({ status: 'Fail', message: `文件上传失败！${error.message}`, data: null })
+  }
+})
+
+// 保存图片信息
+router.post('/getImageList', async (req, res) => {
+  try {
+    const { telephone } = req.body as PhoneCode
+
+    const imageList = await sqlDB.query(`select filename from filelist where telephone = '${telephone}'`, {})
+    res.send({ status: 'Success', message: JSON.stringify(imageList) })
+  }
+  catch (error) {
+    res.send({ status: 'Fail', message: `文件上传失败！${error.message}`, data: null })
   }
 })
 

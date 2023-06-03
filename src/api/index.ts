@@ -55,6 +55,22 @@ export function fetchChatAPIProcess<T = any>(
   })
 }
 
+export function addImageFile({filename}: {filename: string}) {
+	const authStore = useAuthStore()
+	return post({
+		url: '/addImageFile',
+		data: { filename, telephone: authStore.telephone },
+	})
+}
+
+export function getImageList() {
+	const authStore = useAuthStore()
+	return post({
+		url: '/getImageList',
+		data: { telephone: authStore.telephone },
+	})
+}
+
 export function fetchSession<T>() {
   return post<T>({
     url: '/session',

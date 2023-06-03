@@ -70,7 +70,10 @@ export async function replyMidjourney(prompt, dbRecord, res) {
         return
       }
 
-      let newPrompt = prompt
+      let newPrompt = ''
+      if (prompt.startsWith('http'))
+        newPrompt = prompt.split(' ')[0]
+
       if (/[\u4E00-\u9FA5]/.test(prompt)) {
         let myChat: ChatMessage | undefined
         await chatReplyProcess({
@@ -82,7 +85,7 @@ export async function replyMidjourney(prompt, dbRecord, res) {
           temperature: 0,
         })
 
-        newPrompt = myChat.text
+        newPrompt = `${newPrompt} ${myChat.text}`
       }
 
       console.warn('newPrompt -> ', newPrompt)
@@ -91,7 +94,6 @@ export async function replyMidjourney(prompt, dbRecord, res) {
         async (uri: string) => {
           console.warn('loading', uri)
           await saveTmpPicture(uri, finalFileName, res)
-          // res.write(`\n${JSON.stringify({ text: `[进行中...]图片生成中，请耐心等待...\n![](${uri})` })}`)
         },
       )
     }
