@@ -81,7 +81,7 @@ async function executeCommand(prompt, dbRecord) {
           if (resp.status !== 200)
             return `error: 文件保存错误${resp.message}`
 
-          return `image: https://download.mashaojie.cn/images/dalle/${fileName}\ntext: ${subpod.moutput}`
+          return `image: https://chat.mashaojie.cn/download/images/dalle/${fileName}\ntext: ${subpod.moutput}`
         }
         else {
           return `text: ${subpod.moutput}`

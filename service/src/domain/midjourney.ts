@@ -108,7 +108,7 @@ export async function replyMidjourney(prompt, dbRecord, res) {
         res.write(`\n${JSON.stringify({ text: resp.message })}`)
         return
       }
-      response.localurl = `https://download.mashaojie.cn/images/dalle/${finalFileName}`
+      response.localurl = `https://chat.mashaojie.cn/download/images/dalle/${finalFileName}`
 
       await sqlDB.insert('mjdata', { ...response, prompt, username: dbRecord.username, telephone: dbRecord.telephone })
 
@@ -127,12 +127,12 @@ export async function replyMidjourney(prompt, dbRecord, res) {
       }
     }
     else {
-      res.write(`\n${JSON.stringify({ text: `图片生成失败！！！${JSON.stringify(response)}\n请联系管理员，微信：18514665919\n![](https://download.mashaojie.cn/image/%E5%8A%A0%E6%88%91%E5%A5%BD%E5%8F%8B.jpg)` })}`)
+      res.write(`\n${JSON.stringify({ text: `图片生成失败！！！${JSON.stringify(response)}\n请联系管理员，微信：18514665919\n![](https://chat.mashaojie.cn/download/image/%E5%8A%A0%E6%88%91%E5%A5%BD%E5%8F%8B.jpg)` })}`)
       dbRecord.conversationId = `图片生成_${dbRecord.username}_${dbRecord.telephone}`
     }
   }
   catch (error) {
-    res.write(JSON.stringify({ message: `${error.message}\n请联系管理员，微信：18514665919\n![](https://download.mashaojie.cn/image/%E5%8A%A0%E6%88%91%E5%A5%BD%E5%8F%8B.jpg)` }))
+    res.write(JSON.stringify({ message: `${error.message}\n请联系管理员，微信：18514665919\n![](https://chat.mashaojie.cn/download/image/%E5%8A%A0%E6%88%91%E5%A5%BD%E5%8F%8B.jpg)` }))
     throw new Error(error)
   }
 }

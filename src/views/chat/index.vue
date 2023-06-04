@@ -534,7 +534,7 @@ onUnmounted(() => {
 
 const uploadFile = ref<boolean>(true)
 async function handleFinish({event} : {event: any}) {
-	await addImageFile("https://download.mashaojie.cn/images/users/" + event.srcElement.responseText)
+	await addImageFile("https://chat.mashaojie.cn/download/images/users/" + event.srcElement.responseText)
 	uploadFile.value = false
 	setTimeout(() => {
 		uploadFile.value = true

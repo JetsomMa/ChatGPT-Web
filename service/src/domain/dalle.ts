@@ -24,7 +24,7 @@ export async function replyDalle(prompt, dbRecord, res) {
           res.write(`\n${JSON.stringify({ text: resp.message })}`)
           return
         }
-        item.url = `https://download.mashaojie.cn/images/dalle/${fileName}`
+        item.url = `https://chat.mashaojie.cn/download/images/dalle/${fileName}`
       }
 
       let resultText = ''
