@@ -135,13 +135,13 @@ function handleUpscaleImage(data: string) {
           @upscale-image="handleUpscaleImage"
         />
         <div class="flex flex-col">
-          <button
+          <!-- <button
             v-if="!inversion"
             class="mb-2 transition text-neutral-300 hover:text-neutral-800 dark:hover:text-neutral-300"
             @click="handleRegenerate"
           >
             <SvgIcon icon="ri:restart-line" />
-          </button>
+          </button> -->
           <NDropdown
             :trigger="isMobile ? 'click' : 'hover'"
             :placement="!inversion ? 'right' : 'left'"

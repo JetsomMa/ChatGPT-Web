@@ -9,6 +9,7 @@ const client = new Midjourney({
   ChannelId: <string>process.env.CHANNEL_ID,
   SalaiToken: <string>process.env.SALAI_TOKEN,
   Debug: true,
+	Ws: true,
 })
 
 const blackKeyWords = ['性爱', '性交', '萝莉', '裸体', '习近平']
@@ -86,7 +87,9 @@ export async function replyMidjourney(prompt, dbRecord, res) {
         })
 
         newPrompt = `${newPrompt} ${myChat.text}`
-      }
+      } else {
+				newPrompt = prompt
+			}
 
       console.warn('newPrompt -> ', newPrompt)
       response = await client.Imagine(
