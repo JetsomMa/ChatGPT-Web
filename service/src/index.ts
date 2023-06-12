@@ -237,9 +237,9 @@ router.post('/chat-query', async (req, res) => {
   // const systemMessage = `当前时间为: ${dateFormat(new Date(new Date().getTime() + 8 * 60 * 60 * 1000), 'yyyy年MM月dd日 hh时mm分ss秒')}\n\n您是一个知识渊博的学者，基于openai公司的chatgpt3.5版本，有着极其严谨而又风趣的聊天态度，请尽可能准确详细的回答问题。`
   const systemMessage = `当前时间为: ${dateFormat(new Date(), 'yyyy年MM月dd日 hh时mm分ss秒')}\n\n您是一个知识渊博的学者，基于openai公司的chatgpt3.5版本，有着极其严谨而又风趣的聊天态度，请尽可能准确详细的回答问题。`
   const device = 'wechat'
-  let { prompt, username, telephone } = req.body as RequestProps
+  let { prompt, username, telephone, querymethod, chatusername } = req.body as RequestProps
 
-  const dbRecord: any = { prompt, device, username, modeltype: 'gpt-3.5', telephone }
+  const dbRecord: any = { prompt, device, querymethod, username, modeltype: 'gpt-3.5', telephone }
   try {
     prompt = prompt.trim()
 
@@ -254,38 +254,45 @@ router.post('/chat-query', async (req, res) => {
         console.error(error)
       }
 
-      let mySystemMessage = ''
+			if(querymethod === '画画'){
+				const result = await replyMidjourney(prompt, dbRecord, null, chatusername)
+				console.log('result --> ', result)
+				dbRecord.conversation = result
+      	dbRecord.finish_reason = 'stop'
+			} else {
+				let mySystemMessage = ''
 
-      if (telephone === '18514665919' && (prompt.startsWith('/查询 ') || prompt.startsWith('/操作 '))) {
-        const result = await executeCommand(prompt, dbRecord)
-        if (result.startsWith('error:')) {
-          dbRecord.conversation = result
-          dbRecord.finish_reason = 'stop'
-        }
-        else {
-          prompt = result
-          mySystemMessage = resultCommandMessage
-        }
-      }
-      else {
-        mySystemMessage = systemMessage
-      }
+				if (telephone === '18514665919' && (prompt.startsWith('/查询 ') || prompt.startsWith('/操作 '))) {
+					const result = await executeCommand(prompt, dbRecord)
+					if (result.startsWith('error:')) {
+						dbRecord.conversation = result
+						dbRecord.finish_reason = 'stop'
+					}
+					else {
+						prompt = result
+						mySystemMessage = resultCommandMessage
+					}
+				}
+				else {
+					mySystemMessage = systemMessage
+				}
 
-      let myChat: ChatMessage | undefined
-      await chatReplyProcess({
-        message: prompt,
-        process: (chat: ChatMessage) => {
-          myChat = chat
-        },
-        systemMessage: mySystemMessage,
-        temperature: 0,
-      })
+				let myChat: ChatMessage | undefined
+				await chatReplyProcess({
+					message: prompt,
+					process: (chat: ChatMessage) => {
+						myChat = chat
+					},
+					systemMessage: mySystemMessage,
+					temperature: 0,
+				})
 
-      if (myChat) {
-        dbRecord.conversation = myChat.text
-        dbRecord.conversationId = myChat.id
-        dbRecord.finish_reason = myChat.detail.choices[0].finish_reason
-      }
+				if (myChat) {
+					dbRecord.conversation = myChat.text
+					dbRecord.conversationId = myChat.id
+					dbRecord.finish_reason = myChat.detail.choices[0].finish_reason
+				}
+			}
     }
     else {
       dbRecord.conversation = '请输入您的会话内容'

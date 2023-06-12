@@ -2,13 +2,14 @@ import type { FetchFn } from 'chatgpt'
 
 export interface RequestProps {
   prompt: string
-  querymethodt: string
+  querymethod: string
   options?: ChatContext
   systemMessage: string
   temperature?: number
   device?: string
   username?: string
   telephone?: string
+  chatusername?: string
 }
 
 export interface ChatContext {

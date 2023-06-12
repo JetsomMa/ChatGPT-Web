@@ -4,18 +4,19 @@ import type { ChatMessage } from '../chatgpt'
 import { chatReplyProcess } from '../chatgpt'
 import { sqlDB } from '../utils'
 import type { MJMessage } from '../midjourney/interfaces/message'
+
 const client = new Midjourney({
-  ServerId: <string>process.env.SERVER_ID,
-  ChannelId: <string>process.env.CHANNEL_ID,
-  SalaiToken: <string>process.env.SALAI_TOKEN,
+  ServerId: process.env.SERVER_ID as string,
+  ChannelId: process.env.CHANNEL_ID as string,
+  SalaiToken: process.env.SALAI_TOKEN as string,
   Debug: true,
-	Ws: true,
+  Ws: true,
 })
 
 const blackKeyWords = ['性爱', '性交', '萝莉', '裸体', '习近平']
-export async function replyMidjourney(prompt, dbRecord, res) {
+export async function replyMidjourney(prompt, dbRecord, res, chatusername = '') {
   try {
-    res.write(`\n${JSON.stringify({ text: '准备生成图片，请耐心等待...[如果长时间不生成内容，可能是因为输入中包含敏感词导致任务被拦截，不要多次做类似尝试，我会封你号！]' })}`)
+    res && res.write(`\n${JSON.stringify({ text: '准备生成图片，请耐心等待...[如果长时间不生成内容，可能是因为输入中包含敏感词导致任务被拦截！]' })}`)
 
     let response: MJMessage | undefined
     let finalName = 'imagine'
@@ -35,8 +36,8 @@ export async function replyMidjourney(prompt, dbRecord, res) {
           response = await client.Variation(
             mjdata.content,
             index,
-            <string>mjdata.id,
-            <string>mjdata.hash,
+            mjdata.id as string,
+            mjdata.hash as string,
             async (uri: string) => {
               console.warn('loading', uri)
               await saveTmpPicture(uri, finalFileName, res)
@@ -48,8 +49,8 @@ export async function replyMidjourney(prompt, dbRecord, res) {
           response = await client.Upscale(
             mjdata.content,
             index,
-            <string>mjdata.id,
-            <string>mjdata.hash,
+            mjdata.id as string,
+            mjdata.hash as string,
             async (uri: string) => {
               console.warn('loading', uri)
               await saveTmpPicture(uri, finalFileName, res)
@@ -67,7 +68,7 @@ export async function replyMidjourney(prompt, dbRecord, res) {
     }
     else {
       if (blackKeyWords.some(key => prompt.includes(key))) {
-        res.write(`\n${JSON.stringify({ text: '输入中包含敏感词导致任务被拦截！' })}`)
+        res && res.write(`\n${JSON.stringify({ text: '输入中包含敏感词导致任务被拦截！' })}`)
         return
       }
 
@@ -87,9 +88,10 @@ export async function replyMidjourney(prompt, dbRecord, res) {
         })
 
         newPrompt = `${newPrompt} ${myChat.text}`
-      } else {
-				newPrompt = prompt
-			}
+      }
+      else {
+        newPrompt = prompt
+      }
 
       console.warn('newPrompt -> ', newPrompt)
       response = await client.Imagine(
@@ -108,7 +110,7 @@ export async function replyMidjourney(prompt, dbRecord, res) {
 
       const resp: any = await axios.post('http://118.195.236.91:3011/api/downloadImage', { imageUrl: response.uri, fileName: finalFileName })
       if (resp.status !== 200) {
-        res.write(`\n${JSON.stringify({ text: resp.message })}`)
+        res && res.write(`\n${JSON.stringify({ text: resp.message })}`)
         return
       }
       response.localurl = `https://chat.mashaojie.cn/download/images/dalle/${finalFileName}`
@@ -116,38 +118,50 @@ export async function replyMidjourney(prompt, dbRecord, res) {
       await sqlDB.insert('mjdata', { ...response, prompt, username: dbRecord.username, telephone: dbRecord.telephone })
 
       const resultText = `![${finalName}](${response.localurl})`
-      res.write(`\n${JSON.stringify({ text: resultText, finish: true })}`)
+      res && res.write(`\n${JSON.stringify({ text: resultText, finish: true })}`)
 
-      dbRecord.conversation = resultText
-      dbRecord.conversationId = response.localurl
-      dbRecord.finish_reason = 'stop'
+      if (res) {
+        dbRecord.conversation = resultText
+        dbRecord.conversationId = response.localurl
+        dbRecord.finish_reason = 'stop'
+      }
+      else {
+        dbRecord.conversation = response.localurl
+        dbRecord.conversationId = response.localurl
+        dbRecord.finish_reason = 'stop'
+      }
 
       try {
-        axios.post('http://118.195.236.91:3012/api/mdj', { username: dbRecord.username, url: response.localurl })
+        // axios.post('http://118.195.236.91:3012/api/mdj', { username: dbRecord.username, url: response.localurl, chatusername })
+        axios.post('http://127.0.0.1:3012/api/mdj', { username: dbRecord.username, url: response.localurl, chatusername })
       }
       catch (error) {
         console.error(error)
       }
+
+      return response.localurl
     }
     else {
-      res.write(`\n${JSON.stringify({ text: `图片生成失败！！！${JSON.stringify(response)}\n请联系管理员，微信：18514665919\n![](https://chat.mashaojie.cn/download/image/%E5%8A%A0%E6%88%91%E5%A5%BD%E5%8F%8B.jpg)` })}`)
+      res && res.write(`\n${JSON.stringify({ text: `图片生成失败！！！${JSON.stringify(response)}\n请联系管理员，微信：18514665919\n![](https://chat.mashaojie.cn/download/image/%E5%8A%A0%E6%88%91%E5%A5%BD%E5%8F%8B.jpg)` })}`)
       dbRecord.conversationId = `图片生成_${dbRecord.username}_${dbRecord.telephone}`
+      return 'error'
     }
   }
   catch (error) {
-    res.write(JSON.stringify({ message: `${error.message}\n请联系管理员，微信：18514665919\n![](https://chat.mashaojie.cn/download/image/%E5%8A%A0%E6%88%91%E5%A5%BD%E5%8F%8B.jpg)` }))
-    throw new Error(error)
+    res && res.write(JSON.stringify({ message: `${error.message}\n请联系管理员，微信：18514665919\n![](https://chat.mashaojie.cn/download/image/%E5%8A%A0%E6%88%91%E5%A5%BD%E5%8F%8B.jpg)` }))
+    console.error('replyMidjourney -> ', error)
+    return 'error'
   }
 }
 
 async function saveTmpPicture(uri, finalFileName, res) {
   const resp: any = await axios.post('http://118.195.236.91:3011/api/downloadImage', { imageUrl: uri, fileName: finalFileName })
   if (resp.status !== 200) {
-    res.write(`\n${JSON.stringify({ text: resp.message })}`)
+    res && res.write(`\n${JSON.stringify({ text: resp.message })}`)
     return
   }
   const localurl = `https://download.mashaojie.cn/images/dalle/${finalFileName}?date=${new Date().getTime()}`
 
   const resultText = `[进行中...]图片生成中，请耐心等待...\n\n![progress](${localurl})`
-  res.write(`\n${JSON.stringify({ text: resultText })}`)
+  res && res.write(`\n${JSON.stringify({ text: resultText })}`)
 }
