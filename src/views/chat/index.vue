@@ -587,7 +587,7 @@ function createImagePrompt() {
 </script>
 
 <template>
-  <div class="flex flex-col w-full h-full">
+  <div class="flex flex-col w-full h-full chat-index">
     <HeaderComponent
       v-if="isMobile"
       :querymethod="querymethod"
@@ -759,21 +759,21 @@ function createImagePrompt() {
 </template>
 
 <style>
-.file-manager .n-radio-group .n-radio-button {
+.chat-index .n-radio-group .n-radio-button {
 	background-color: violet;
 	color: #666;
 }
-.file-manager .n-radio-group .n-radio-button.n-radio-button--checked {
+.chat-index .n-radio-group .n-radio-button.n-radio-button--checked {
 	background: blue;
 	color: #ffffff;
 }
-.file-manager .n-base-selection .n-base-selection-label {
+.chat-index .n-base-selection .n-base-selection-label {
 	background-color: fuchsia !important;
 }
-.file-manager .n-base-selection .n-base-selection-label .n-base-selection-input {
+.chat-index .n-base-selection .n-base-selection-label .n-base-selection-input {
 	color: #ffffff;
 }
-.file-manager .n-base-selection .n-base-suffix .n-base-suffix__arrow {
+.chat-index .n-base-selection .n-base-suffix .n-base-suffix__arrow {
 	color: #ffffff;
 }
 .file-manager .n-card-header {
