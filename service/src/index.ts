@@ -121,7 +121,7 @@ router.post('/chat-process', [auth, limiter], async (req, res) => {
         // 如果用户已过期
         if (querymethod === '画画') {
           if (userinfo.dalleday <= 0 || userinfo.dallemonth <= 0) {
-            dbRecord.conversation = '画画功能超过每日1张免费限额，请联系管理员进行充值(单张购买0.5元1张图，包月25元)！微信：18514665919\n![](https://chat.mashaojie.cn/download/image/%E5%8A%A0%E6%88%91%E5%A5%BD%E5%8F%8B.jpg)'
+            dbRecord.conversation = '画画功能超过每日1张免费限额，请联系管理员进行充值(包月25元，单张购买0.5元1张图)！微信：18514665919\n![](https://chat.mashaojie.cn/download/image/%E5%8A%A0%E6%88%91%E5%A5%BD%E5%8F%8B.jpg)'
             res.write(JSON.stringify({ message: dbRecord.conversation }))
           }
           else {
@@ -148,7 +148,7 @@ router.post('/chat-process', [auth, limiter], async (req, res) => {
         }
         else if (querymethod === 'ChatGPT') {
           if (userinfo.chatgptday <= 0) {
-            dbRecord.conversation = 'ChatGPT功能超过每日3次免费限额，请联系管理员进行充值(包月20元，包含5张画画额度)！微信：18514665919\n![](https://chat.mashaojie.cn/download/image/%E5%8A%A0%E6%88%91%E5%A5%BD%E5%8F%8B.jpg)'
+            dbRecord.conversation = 'ChatGPT功能超过每日3次免费限额，请联系管理员进行充值(包月20元)！微信：18514665919\n![](https://chat.mashaojie.cn/download/image/%E5%8A%A0%E6%88%91%E5%A5%BD%E5%8F%8B.jpg)'
             res.write(JSON.stringify({ message: dbRecord.conversation }))
           }
           else {
@@ -165,7 +165,7 @@ router.post('/chat-process', [auth, limiter], async (req, res) => {
         // 如果用户未过期
         if (querymethod === '画画') {
           if (userinfo.dallemonth <= 0 && userinfo.extenddalle <= 0) {
-            dbRecord.conversation = '画画功能超过每月5张限额，请联系管理员进行充值(单张购买0.5元1张图，包月25元)！微信：18514665919\n![](https://chat.mashaojie.cn/download/image/%E5%8A%A0%E6%88%91%E5%A5%BD%E5%8F%8B.jpg)'
+            dbRecord.conversation = '画画功能超过每月5张免费限额，请联系管理员进行充值(包月25元，单张购买0.5元1张图)！微信：18514665919\n![](https://chat.mashaojie.cn/download/image/%E5%8A%A0%E6%88%91%E5%A5%BD%E5%8F%8B.jpg)'
             res.write(JSON.stringify({ message: dbRecord.conversation }))
           }
           else {
