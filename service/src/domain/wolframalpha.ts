@@ -64,7 +64,7 @@ async function executeCommand(prompt, dbRecord) {
       return 'error: 指令转换失败, 请检查你的输入！'
     }
     else {
-      const url = `https://api.wolframalpha.com/v2/query?appid=59PXUT-YTTHVPWVVP&includepodid=Result&output=json&format=image,moutput&input=${encodeURIComponent(command)}&podstate=Step‐by‐step`
+      const url = `https://api.wolframalpha.com/v2/query?appid=${process.env.WOLFRAM_APPID}&includepodid=Result&output=json&format=image,moutput&input=${encodeURIComponent(command)}&podstate=Step‐by‐step`
       console.log('url --> ', url)
       const response = await fetch(url)
       const json: any = await response.json()

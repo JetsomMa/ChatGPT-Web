@@ -1,8 +1,8 @@
 import { Authenticator } from '../claude/index'
 import type { ChatResponse } from '../claude/types'
 
-const token = 'xoxp-5372539915360-5351270438836-5351956593428-489ba69bfac52d0515f995db30df7b9f'
-const bot = 'U059U9ETPHV'
+const token = process.env.CLAUDE_TOKEN
+const bot = process.env.CLAUDE_BOT
 const authenticator = new Authenticator(token, bot)
 // 创建一个频道，已存在则直接返回频道ID
 let channel
