@@ -55,7 +55,7 @@ export default {
     setting: 'Setting',
     general: 'General',
     advanced: 'Advanced',
-    config: 'Config',
+    config: 'Bill',
     avatarLink: 'Avatar Link',
     name: 'Name',
     description: 'Description',

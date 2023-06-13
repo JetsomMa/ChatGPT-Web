@@ -1,15 +1,17 @@
 <script lang="ts" setup>
 import { computed, nextTick } from 'vue'
+import { NSelect } from 'naive-ui'
+import { querymethodsOptions } from './options'
 import { HoverButton, SvgIcon } from '@/components/common'
 import { useAppStore, useChatStore } from '@/store'
 
 interface Props {
-  usingContext: boolean
+  querymethod: string
 }
 
 interface Emit {
   (ev: 'export'): void
-  (ev: 'toggleUsingContext'): void
+  (ev: 'querymethodChange'): void
 }
 
 defineProps<Props>()
@@ -36,8 +38,8 @@ function handleExport() {
   emit('export')
 }
 
-function toggleUsingContext() {
-  emit('toggleUsingContext')
+function querymethodChange(value: string) {
+  emit('querymethodChange', value)
 }
 </script>
 
@@ -62,11 +64,7 @@ function toggleUsingContext() {
         {{ (currentChatHistory || {}).title || '' }}
       </h1>
       <div class="flex items-center space-x-2">
-        <HoverButton @click="toggleUsingContext">
-          <span class="text-xl" :class="{ 'text-[#4b9e5f]': usingContext, 'text-[#a8071a]': !usingContext }">
-            <SvgIcon icon="ri:chat-history-line" />
-          </span>
-        </HoverButton>
+        <NSelect style="width: 170px;" :value="querymethod" :options="querymethodsOptions" @update:value="querymethodChange" />
         <HoverButton @click="handleExport">
           <span class="text-xl text-[#4f555e] dark:text-white">
             <SvgIcon icon="ri:download-2-line" />

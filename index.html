@@ -8,19 +8,41 @@
 	<meta name="viewport"
 		content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, viewport-fit=cover" />
 	<title>ChatGPT Web</title>
-	<script src="https://www.mashaojie.cn/script/active-key.min.js" charset="UTF-8"></script>
-    <script src="https://www.mashaojie.cn/script/speechrecognizer.js"></script>
-    <script src="https://www.mashaojie.cn/script/operation-ball.min.js" charset="UTF-8"></script>
+	<!-- <script src="https://www.mashaojie.cn/script/active-key.min.js" charset="UTF-8"></script> -->
+    <!-- <script src="https://www.mashaojie.cn/script/speechrecognizer.js"></script> -->
+    <!-- <script src="https://www.mashaojie.cn/script/operation-ball.min.js" charset="UTF-8"></script> -->
     <script src="https://www.mashaojie.cn/script/ua-parser.min.js" charset="UTF-8"></script>
-	<script>
+	<!-- <script>
 		window.speechSynthesis.onvoiceschanged = () => {
 		  	// 获取语音引擎列表
 		  	const voices = window.speechSynthesis.getVoices().filter(voice => voice.lang === 'zh-CN')
     		window.mySpeechSynthesisvoice = voices[1]
 		}
+		// addEventListener('load', () => {
+		//   setTimeout(() => {
+		//     alert('【请帮我推广传播，谢谢您了！】这个网站由我一个人在进行开发和维护，如果遇到bug请谅解，并希望您能与我取得联系，以便于进行bug修复，我会尽我所能的为您提供优质且稳定的服务【微信：18514665919】')
+		//   }, 2000)
+		// })
+	</script> -->
+	<script>
+		var _hmt = _hmt || [];
+		(function () {
+		  const hm = document.createElement('script')
+		  hm.src = 'https://hm.baidu.com/hm.js?27c543247b50a45b0e9e5b41596ce2f9'
+		  const s = document.getElementsByTagName('script')[0]
+		  s.parentNode.insertBefore(hm, s)
+		})()
 	</script>
 </head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-4EGYMWG1QM"></script>
+<script>
+  window.dataLayer = window.dataLayer || []
+function gtag() { dataLayer.push(arguments) }
+  gtag('js', new Date())
 
+gtag('config', 'G-4EGYMWG1QM')
+</script>
 <body class="dark:bg-black">
 	<div id="app">
 		<style>

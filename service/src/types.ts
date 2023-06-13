@@ -2,11 +2,14 @@ import type { FetchFn } from 'chatgpt'
 
 export interface RequestProps {
   prompt: string
+  querymethod: string
   options?: ChatContext
   systemMessage: string
   temperature?: number
   device?: string
   username?: string
+  telephone?: string
+  chatusername?: string
 }
 
 export interface ChatContext {
@@ -32,4 +35,14 @@ export interface ModelConfig {
   balance?: string
 }
 
-export type ApiModel = 'ChatGPTAPI' | 'ChatGPTUnofficialProxyAPI' | undefined
+export interface VerifyProps {
+  token: string
+  username: string
+  telephone: string
+  remark: string
+  phonecode: string
+  loginmethod: string
+  password: string
+}
+
+export type ApiModel = 'ChatGPTAPI' | 'ChatGPTUnofficialProxyAPI' | string | undefined

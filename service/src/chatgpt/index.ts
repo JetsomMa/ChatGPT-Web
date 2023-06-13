@@ -24,14 +24,14 @@ const ErrorCodeMessage: Record<string, string> = {
   500: '[OpenAI] 服务器繁忙，请稍后再试 | Internal Server Error',
 }
 
-const timeoutMs: number = !isNaN(+process.env.TIMEOUT_MS) ? +process.env.TIMEOUT_MS : 120 * 1000
+const timeoutMs: number = 300 * 1000
 
 let apiModel: ApiModel
 
 if (!isNotEmptyString(process.env.OPENAI_API_KEY) && !isNotEmptyString(process.env.OPENAI_ACCESS_TOKEN))
   throw new Error('Missing OPENAI_API_KEY or OPENAI_ACCESS_TOKEN environment variable')
 
-let api: ChatGPTAPI | ChatGPTUnofficialProxyAPI
+let ChatGptApi: ChatGPTAPI | ChatGPTUnofficialProxyAPI
 
 (async () => {
   // More Info: https://github.com/transitive-bullshit/chatgpt-api
@@ -55,13 +55,13 @@ let api: ChatGPTAPI | ChatGPTUnofficialProxyAPI
         options.maxResponseTokens = 16384
       }
       else {
-        options.maxModelTokens = 8192
-        options.maxResponseTokens = 4096
+        options.maxModelTokens = 8000
+        options.maxResponseTokens = 4000
       }
     }
     else {
-      options.maxModelTokens = 4096
-      options.maxResponseTokens = 2048
+      options.maxModelTokens = 4000
+      options.maxResponseTokens = 2000
     }
 
     if (isNotEmptyString(OPENAI_API_BASE_URL))
@@ -69,7 +69,8 @@ let api: ChatGPTAPI | ChatGPTUnofficialProxyAPI
 
     setupProxy(options)
 
-    api = new ChatGPTAPI({ ...options })
+    ChatGptApi = new ChatGPTAPI({ ...options })
+
     apiModel = 'ChatGPTAPI'
   }
   else {
@@ -86,13 +87,13 @@ let api: ChatGPTAPI | ChatGPTUnofficialProxyAPI
 
     setupProxy(options)
 
-    api = new ChatGPTUnofficialProxyAPI({ ...options })
+    ChatGptApi = new ChatGPTUnofficialProxyAPI({ ...options })
     apiModel = 'ChatGPTUnofficialProxyAPI'
   }
 })()
 
 async function chatReplyProcess(options: RequestOptions) {
-  const { message, lastContext, process, systemMessage, temperature } = options
+  let { message, lastContext, process: processFunction, systemMessage, temperature } = options
   try {
     let options: SendMessageOptions = { timeoutMs }
 
@@ -109,12 +110,15 @@ async function chatReplyProcess(options: RequestOptions) {
     }
 
     options.completionParams = options.completionParams || {}
-    options.completionParams.temperature = temperature || 0
+    if (temperature !== 0 && !temperature)
+      temperature = 0.8
 
-    const response = await api.sendMessage(message, {
+    options.completionParams.temperature = temperature
+
+    const response = await ChatGptApi.sendMessage(message, {
       ...options,
       onProgress: (partialResponse) => {
-        process && process(partialResponse)
+        processFunction && processFunction(partialResponse)
       },
     })
 
@@ -153,6 +157,7 @@ async function fetchBalance() {
 
 async function chatConfig() {
   const balance = await fetchBalance()
+  const OPENAI_API_MODEL = process.env.OPENAI_API_MODEL
   const reverseProxy = process.env.API_REVERSE_PROXY || '-'
   const httpsProxy = (process.env.HTTPS_PROXY || process.env.ALL_PROXY) || '-'
   const socksProxy = (process.env.SOCKS_PROXY_HOST && process.env.SOCKS_PROXY_PORT)
@@ -160,7 +165,7 @@ async function chatConfig() {
     : '-'
   return sendResponse<ModelConfig>({
     type: 'Success',
-    data: { apiModel, reverseProxy, timeoutMs, socksProxy, httpsProxy, balance },
+    data: { apiModel: isNotEmptyString(OPENAI_API_MODEL) ? OPENAI_API_MODEL : 'gpt-3.5-turbo', reverseProxy, timeoutMs, socksProxy, httpsProxy, balance },
   })
 }
 

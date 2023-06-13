@@ -1,20 +1,21 @@
 <script setup lang='ts'>
 import type { Ref } from 'vue'
-import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { computed, onMounted, onUnmounted, reactive, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { storeToRefs } from 'pinia'
-import { NAutoComplete, NButton, NInput, useDialog, useMessage } from 'naive-ui'
+import { NAutoComplete, NButton, NCard, NImage, NInput, NModal, NRadioButton, NRadioGroup, NUpload, useDialog, useMessage } from 'naive-ui'
 import html2canvas from 'html2canvas'
 import { Message } from './components'
+import HeaderComponent from './components/Header/index.vue'
+import { querymethodsOptions } from './components/Header/options'
 import { useScroll } from './hooks/useScroll'
 import { useChat } from './hooks/useChat'
 import { useCopyCode } from './hooks/useCopyCode'
-import { useUsingContext } from './hooks/useUsingContext'
-import HeaderComponent from './components/Header/index.vue'
+import { useQueryMethod } from './hooks/useQueryMethod'
 import { HoverButton, SvgIcon } from '@/components/common'
 import { useBasicLayout } from '@/hooks/useBasicLayout'
 import { useChatStore, usePromptStore } from '@/store'
-import { fetchChatAPIProcess } from '@/api'
+import { addImageFile as addImageFileFunc, fetchChatAPIProcess, getImageList as getImageListFunc } from '@/api'
 import { t } from '@/locales'
 
 let controller = new AbortController()
@@ -25,22 +26,29 @@ const dialog = useDialog()
 const ms = useMessage()
 
 const chatStore = useChatStore()
+const { querymethod, setQueryMethod } = useQueryMethod()
 
 useCopyCode()
 
 const { isMobile } = useBasicLayout()
 const { addChat, updateChat, updateChatSome, getChatByUuidAndIndex } = useChat()
 const { scrollRef, scrollToBottom, scrollToBottomIfAtBottom } = useScroll()
-const { usingContext, toggleUsingContext } = useUsingContext()
 
 const { uuid } = route.params as { uuid: string }
 
 const dataSources = computed(() => chatStore.getChatByUuid(+uuid))
 const conversationList = computed(() => dataSources.value.filter(item => (!item.inversion && !item.error)))
 
+const querymethods = ref(querymethodsOptions)
+
 const prompt = ref<string>('')
 const loading = ref<boolean>(false)
+const notionShow = ref<boolean>(true)
 const inputRef = ref<Ref | null>(null)
+const visiablePicturePanel = ref<boolean>(false)
+const state = reactive({
+  images: [],
+})
 
 // 添加PromptStore
 const promptStore = usePromptStore()
@@ -67,6 +75,11 @@ async function onConversation() {
   if (!message || message.trim() === '')
     return
 
+  if (message.length > 1200) {
+    ms.error('输入字符超长，不能超过1200个字符！')
+    return
+  }
+
   controller = new AbortController()
 
   addChat(
@@ -76,6 +89,7 @@ async function onConversation() {
       text: message,
       inversion: true,
       error: false,
+      querymethod: querymethod.value,
       conversationOptions: null,
       requestOptions: { prompt: message, options: null },
     },
@@ -88,7 +102,7 @@ async function onConversation() {
   let options: Chat.ConversationRequest = {}
   const lastContext = (conversationList.value[conversationList.value.length - 1] || {}).conversationOptions
 
-  if (lastContext && usingContext.value)
+  if (lastContext && (querymethod.value === 'ChatGPT'))
     options = { ...lastContext }
 
   addChat(
@@ -97,8 +111,10 @@ async function onConversation() {
       dateTime: new Date().toLocaleString(),
       text: '',
       loading: true,
+      finish: false,
       inversion: false,
       error: false,
+      querymethod: querymethod.value,
       conversationOptions: null,
       requestOptions: { prompt: message, options: { ...options } },
     },
@@ -110,6 +126,7 @@ async function onConversation() {
     const fetchChatAPIOnce = async () => {
       await fetchChatAPIProcess<Chat.ConversationResponse>({
         prompt: message,
+        querymethod: querymethod.value,
         options,
         signal: controller.signal,
         onDownloadProgress: ({ event }) => {
@@ -128,6 +145,7 @@ async function onConversation() {
               {
                 dateTime: new Date().toLocaleString(),
                 text: lastText + data.text || '',
+                querymethod: querymethod.value,
                 inversion: false,
                 error: false,
                 loading: false,
@@ -136,11 +154,22 @@ async function onConversation() {
               },
             )
 
-            if (openLongReply && data.detail.choices[0].finish_reason === 'length') {
+            if (openLongReply) {
               options.parentMessageId = data.id
               lastText = data.text
               message = ''
               return fetchChatAPIOnce()
+            }
+
+            if (data.finish) {
+              updateChatSome(
+                +uuid,
+                dataSources.value.length - 1,
+                {
+                  dateTime: new Date().toLocaleString(),
+                  finish: true,
+                },
+              )
             }
 
             scrollToBottomIfAtBottom()
@@ -193,6 +222,7 @@ async function onConversation() {
         inversion: false,
         error: true,
         loading: false,
+        querymethod: querymethod.value,
         conversationOptions: null,
         requestOptions: { prompt: message, options: { ...options } },
       },
@@ -228,8 +258,10 @@ async function onRegenerate(index: number) {
       dateTime: new Date().toLocaleString(),
       text: '',
       inversion: false,
+      finish: false,
       error: false,
       loading: true,
+      querymethod: querymethod.value,
       conversationOptions: null,
       requestOptions: { prompt: message, ...options },
     },
@@ -240,6 +272,7 @@ async function onRegenerate(index: number) {
     const fetchChatAPIOnce = async () => {
       await fetchChatAPIProcess<Chat.ConversationResponse>({
         prompt: message,
+        querymethod: querymethod.value,
         options,
         signal: controller.signal,
         onDownloadProgress: ({ event }) => {
@@ -259,18 +292,31 @@ async function onRegenerate(index: number) {
                 dateTime: new Date().toLocaleString(),
                 text: lastText + data.text || '',
                 inversion: false,
+                finish: false,
                 error: false,
                 loading: false,
+                querymethod: querymethod.value,
                 conversationOptions: { conversationId: data.conversationId, parentMessageId: data.id },
                 requestOptions: { prompt: message, ...options },
               },
             )
 
-            if (openLongReply && data.detail.choices[0].finish_reason === 'length') {
+            if (openLongReply) {
               options.parentMessageId = data.id
               lastText = data.text
               message = ''
               return fetchChatAPIOnce()
+            }
+
+            if (data.finish) {
+              updateChatSome(
+                +uuid,
+                index,
+                {
+                  dateTime: new Date().toLocaleString(),
+                  finish: true,
+                },
+              )
             }
           }
           catch (error) {
@@ -304,6 +350,7 @@ async function onRegenerate(index: number) {
         inversion: false,
         error: true,
         loading: false,
+        querymethod: querymethod.value,
         conversationOptions: null,
         requestOptions: { prompt: message, ...options },
       },
@@ -463,23 +510,115 @@ onMounted(() => {
     prompt.value = e.detail.result
     handleSubmit()
   })
+  getImageList()
 })
+
+function handleVariationImage(data: string) {
+  prompt.value = data
+  handleSubmit()
+}
+
+function handleUpscaleImage(data: string) {
+  prompt.value = data
+  handleSubmit()
+}
+
+function visiablePicturePanelFunc() {
+  visiablePicturePanel.value = true
+}
 
 onUnmounted(() => {
   if (loading.value)
     controller.abort()
 })
+
+const uploadFile = ref<boolean>(true)
+async function handleFinish({ event }: { event: any }) {
+  await addImageFile(`https://chat.mashaojie.cn/download/images/users/${event.srcElement.responseText}`)
+  uploadFile.value = false
+  setTimeout(() => {
+    uploadFile.value = true
+  }, 50)
+}
+
+function handleError(err: Error) {
+  console.error(err)
+  ms.error('文件上传失败！')
+}
+
+async function addImageFile(filename: string) {
+  const response: any = await addImageFileFunc({ filename })
+  if (response.status === 'Success') {
+    getImageList()
+    ms.success('文件上传成功！')
+  }
+  else {
+    ms.error(response.message)
+  }
+}
+
+async function getImageList() {
+  const response: any = await getImageListFunc()
+  if (response.status === 'Success') {
+    state.images = JSON.parse(response.message).map((item: any) => {
+      return item.filename
+    })
+  }
+  else {
+    ms.error(response.message)
+  }
+}
+
+const createPromptVisibale = ref<boolean>(false)
+const imageSelected = ref('')
+const imagePrompt = ref('')
+function imageClick(url: string) {
+  imageSelected.value = url
+  createPromptVisibale.value = true
+}
+function createImagePrompt() {
+  prompt.value = `${imageSelected.value} ${imagePrompt.value}`
+  imageSelected.value = ''
+  imagePrompt.value = ''
+  createPromptVisibale.value = false
+  visiablePicturePanel.value = false
+  handleSubmit()
+}
 </script>
 
 <template>
-  <div class="flex flex-col w-full h-full">
+  <div class="flex flex-col w-full h-full chat-index">
     <HeaderComponent
       v-if="isMobile"
-      :using-context="usingContext"
+      :querymethod="querymethod"
       @export="handleExport"
-      @toggle-using-context="toggleUsingContext"
+      @querymethodChange="setQueryMethod"
     />
     <main class="flex-1 overflow-hidden">
+      <div style="width: 100%; display: flex; z-index: 100; align-items: center; flex-direction: column; position: absolute;">
+        <!-- <div v-if="notionShow" style="position: relative; padding: 5px; color: green; width: 100%; background-color: yellow; opacity: 1;">
+          <div style="padding-right: 45px;">
+            请帮我推广传播，浏览器功能和矩阵运算功能免费，画画功能独立计费25元包月，单张图0.5元[所有用户每月可免费使用5次]，chatgpt功能新注册用户可免费试用一个月，后将收费每月20元人民币。过期用户每天可以免费chatgpt问答3次，每天免费画画1次[每月总共限制5次]。使用中有任何问题随时可以联系我，【微信/电话：18514665919】。
+            <a href="https://blog.mashaojie.cn/9999/09/08/ChatGPT%E4%BD%BF%E7%94%A8%E6%8C%87%E5%8D%97" class="text-blue-500" target="_blank">阅读网站使用指南[更新于2023/05/30 13:15]</a>
+          </div>
+          <NButton type="primary" style="padding: 0 5px; position: absolute; right: 10px; top: 5px;" @click="notionShow = false">
+            关闭
+          </NButton>
+        </div> -->
+        <div v-if="!isMobile" style="padding: 10px; background-color: #efefef;">
+          <NRadioGroup :value="querymethod" size="medium" default-value="ChatGPT" @update:value="setQueryMethod">
+            <NRadioButton
+              v-for="method of querymethods"
+              :key="method.value"
+              style="width: 150px; text-align: center;"
+              :value="method.value"
+              :disabled="method.disabled"
+            >
+              {{ method.label }}
+            </NRadioButton>
+          </NRadioGroup>
+        </div>
+      </div>
       <div
         id="scrollRef"
         ref="scrollRef"
@@ -497,26 +636,28 @@ onUnmounted(() => {
             </div>
           </template>
           <template v-else>
-            <div>
-              <Message
-                v-for="(item, index) of dataSources"
-                :key="index"
-                :date-time="item.dateTime"
-                :text="item.text"
-                :inversion="item.inversion"
-                :error="item.error"
-                :loading="item.loading"
-                @regenerate="onRegenerate(index)"
-                @delete="handleDelete(index)"
-              />
-              <div class="sticky bottom-0 left-0 flex justify-center">
-                <NButton v-if="loading" type="warning" @click="handleStop">
-                  <template #icon>
-                    <SvgIcon icon="ri:stop-circle-line" />
-                  </template>
-                  Stop Responding
-                </NButton>
-              </div>
+            <Message
+              v-for="(item, index) of dataSources"
+              :key="index"
+              :date-time="item.dateTime"
+              :text="item.text"
+              :inversion="item.inversion"
+              :finish="item.finish"
+              :querymethod="item.querymethod"
+              :error="item.error"
+              :loading="item.loading"
+              @regenerate="onRegenerate(index)"
+              @delete="handleDelete(index)"
+              @variation-image="handleVariationImage"
+              @upscale-image="handleUpscaleImage"
+            />
+            <div class="sticky bottom-0 left-0 flex justify-center">
+              <NButton v-if="loading" type="warning" @click="handleStop">
+                <template #icon>
+                  <SvgIcon icon="ri:stop-circle-line" />
+                </template>
+                Stop Responding
+              </NButton>
             </div>
           </template>
         </div>
@@ -535,11 +676,23 @@ onUnmounted(() => {
               <SvgIcon icon="ri:download-2-line" />
             </span>
           </HoverButton>
-          <HoverButton v-if="!isMobile" @click="toggleUsingContext">
+          <NButton v-if="querymethod === '画画'" type="primary" @click="visiablePicturePanelFunc">
+            <template #icon>
+              <span class="text-xl text-[#4f555e] dark:text-white" style="width: 22px; color: white;">
+                <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 1024 1024"><path d="M928 160H96c-17.7 0-32 14.3-32 32v640c0 17.7 14.3 32 32 32h832c17.7 0 32-14.3 32-32V192c0-17.7-14.3-32-32-32zm-40 632H136v-39.9l138.5-164.3l150.1 178L658.1 489L888 761.6V792zm0-129.8L664.2 396.8c-3.2-3.8-9-3.8-12.2 0L424.6 666.4l-144-170.7c-3.2-3.8-9-3.8-12.2 0L136 652.7V232h752v430.2zM304 456a88 88 0 1 0 0-176a88 88 0 0 0 0 176zm0-116c15.5 0 28 12.5 28 28s-12.5 28-28 28s-28-12.5-28-28s12.5-28 28-28z" fill="currentColor" /></svg>
+              </span>
+            </template>
+          </NButton>
+          <!-- <HoverButton v-if="querymethod === '画画'" @click="visiablePicturePanelFunc" style="margin: 0;">
+            <span class="text-xl text-[#4f555e] dark:text-white" style="width: 22px;">
+              <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 1024 1024"><path d="M928 160H96c-17.7 0-32 14.3-32 32v640c0 17.7 14.3 32 32 32h832c17.7 0 32-14.3 32-32V192c0-17.7-14.3-32-32-32zm-40 632H136v-39.9l138.5-164.3l150.1 178L658.1 489L888 761.6V792zm0-129.8L664.2 396.8c-3.2-3.8-9-3.8-12.2 0L424.6 666.4l-144-170.7c-3.2-3.8-9-3.8-12.2 0L136 652.7V232h752v430.2zM304 456a88 88 0 1 0 0-176a88 88 0 0 0 0 176zm0-116c15.5 0 28 12.5 28 28s-12.5 28-28 28s-28-12.5-28-28s12.5-28 28-28z" fill="currentColor"></path></svg>
+            </span>
+          </HoverButton> -->
+          <!-- <HoverButton v-if="!isMobile" @click="toggleUsingContext">
             <span class="text-xl" :class="{ 'text-[#4b9e5f]': usingContext, 'text-[#a8071a]': !usingContext }">
               <SvgIcon icon="ri:chat-history-line" />
             </span>
-          </HoverButton>
+          </HoverButton> -->
           <NAutoComplete v-model:value="prompt" :options="searchOptions" :render-label="renderOption">
             <template #default="{ handleInput, handleBlur, handleFocus }">
               <NInput
@@ -565,5 +718,68 @@ onUnmounted(() => {
         </div>
       </div>
     </footer>
+    <!-- 文件管理 -->
+    <NModal v-model:show="visiablePicturePanel" class="file-manager">
+      <NCard
+        :style="isMobile ? 'width: 95%;' : 'width: 600px;'"
+        style="padding: 10px; text-align: left;"
+        :title="createPromptVisibale ? '照片衍生' : '上传照片管理'"
+        :bordered="false"
+        size="huge"
+        role="dialog"
+        aria-modal="true"
+        :closable="true"
+        @close="visiablePicturePanel = false, createPromptVisibale = false"
+      >
+        <div v-show="createPromptVisibale" style="padding: 10px; text-align: center;">
+          <NImage :src="imageSelected" style="width: 120px; margin: 5px;" />
+          <NInput v-model:value="imagePrompt" type="textarea" />
+          <NButton type="primary" :disabled="!imagePrompt.length" style="margin-top: 10px;" @click="createImagePrompt">
+            开始生成
+          </NButton>
+        </div>
+        <div v-show="!createPromptVisibale" style="text-align: center;">
+          <NUpload
+            v-if="uploadFile"
+            action="https://api.mashaojie.cn/python/api/upload"
+            accept="image/png, image/jpeg, image/jpg"
+            :max="1"
+            @finish="handleFinish"
+            @error="handleError"
+          >
+            <NButton type="primary">
+              上传 PNG 文件
+            </NButton>
+          </NUpload>
+          <NImage v-for="image of state.images" :key="image" :src="image" style="width: 120px; margin: 5px;" :preview-disabled="true" @click="imageClick(image)" />
+        </div>
+      </NCard>
+    </NModal>
   </div>
 </template>
+
+<style>
+.chat-index .n-radio-group .n-radio-button {
+	background-color: violet;
+	color: #666;
+}
+.chat-index .n-radio-group .n-radio-button.n-radio-button--checked {
+	background: blue;
+	color: #ffffff;
+}
+.chat-index .n-base-selection .n-base-selection-label {
+	background-color: fuchsia !important;
+}
+.chat-index .n-base-selection .n-base-selection-label .n-base-selection-input {
+	color: #ffffff;
+}
+.chat-index .n-base-selection .n-base-suffix .n-base-suffix__arrow {
+	color: #ffffff;
+}
+.file-manager .n-card-header {
+	padding: 0px 10px 10px !important;
+}
+.file-manager .n-card__content{
+	padding: 0px !important;
+}
+</style>

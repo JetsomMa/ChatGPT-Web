@@ -28,6 +28,7 @@ const device = `device: ${parserResults.device.vendor || ''} ${parserResults.dev
 export function fetchChatAPIProcess<T = any>(
   params: {
     prompt: string
+    querymethod: string
     options?: { conversationId?: string; parentMessageId?: string }
     signal?: GenericAbortSignal
     onDownloadProgress?: (progressEvent: AxiosProgressEvent) => void },
@@ -35,7 +36,7 @@ export function fetchChatAPIProcess<T = any>(
   const settingStore = useSettingStore()
   const authStore = useAuthStore()
 
-  let queryData = JSON.stringify({ username: authStore.username, prompt: params.prompt, options: params.options, systemMessage: settingStore.systemMessage, temperature: settingStore.temperature, device })
+  let queryData = JSON.stringify({ username: authStore.username, telephone: authStore.telephone, prompt: params.prompt, querymethod: params.querymethod, options: params.options, systemMessage: settingStore.systemMessage, temperature: settingStore.temperature, device })
 
   if (!AESKey)
     AESKey = CryptoJS.MD5(authStore.token || '1234567890123456').toString()
@@ -50,7 +51,24 @@ export function fetchChatAPIProcess<T = any>(
     data: { queryData },
     signal: params.signal,
     onDownloadProgress: params.onDownloadProgress,
+    timeout: 300 * 1000,
   })
+}
+
+export function addImageFile({filename}: {filename: string}) {
+	const authStore = useAuthStore()
+	return post({
+		url: '/addImageFile',
+		data: { filename, telephone: authStore.telephone },
+	})
+}
+
+export function getImageList() {
+	const authStore = useAuthStore()
+	return post({
+		url: '/getImageList',
+		data: { telephone: authStore.telephone },
+	})
 }
 
 export function fetchSession<T>() {
@@ -63,10 +81,24 @@ interface VerifyProps {
   token: string
   username: string
   telephone: string
+  remark: string
+  phonecode: string
+  loginmethod: string
+  password: string
 }
 export function fetchVerify<T>(data: VerifyProps) {
   return post<T>({
     url: '/verify',
+    data,
+  })
+}
+
+interface PhoneCode {
+  telephone: string
+}
+export function fetchPhoneCode<T>(data: PhoneCode) {
+  return post<T>({
+    url: '/phonecode',
     data,
   })
 }

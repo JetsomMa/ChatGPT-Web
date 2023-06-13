@@ -5,7 +5,9 @@ declare namespace Chat {
 		text: string
 		inversion?: boolean
 		error?: boolean
+		finish?: boolean
 		loading?: boolean
+		querymethod?: string
 		conversationOptions?: ConversationRequest | null
 		requestOptions: { prompt: string; options?: ConversationRequest | null }
 	}
@@ -19,6 +21,7 @@ declare namespace Chat {
 	interface ChatState {
 		active: number | null
 		usingContext: boolean;
+		querymethod: string;
 		history: History[]
 		chat: { uuid: number; data: Chat[] }[]
 	}

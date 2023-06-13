@@ -13,14 +13,18 @@ import { SpeechSynthesiser } from '@/api/speechSynthesiser'
 interface Props {
   dateTime?: string
   text?: string
+  querymethod?: string
   inversion?: boolean
   error?: boolean
+  finish?: boolean
   loading?: boolean
 }
 
 interface Emit {
   (ev: 'regenerate'): void
   (ev: 'delete'): void
+  (ev: 'variationImage', data: string): void
+  (ev: 'upscaleImage', data: string): void
 }
 
 const props = defineProps<Props>()
@@ -50,7 +54,7 @@ const options = computed(() => {
       icon: iconRender({ icon: 'ri:delete-bin-line' }),
     },
     {
-      label: '播报',
+      label: '朗读',
       key: 'read',
       icon: iconRender({ icon: 'mdi:broadcast' }),
     },
@@ -84,8 +88,16 @@ function handleSelect(key: 'copyText' | 'delete' | 'toggleRenderType' | 'read') 
 }
 
 function handleRegenerate() {
-  messageRef.value && messageRef.value.scrollIntoView && messageRef.value.scrollIntoView()
+  messageRef.value && messageRef.value.scrollIntoView && messageRef.value.scrollIntoView(false)
   emit('regenerate')
+}
+
+function handleVariationImage(data: string) {
+  emit('variationImage', data)
+}
+
+function handleUpscaleImage(data: string) {
+  emit('upscaleImage', data)
 }
 </script>
 
@@ -115,16 +127,21 @@ function handleRegenerate() {
           :error="error"
           :text="text"
           :loading="loading"
+          :finish="finish"
+          :querymethod="querymethod"
           :as-raw-text="asRawText"
+          @regenerate="handleRegenerate"
+          @variation-image="handleVariationImage"
+          @upscale-image="handleUpscaleImage"
         />
         <div class="flex flex-col">
-          <button
+          <!-- <button
             v-if="!inversion"
             class="mb-2 transition text-neutral-300 hover:text-neutral-800 dark:hover:text-neutral-300"
             @click="handleRegenerate"
           >
             <SvgIcon icon="ri:restart-line" />
-          </button>
+          </button> -->
           <NDropdown
             :trigger="isMobile ? 'click' : 'hover'"
             :placement="!inversion ? 'right' : 'left'"

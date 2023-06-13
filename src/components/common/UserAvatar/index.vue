@@ -1,13 +1,14 @@
 <script setup lang='ts'>
 import { computed } from 'vue'
 import { NAvatar } from 'naive-ui'
-import { useUserStore } from '@/store'
+import { useAuthStore, useUserStore } from '@/store'
 import defaultAvatar from '@/assets/avatar.jpg'
 import { isString } from '@/utils/is'
 
 const userStore = useUserStore()
+const authStore = useAuthStore()
 
-const userInfo = computed(() => userStore.userInfo)
+const userInfo = computed(() => Object.assign(userStore.userInfo, { name: authStore.username }))
 </script>
 
 <template>

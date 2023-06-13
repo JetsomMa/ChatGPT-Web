@@ -55,7 +55,7 @@ export default {
     setting: '設定',
     general: '總覽',
     advanced: '高級',
-    config: '設定',
+    config: '收费',
     avatarLink: '頭貼連結',
     name: '名稱',
     description: '描述',

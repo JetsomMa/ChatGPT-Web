@@ -1,8 +1,6 @@
 <script setup lang='ts'>
 import { computed, onMounted, ref } from 'vue'
-import { NSpin } from 'naive-ui'
 import { fetchChatConfig } from '@/api'
-import pkg from '@/../package.json'
 import { useAuthStore } from '@/store'
 
 interface ConfigState {
@@ -39,7 +37,26 @@ onMounted(() => {
 </script>
 
 <template>
-  <NSpin :show="loading">
+  <div style="padding: 10px 0px;">
+    <div style="color: green; font-size: 20px; padding-bottom: 10px;">
+      请帮我推广传播
+    </div>
+    <ul style="font-size: 12px;">
+      <ol>Claude、New Bing和矩阵运算功能免费</ol>
+      <ol>chatgpt功能新注册用户可免费试用一个月，后将收费每月20元人民币</ol>
+      <ol>画画功能包月25元，单张图0.5元[所有用户每月可免费使用5次]</ol>
+      <ol>过期用户每天可以免费chatgpt问答3次，画画1次[每月总共5次]</ol>
+      <ol>使用中有任何问题随时可以联系我，【微信/电话：18514665919】</ol>
+    </ul>
+    <div style="font-size: 19px; padding: 10px 0px;">
+      阅读<a href="https://blog.mashaojie.cn/9999/09/08/ChatGPT%E4%BD%BF%E7%94%A8%E6%8C%87%E5%8D%97" class="text-blue-500" target="_blank">网站使用指南</a>[更新于2023/05/30 13:15]
+    </div>
+    <div style="display: flex; height: 250px; justify-content: center;">
+      <img src="https://chat.mashaojie.cn/download/image/%E5%8A%A0%E6%88%91%E5%A5%BD%E5%8F%8B.jpg" alt="扫码加好友">
+      <img src="https://chat.mashaojie.cn/download/image/%E7%BE%A4%E4%BA%8C%E7%BB%B4%E7%A0%81.png" alt="扫码进群">
+    </div>
+  </div>
+  <!-- <NSpin :show="loading">
     <div class="p-4 space-y-4">
       <h2 class="text-xl font-bold">
         Version - {{ pkg.version }}
@@ -71,5 +88,5 @@ onMounted(() => {
       <p>{{ $t("setting.socks") }}：{{ (config || {}).socksProxy || '-' }}</p>
       <p>{{ $t("setting.httpsProxy") }}：{{ (config || {}).httpsProxy || '-' }}</p>
     </div>
-  </NSpin>
+  </NSpin> -->
 </template>
