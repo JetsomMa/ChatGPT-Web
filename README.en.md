@@ -310,29 +310,11 @@ Q: The content returned is incomplete?
 A: There is a length limit for the content returned by the API each time. You can modify the `VITE_GLOB_OPEN_LONG_REPLY` field in the `.env` file under the root directory, set it to `true`, and rebuild the front-end to enable the long reply feature, which can return the full content. It should be noted that using this feature may bring more API usage fees.
 
 ## Contributing
-
-Please read the [Contributing Guidelines](./CONTRIBUTING.en.md) before contributing.
-
 Thanks to all the contributors!
 
 <a href="https://github.com/Chanzhaoyu/chatgpt-web/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=Chanzhaoyu/chatgpt-web" />
 </a>
-
-## Sponsorship
-
-If you find this project helpful and circumstances permit, you can give me a little support. Thank you very much for your support~
-
-<div style="display: flex; gap: 20px;">
-	<div style="text-align: center">
-		<img style="max-width: 100%" src="./docs/wechat.png" alt="WeChat" />
-		<p>WeChat Pay</p>
-	</div>
-	<div style="text-align: center">
-		<img style="max-width: 100%" src="./docs/alipay.png" alt="Alipay" />
-		<p>Alipay</p>
-	</div>
-</div>
 
 ## License
 MIT © [ChenZhaoYu](./license)

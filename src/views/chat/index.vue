@@ -75,18 +75,18 @@ async function onConversation() {
   if (!message || message.trim() === '')
     return
 
-  if (querymethod.value === 'ChatGPT16K') {
-    if (message.length > 3600) {
-      ms.error('输入字符超长，不能超过3600个字符！')
-      return
-    }
-  }
-  else {
-    if (message.length > 900) {
-      ms.error('输入字符超长，不能超过900个字符！')
-      return
-    }
-  }
+  // if (querymethod.value === 'ChatGPT16K') {
+  //   if (message.length > 3600) {
+  //     ms.error('输入字符超长，不能超过3600个字符！')
+  //     return
+  //   }
+  // }
+  // else {
+  //   if (message.length > 900) {
+  //     ms.error('输入字符超长，不能超过900个字符！')
+  //     return
+  //   }
+  // }
 
   controller = new AbortController()
 

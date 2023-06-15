@@ -40,20 +40,20 @@ let ChatGptApi2: ChatGPTAPI | ChatGPTUnofficialProxyAPI
     if (model.toLowerCase().includes('gpt-4')) {
       // if use 32k model
       if (model.toLowerCase().includes('32k')) {
-        options.maxModelTokens = 32000
-        options.maxResponseTokens = 16000
+        options.maxModelTokens = 32768
+        options.maxResponseTokens = 16384
       } else {
-        options.maxModelTokens = 8000
-        options.maxResponseTokens = 4000
+        options.maxModelTokens = 8192
+        options.maxResponseTokens = 4096
       }
     }
     else {
 			if (model.toLowerCase().includes('16k')) {
-        options.maxModelTokens = 16000
-        options.maxResponseTokens = 8000
+        options.maxModelTokens = 16384
+        options.maxResponseTokens = 8192
       } else {
-				options.maxModelTokens = 4000
-				options.maxResponseTokens = 2000
+				options.maxModelTokens = 4096
+				options.maxResponseTokens = 2048
 			}
     }
 	}
