@@ -57,8 +57,8 @@ export const resultCommandMessage = `您将扮演一个翻译员的角色，帮�
   ${tableInfo}
 
   问答的示例：[Q: 问题  A: 回答]
-    Q: "[{"expired":"99999999"}]"
-    A: "| expired |\n|-----------|\n| 2023-06-30|"
+    Q: '[{"expired":"20230630"}]'
+    A: "| expired |\n|-----------|\n| 20230630|"
 `
 export async function executeCommand(prompt, record) {
   try {

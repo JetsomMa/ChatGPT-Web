@@ -146,19 +146,20 @@ router.post('/chat-process', [auth, limiter], async (req, res) => {
             // }
           }
         }
-        else if (querymethod === 'ChatGPT') {
+        else if (querymethod === 'ChatGPT' || querymethod === 'ChatGPT16K') {
           if (userinfo.chatgptday <= 0) {
             dbRecord.conversation = 'ChatGPT功能超过每日3次免费限额，请联系管理员进行充值(包月20元)！微信：18514665919\n![](https://chat.mashaojie.cn/download/image/%E5%8A%A0%E6%88%91%E5%A5%BD%E5%8F%8B.jpg)'
             res.write(JSON.stringify({ message: dbRecord.conversation }))
           }
           else {
             userinfo.chatgptday--
-            sqlDB.update('userinfo', userinfo)
             await chatProcess(prompt, querymethod, dbRecord, res, options, systemMessage, temperature)
+            sqlDB.update('userinfo', userinfo)
           }
         }
         else {
           await chatProcess(prompt, querymethod, dbRecord, res, options, systemMessage, temperature)
+					sqlDB.update('userinfo', userinfo)
         }
       }
       else {
@@ -198,6 +199,7 @@ router.post('/chat-process', [auth, limiter], async (req, res) => {
         }
         else {
           await chatProcess(prompt, querymethod, dbRecord, res, options, systemMessage, temperature)
+					sqlDB.update('userinfo', userinfo)
         }
       }
     }

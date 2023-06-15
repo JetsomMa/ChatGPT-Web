@@ -49,7 +49,7 @@ onMounted(() => {
       <ol>使用中有任何问题随时可以联系我，【微信/电话：18514665919】</ol>
     </ul>
     <div style="font-size: 19px; padding: 10px 0px;">
-      阅读<a href="https://blog.mashaojie.cn/9999/09/08/ChatGPT%E4%BD%BF%E7%94%A8%E6%8C%87%E5%8D%97" class="text-blue-500" target="_blank">网站使用指南</a>[更新于2023/05/30 13:15]
+      阅读<a href="https://blog.mashaojie.cn/9999/09/08/%E5%9B%BD%E5%86%85%E5%85%8D%E7%BF%BB%E7%9A%84ChatGPT%E5%92%8CMidjourney%E7%BD%91%E7%AB%99/" class="text-blue-500" target="_blank">网站使用指南</a>[更新于2023/05/30 13:15]
     </div>
     <div style="display: flex; height: 250px; justify-content: center;">
       <img src="https://chat.mashaojie.cn/download/image/%E5%8A%A0%E6%88%91%E5%A5%BD%E5%8F%8B.jpg" alt="扫码加好友">

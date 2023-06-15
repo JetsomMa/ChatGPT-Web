@@ -24,7 +24,7 @@ export async function replyChatGPT(prompt, dbRecord, res, options, systemMessage
       },
       systemMessage,
       temperature,
-    })
+    }, dbRecord.querymethod === 'ChatGPT16K')
 
     myChat.finish = true
     res.write(`\n${JSON.stringify(myChat)}`)

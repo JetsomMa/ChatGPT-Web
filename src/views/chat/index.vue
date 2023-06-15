@@ -75,9 +75,17 @@ async function onConversation() {
   if (!message || message.trim() === '')
     return
 
-  if (message.length > 1200) {
-    ms.error('输入字符超长，不能超过1200个字符！')
-    return
+  if (querymethod.value === 'ChatGPT16K') {
+    if (message.length > 3600) {
+      ms.error('输入字符超长，不能超过3600个字符！')
+      return
+    }
+  }
+  else {
+    if (message.length > 900) {
+      ms.error('输入字符超长，不能超过900个字符！')
+      return
+    }
   }
 
   controller = new AbortController()
@@ -599,7 +607,7 @@ function createImagePrompt() {
         <!-- <div v-if="notionShow" style="position: relative; padding: 5px; color: green; width: 100%; background-color: yellow; opacity: 1;">
           <div style="padding-right: 45px;">
             请帮我推广传播，浏览器功能和矩阵运算功能免费，画画功能独立计费25元包月，单张图0.5元[所有用户每月可免费使用5次]，chatgpt功能新注册用户可免费试用一个月，后将收费每月20元人民币。过期用户每天可以免费chatgpt问答3次，每天免费画画1次[每月总共限制5次]。使用中有任何问题随时可以联系我，【微信/电话：18514665919】。
-            <a href="https://blog.mashaojie.cn/9999/09/08/ChatGPT%E4%BD%BF%E7%94%A8%E6%8C%87%E5%8D%97" class="text-blue-500" target="_blank">阅读网站使用指南[更新于2023/05/30 13:15]</a>
+            <a href="https://blog.mashaojie.cn/9999/09/08/%E5%9B%BD%E5%86%85%E5%85%8D%E7%BF%BB%E7%9A%84ChatGPT%E5%92%8CMidjourney%E7%BD%91%E7%AB%99/" class="text-blue-500" target="_blank">阅读网站使用指南[更新于2023/05/30 13:15]</a>
           </div>
           <NButton type="primary" style="padding: 0 5px; position: absolute; right: 10px; top: 5px;" @click="notionShow = false">
             关闭

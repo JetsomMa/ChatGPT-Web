@@ -128,7 +128,7 @@ function handlePress(event: KeyboardEvent) {
           <!-- <div>添加书签或手机“添加到主屏幕”，方便实用。</div> -->
           <!-- <div>openai接口有成本，6月10日起收费¥20/月。</div> -->
           <div>加我微信或进群，提供服务保障和技术分享。</div>
-          <div>使用前，请先阅读<a href="https://blog.mashaojie.cn/9999/09/08/ChatGPT%E4%BD%BF%E7%94%A8%E6%8C%87%E5%8D%97" class="text-blue-500" target="_blank">ChatGPT使用指南</a></div>
+          <div>使用前，请先阅读<a href="https://blog.mashaojie.cn/9999/09/08/%E5%9B%BD%E5%86%85%E5%85%8D%E7%BF%BB%E7%9A%84ChatGPT%E5%92%8CMidjourney%E7%BD%91%E7%AB%99/" class="text-blue-500" target="_blank">ChatGPT使用指南</a></div>
         </div>
 
         <NTabs v-model:value="loginmethod" type="segment">
