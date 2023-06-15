@@ -17,7 +17,7 @@ export function defaultSetting(): UserState {
     userInfo: {
       avatar: 'https://chat.mashaojie.cn/download/image/avatar.jpg',
       name: 'Ma Shaojie',
-      description: '<a href="https://blog.mashaojie.cn/9999/09/08/ChatGPT%E4%BD%BF%E7%94%A8%E6%8C%87%E5%8D%97" class="text-blue-500" target="_blank" >ChatGPT使用指南</a>',
+      description: '<a href="https://blog.mashaojie.cn/9999/09/08/%E5%9B%BD%E5%86%85%E5%85%8D%E7%BF%BB%E7%9A%84ChatGPT%E5%92%8CMidjourney%E7%BD%91%E7%AB%99/" class="text-blue-500" target="_blank" >ChatGPT使用指南</a>',
     },
   }
 }

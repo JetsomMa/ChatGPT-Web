@@ -32,37 +32,63 @@ if (!isNotEmptyString(process.env.OPENAI_API_KEY) && !isNotEmptyString(process.e
   throw new Error('Missing OPENAI_API_KEY or OPENAI_ACCESS_TOKEN environment variable')
 
 let ChatGptApi: ChatGPTAPI | ChatGPTUnofficialProxyAPI
+let ChatGptApi2: ChatGPTAPI | ChatGPTUnofficialProxyAPI
 
 (async () => {
-  // More Info: https://github.com/transitive-bullshit/chatgpt-api
-
-  if (isNotEmptyString(process.env.OPENAI_API_KEY)) {
-    const OPENAI_API_BASE_URL = process.env.OPENAI_API_BASE_URL
-    const OPENAI_API_MODEL = process.env.OPENAI_API_MODEL
-    const model = isNotEmptyString(OPENAI_API_MODEL) ? OPENAI_API_MODEL : 'gpt-3.5-turbo'
-
-    const options: ChatGPTAPIOptions = {
-      apiKey: process.env.OPENAI_API_KEY,
-      completionParams: { model },
-      debug: true,
-    }
-
-    // increase max token limit if use gpt-4
+	function setModelTokens(model, options){
+		// increase max token limit if use gpt-4
     if (model.toLowerCase().includes('gpt-4')) {
       // if use 32k model
       if (model.toLowerCase().includes('32k')) {
-        options.maxModelTokens = 32768
-        options.maxResponseTokens = 16384
-      }
-      else {
+        options.maxModelTokens = 32000
+        options.maxResponseTokens = 16000
+      } else {
         options.maxModelTokens = 8000
         options.maxResponseTokens = 4000
       }
     }
     else {
-      options.maxModelTokens = 4000
-      options.maxResponseTokens = 2000
+			if (model.toLowerCase().includes('16k')) {
+        options.maxModelTokens = 16000
+        options.maxResponseTokens = 8000
+      } else {
+				options.maxModelTokens = 4000
+				options.maxResponseTokens = 2000
+			}
     }
+	}
+
+  // More Info: https://github.com/transitive-bullshit/chatgpt-api
+	const OPENAI_API_BASE_URL = process.env.OPENAI_API_BASE_URL
+	if (isNotEmptyString(process.env.OPENAI_API_KEY2)) {
+    const model2 = 'gpt-3.5-turbo-16k'
+
+		const options2: ChatGPTAPIOptions = {
+      apiKey: process.env.OPENAI_API_KEY2,
+      completionParams: { model: model2 },
+      debug: true,
+    }
+		setModelTokens(model2, options2)
+
+		if (isNotEmptyString(OPENAI_API_BASE_URL))
+      options2.apiBaseUrl = `${OPENAI_API_BASE_URL}/v1`
+
+    setupProxy(options2)
+
+    ChatGptApi2 = new ChatGPTAPI({ ...options2 })
+	}
+
+  if (isNotEmptyString(process.env.OPENAI_API_KEY)) {
+    const OPENAI_API_MODEL = process.env.OPENAI_API_MODEL
+    const model = isNotEmptyString(OPENAI_API_MODEL) ? OPENAI_API_MODEL : 'gpt-3.5-turbo'
+
+		const options: ChatGPTAPIOptions = {
+      apiKey: process.env.OPENAI_API_KEY,
+      completionParams: { model },
+      debug: true,
+    }
+
+		setModelTokens(model, options)
 
     if (isNotEmptyString(OPENAI_API_BASE_URL))
       options.apiBaseUrl = `${OPENAI_API_BASE_URL}/v1`
@@ -92,7 +118,7 @@ let ChatGptApi: ChatGPTAPI | ChatGPTUnofficialProxyAPI
   }
 })()
 
-async function chatReplyProcess(options: RequestOptions) {
+async function chatReplyProcess(options: RequestOptions, is16K = false) {
   let { message, lastContext, process: processFunction, systemMessage, temperature } = options
   try {
     let options: SendMessageOptions = { timeoutMs }
@@ -115,14 +141,25 @@ async function chatReplyProcess(options: RequestOptions) {
 
     options.completionParams.temperature = temperature
 
-    const response = await ChatGptApi.sendMessage(message, {
-      ...options,
-      onProgress: (partialResponse) => {
-        processFunction && processFunction(partialResponse)
-      },
-    })
+		if (is16K && ChatGptApi2) {
+			const response = await ChatGptApi2.sendMessage(message, {
+				...options,
+				onProgress: (partialResponse) => {
+					processFunction && processFunction(partialResponse)
+				},
+			})
 
-    return sendResponse({ type: 'Success', data: response })
+			return sendResponse({ type: 'Success', data: response })
+		} else {
+			const response = await ChatGptApi.sendMessage(message, {
+				...options,
+				onProgress: (partialResponse) => {
+					processFunction && processFunction(partialResponse)
+				},
+			})
+
+			return sendResponse({ type: 'Success', data: response })
+		}
   }
   catch (error: any) {
     const code = error.statusCode
