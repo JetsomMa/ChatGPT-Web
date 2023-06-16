@@ -10,6 +10,7 @@ export interface MJConfig {
   HuggingFaceToken?: string
   DiscordBaseUrl: string
   WsBaseUrl: string
+  ApplicationId: string
 }
 export interface MJConfigParam {
   SalaiToken: string
@@ -26,9 +27,10 @@ export interface MJConfigParam {
 }
 
 export const DefaultMJConfig: MJConfig = {
-  ChannelId: '1077800642086703114',
+  ApplicationId: '936929561302675456',
+  ChannelId: '1109565631214387222',
   SalaiToken: '',
-  SessionId: '8bb7f5b79c7a49f7d0824ab4b8773a81',
+  SessionId: '87a6cfdc16133a4655b8bae8695047bf',
   Debug: false,
   Limit: 50,
   MaxWait: 100,

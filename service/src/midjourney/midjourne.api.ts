@@ -58,16 +58,16 @@ export class MidjourneyApi {
     }
   }
 
+  // 照片生成
   async ImagineApi(prompt: string, nonce: string = nextNonce()) {
-    const guild_id = this.config.ServerId
     const payload = {
       type: 2,
-      application_id: '936929561302675456',
-      guild_id,
+      application_id: this.config.ApplicationId,
+      guild_id: this.config.ServerId,
       channel_id: this.config.ChannelId,
       session_id: this.config.SessionId,
       data: {
-        version: '1077969938624553050',
+        version: '1118961510123847772',
         id: '938956540159881230',
         name: 'imagine',
         type: 1,
@@ -80,15 +80,20 @@ export class MidjourneyApi {
         ],
         application_command: {
           id: '938956540159881230',
-          application_id: '936929561302675456',
-          version: '1077969938624553050',
-          default_permission: true,
+          application_id: this.config.ApplicationId,
+          version: '1118961510123847772',
+          // default_permission: true,
           default_member_permissions: null,
           type: 1,
           nsfw: false,
           name: 'imagine',
           description: 'Create images with Midjourney',
           dm_permission: true,
+          contexts: [
+            0,
+            1,
+            2,
+          ],
           options: [
             {
               type: 3,
@@ -105,6 +110,7 @@ export class MidjourneyApi {
     return this.safeIteractions(payload)
   }
 
+  // 照片变幻
   async VariationApi(
     index: number,
     messageId: string,
@@ -117,8 +123,8 @@ export class MidjourneyApi {
       channel_id: this.config.ChannelId,
       message_flags: 0,
       message_id: messageId,
-      application_id: '936929561302675456',
-      session_id: '1f3dbdf09efdf93d81a3a6420882c92c',
+      application_id: this.config.ApplicationId,
+      session_id: this.config.SessionId,
       data: {
         component_type: 2,
         custom_id: `MJ::JOB::variation::${index}::${messageHash}`,
@@ -128,21 +134,21 @@ export class MidjourneyApi {
     return this.safeIteractions(payload)
   }
 
+  // 照片放大
   async UpscaleApi(
     index: number,
     messageId: string,
     messageHash: string,
     nonce?: string,
   ) {
-    const guild_id = this.config.ServerId
     const payload = {
       type: 3,
-      guild_id,
+      guild_id: this.config.ServerId,
       channel_id: this.config.ChannelId,
       message_flags: 0,
       message_id: messageId,
-      application_id: '936929561302675456',
-      session_id: 'ec6524c8d2926e285a8232f7ed1ced98',
+      application_id: this.config.ApplicationId,
+      session_id: this.config.SessionId,
       data: {
         component_type: 2,
         custom_id: `MJ::JOB::upsample::${index}::${messageHash}`,
@@ -152,33 +158,13 @@ export class MidjourneyApi {
     return this.safeIteractions(payload)
   }
 
-  async ClickBtnApi(messageId: string, customId: string, nonce?: string) {
-    const guild_id = this.config.ServerId
-    const payload = {
-      type: 3,
-      nonce,
-      guild_id,
-      channel_id: this.config.ChannelId,
-      message_flags: 0,
-      message_id: messageId,
-      application_id: '936929561302675456',
-      session_id: this.config.SessionId,
-      data: {
-        component_type: 2,
-        custom_id: customId,
-      },
-    }
-    return this.safeIteractions(payload)
-  }
-
   async InfoApi(nonce?: string) {
-    const guild_id = this.config.ServerId
     const payload = {
       type: 2,
-      application_id: '936929561302675456',
-      guild_id,
+      application_id: this.config.ApplicationId,
+      guild_id: this.config.ServerId,
       channel_id: this.config.ChannelId,
-      session_id: 'b8365bc80a004e656afbd4e48113509f',
+      session_id: this.config.SessionId,
       data: {
         version: '987795925764280356',
         id: '972289487818334209',
@@ -187,7 +173,7 @@ export class MidjourneyApi {
         options: [],
         application_command: {
           id: '972289487818334209',
-          application_id: '936929561302675456',
+          application_id: this.config.ApplicationId,
           version: '987795925764280356',
           default_member_permissions: null,
           type: 1,
@@ -205,13 +191,12 @@ export class MidjourneyApi {
   }
 
   async FastApi(nonce?: string) {
-    const guild_id = this.config.ServerId
     const payload = {
       type: 2,
-      application_id: '936929561302675456',
-      guild_id,
+      application_id: this.config.ApplicationId,
+      guild_id: this.config.ServerId,
       channel_id: this.config.ChannelId,
-      session_id: 'b8365bc80a004e656afbd4e48113509f',
+      session_id: this.config.SessionId,
       data: {
         version: '987795926183731231',
         id: '972289487818334212',
@@ -220,7 +205,7 @@ export class MidjourneyApi {
         options: [],
         application_command: {
           id: '972289487818334212',
-          application_id: '936929561302675456',
+          application_id: this.config.ApplicationId,
           version: '987795926183731231',
           default_member_permissions: null,
           type: 1,
@@ -238,14 +223,12 @@ export class MidjourneyApi {
   }
 
   async RelaxApi(nonce?: string) {
-    const guild_id = this.config.ServerId
-    const channel_id = this.config.ChannelId
     const payload = {
       type: 2,
-      application_id: '936929561302675456',
-      guild_id,
-      channel_id,
-      session_id: 'b8365bc80a004e656afbd4e48113509f',
+      application_id: this.config.ApplicationId,
+      guild_id: this.config.ServerId,
+      channel_id: this.config.ChannelId,
+      session_id: this.config.SessionId,
       data: {
         version: '987795926183731232',
         id: '972289487818334213',
@@ -254,7 +237,7 @@ export class MidjourneyApi {
         options: [],
         application_command: {
           id: '972289487818334213',
-          application_id: '936929561302675456',
+          application_id: this.config.ApplicationId,
           version: '987795926183731232',
           default_member_permissions: null,
           type: 1,
@@ -267,6 +250,24 @@ export class MidjourneyApi {
         attachments: [],
       },
       nonce,
+    }
+    return this.safeIteractions(payload)
+  }
+
+  async ClickBtnApi(messageId: string, customId: string, nonce?: string) {
+    const payload = {
+      type: 3,
+      nonce,
+      guild_id: this.config.ServerId,
+      channel_id: this.config.ChannelId,
+      message_flags: 0,
+      message_id: messageId,
+      application_id: this.config.ApplicationId,
+      session_id: this.config.SessionId,
+      data: {
+        component_type: 2,
+        custom_id: customId,
+      },
     }
     return this.safeIteractions(payload)
   }

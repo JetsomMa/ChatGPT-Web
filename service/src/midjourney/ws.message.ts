@@ -5,10 +5,14 @@ import {
   LoadingHandler,
   WsEventMsg,
 } from "./interfaces";
+import httpsProxyAgent from 'https-proxy-agent'
 
 import { MidjourneyApi } from "./midjourne.api";
 // import { VerifyHuman } from "./verify.human";
 import WebSocket from "isomorphic-ws";
+
+const { HttpsProxyAgent } = httpsProxyAgent
+const agent = process.env.HTTPS_PROXY ? new HttpsProxyAgent(process.env.HTTPS_PROXY) : null
 export class WsMessage {
   ws: WebSocket;
   MJBotId = "936929561302675456";
@@ -19,7 +23,11 @@ export class WsMessage {
   private heartbeatInterval = 0;
 
   constructor(public config: MJConfig, public MJApi: MidjourneyApi) {
-    this.ws = new WebSocket(this.config.WsBaseUrl);
+		let options: any = {}
+		if (agent) {
+			options.agent = agent
+		}
+		this.ws = new WebSocket(this.config.WsBaseUrl, options);
     this.ws.addEventListener("open", this.open.bind(this));
   }
 
@@ -37,7 +45,11 @@ export class WsMessage {
   }
   //try reconnect
   private reconnect() {
-    this.ws = new WebSocket(this.config.WsBaseUrl);
+    let options: any = {}
+		if (agent) {
+			options.agent = agent
+		}
+		this.ws = new WebSocket(this.config.WsBaseUrl, options);
     this.ws.addEventListener("open", this.open.bind(this));
   }
   // After opening ws

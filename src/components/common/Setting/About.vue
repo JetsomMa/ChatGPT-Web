@@ -52,9 +52,9 @@ onMounted(() => {
     <div style="font-size: 19px; padding: 10px 0px;">
       阅读<a href="https://blog.mashaojie.cn/9999/09/08/%E5%9B%BD%E5%86%85%E5%85%8D%E7%BF%BB%E7%9A%84ChatGPT%E5%92%8CMidjourney%E7%BD%91%E7%AB%99/" class="text-blue-500" target="_blank">网站使用指南</a>[更新于2023/05/30 13:15]
     </div>
-    <div style="display: flex; height: 250px; justify-content: center;">
+    <div style="display: flex; height: 230px; justify-content: center;">
       <img src="https://chat.mashaojie.cn/download/image/%E5%8A%A0%E6%88%91%E5%A5%BD%E5%8F%8B.jpg" alt="扫码加好友">
-      <img src="https://chat.mashaojie.cn/download/image/%E7%BE%A4%E4%BA%8C%E7%BB%B4%E7%A0%81.png" alt="扫码进群">
+      <img src="https://download.mashaojie.cn/image/%E7%BE%A4%E4%BA%8C%E7%BB%B4%E7%A0%81.png" alt="扫码进群">
     </div>
   </div>
   <!-- <NSpin :show="loading">
