@@ -21,3 +21,15 @@ export interface WsEventMsg {
   message?: MJMessage
 }
 export type ImageEventType = 'imagine' | 'upscale' | 'variation'
+
+export interface MJInfo {
+  subscription: string
+  jobMode: string
+  visibilityMode: string
+  fastTimeRemaining: string
+  lifetimeUsage: string
+  relaxedUsage: string
+  queuedJobsFast: string
+  queuedJobsRelax: string
+  runningJobs: string
+}

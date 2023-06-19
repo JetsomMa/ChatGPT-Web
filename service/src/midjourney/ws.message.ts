@@ -4,6 +4,7 @@ import {
   MJMessage,
   LoadingHandler,
   WsEventMsg,
+  MJInfo,
 } from "./interfaces";
 import httpsProxyAgent from 'https-proxy-agent'
 
@@ -16,6 +17,7 @@ const agent = process.env.HTTPS_PROXY ? new HttpsProxyAgent(process.env.HTTPS_PR
 export class WsMessage {
   ws: WebSocket;
   MJBotId = "936929561302675456";
+  private closed = false;
   private event: Array<{ event: string; callback: (message: any) => void }> =
     [];
   private waitMjEvents: Map<string, WaitMjEvent> = new Map();
@@ -43,6 +45,11 @@ export class WsMessage {
     await this.timeout(1000 * 40);
     this.heartbeat(num);
   }
+  close() {
+    this.closed = true;
+    this.ws.close();
+  }
+
   //try reconnect
   private reconnect() {
     let options: any = {}
@@ -91,39 +98,47 @@ export class WsMessage {
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
   private async messageCreate(message: any) {
-    // this.log("messageCreate", message);
-    const { application_id, embeds, id, nonce } = message;
+    const { embeds, id, nonce, components } = message;
+
     if (nonce) {
       this.log("waiting start image or info or error");
       this.updateMjEventIdByNonce(id, nonce);
-      if (embeds && embeds.length > 0) {
-        if (embeds[0].color === 16711680) {
-          //error
-          const error = new Error(embeds[0].description);
-          this.EventError(id, error);
-          return;
-        } else if (embeds[0].color === 16776960) {
-          //warning
-          console.warn(embeds[0].description);
-        }
-        // if (embeds[0].title.includes("continue")) {
-        //   if (embeds[0].description.includes("verify you're human")) {
-        //     //verify human
-        //     await this.verifyHuman(message);
-        //     return;
-        //   }
-        // }
-        if (embeds[0].title.includes("Invalid")) {
-          //error
-          const error = new Error(embeds[0].description);
-          this.EventError(id, error);
-          return;
+
+      if (embeds?.[0]) {
+        const { color, description, title } = embeds[0];
+        // this.log("embeds[0].color", color);
+        switch (color) {
+          case 16711680: //error
+            const error = new Error(description);
+            this.EventError(id, error);
+            return;
+
+          case 16776960: //warning
+            console.warn(description);
+            break;
+
+          default:
+            // if (
+            //   title?.includes("continue") &&
+            //   description?.includes("verify you're human")
+            // ) {
+            //   //verify human
+            //   await this.verifyHuman(message);
+            //   return;
+            // }
+
+            if (title?.includes("Invalid")) {
+              //error
+              const error = new Error(description);
+              this.EventError(id, error);
+              return;
+            }
         }
       }
     }
-    //done image
-    if (!nonce && !application_id) {
-      this.log("done image");
+
+    if (!nonce && components?.length > 0) {
+      this.log("finished image");
       this.done(message);
       return;
     }
@@ -132,6 +147,10 @@ export class WsMessage {
   private messageUpdate(message: any) {
     const { content, embeds, id } = message;
     if (content === "") {
+      //describe
+      // if (interaction.name === "describe" && !nonce) {
+      //   this.emitDescribe(id, embeds[0].description);
+      // }
       if (embeds && embeds.length > 0 && embeds[0].color === 0) {
         this.log(embeds[0].title, embeds[0].description);
         //maybe info
@@ -236,6 +255,11 @@ export class WsMessage {
   }
 
   protected content2progress(content: string) {
+    const spcon = content.split("**");
+    if (spcon.length < 3) {
+      return "";
+    }
+    content = spcon[2];
     const regex = /\(([^)]+)\)/; // matches the value inside the first parenthesis
     const match = content.match(regex);
     let progress = "";
@@ -307,6 +331,11 @@ export class WsMessage {
   private emitImage(type: string, message: WsEventMsg) {
     this.emit(type, message);
   }
+  // private emitDescribe(id: string, data: any) {
+  //   const event = this.getEventById(id);
+  //   if (!event) return;
+  //   this.emit(event.nonce, data);
+  // }
   on(event: string, callback: (message: any) => void) {
     this.event.push({ event, callback });
   }
@@ -332,6 +361,16 @@ export class WsMessage {
     };
     this.event.push({ event: "info", callback: once });
   }
+  // onceDescribe(nonce: string, callback: (data: any) => void) {
+  //   const once = (message: any) => {
+  //     this.remove(nonce, once);
+  //     this.removeWaitMjEvent(nonce);
+  //     callback(message);
+  //   };
+  //   this.waitMjEvents.set(nonce, { nonce });
+  //   this.event.push({ event: nonce, callback: once });
+  // }
+
   removeInfo(callback: (message: any) => void) {
     this.remove("info", callback);
   }
@@ -366,15 +405,24 @@ export class WsMessage {
     });
   }
 
+  // async waitDescribe(nonce: string) {
+  //   return new Promise<string[] | null>((resolve) => {
+  //     this.onceDescribe(nonce, (message) => {
+  //       const data = message.split("\n\n");
+  //       resolve(data);
+  //     });
+  //   });
+  // }
+
   async waitInfo() {
-    return new Promise<any | null>((resolve, reject) => {
+    return new Promise<MJInfo | null>((resolve, reject) => {
       this.onceInfo((message) => {
         resolve(this.msg2Info(message));
       });
     });
   }
   msg2Info(msg: string) {
-    const jsonResult = {
+    let jsonResult: MJInfo = {
       subscription: "",
       jobMode: "",
       visibilityMode: "",

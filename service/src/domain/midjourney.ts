@@ -5,19 +5,19 @@ import { chatReplyProcess } from '../chatgpt'
 import { sqlDB } from '../utils'
 import type { MJMessage } from '../midjourney/interfaces/message'
 
-const client = new Midjourney({
-  ServerId: process.env.SERVER_ID as string,
-  ChannelId: process.env.CHANNEL_ID as string,
-  SalaiToken: process.env.SALAI_TOKEN as string,
-  Debug: false,
-  Ws: true,
-})
-
-client.init()
-
 const blackKeyWords = ['性爱', '性交', '萝莉', '裸体', '习近平']
 export async function replyMidjourney(prompt, dbRecord, res, chatusername = '') {
   try {
+    const client = new Midjourney({
+      ServerId: process.env.SERVER_ID as string,
+      ChannelId: process.env.CHANNEL_ID as string,
+      SalaiToken: process.env.SALAI_TOKEN as string,
+      Debug: false,
+      Ws: true,
+    })
+
+    client.init()
+
     let oldurl = ''
     res && res.write(`\n${JSON.stringify({ text: '准备生成图片，请耐心等待...[如果长时间不生成内容，可能是因为输入中包含敏感词导致任务被拦截！]' })}`)
 
@@ -113,6 +113,7 @@ export async function replyMidjourney(prompt, dbRecord, res, chatusername = '') 
       )
     }
 
+    client.Close()
     console.warn('response -> ', response)
 
     if (response.progress === 'done') {

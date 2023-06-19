@@ -20,10 +20,14 @@ import { NewBingSocket, sendConversationMessage } from '../bing/socket'
 // }
 
 function replaceText(str) {
-  // 匹配类似 [^1^] 和 [^2^]: xxx 的内容，并将其替换为空字符串
-  str = str.replace(/\[\^\d+\^\](?::\s*\[[^\]]*\])?/g, '')
-  str = str.replace(/\(https?:\/\/[^\s)]+\)/g, '')
-  return str
+	if(str){
+		// 匹配类似 [^1^] 和 [^2^]: xxx 的内容，并将其替换为空字符串
+		str = str.replace(/\[\^\d+\^\](?::\s*\[[^\]]*\])?/g, '')
+		str = str.replace(/\(https?:\/\/[^\s)]+\)/g, '')
+		return str
+	} else {
+		return ''
+	}
 }
 
 export async function replyBing(prompt, dbRecord, res) {
