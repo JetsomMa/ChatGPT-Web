@@ -118,9 +118,9 @@ function handlePress(event: KeyboardEvent) {
           </p>
           <Icon403 class="w-[200px] m-auto" />
         </header> -->
-        <div style="display: flex; height: 180px; justify-content: center;">
-          <img src="https://chat.mashaojie.cn/download/image/%E5%8A%A0%E6%88%91%E5%A5%BD%E5%8F%8B.jpg" alt="扫码加好友">
-          <img src="https://download.mashaojie.cn/image/%E7%BE%A4%E4%BA%8C%E7%BB%B4%E7%A0%81.png" alt="扫码进群">
+        <div style="display: flex; width: 100%; height: 180px; justify-content: center;">
+          <img style="height: 180px;" src="https://chat.mashaojie.cn/download/image/%E5%8A%A0%E6%88%91%E5%A5%BD%E5%8F%8B.jpg" alt="扫码加好友">
+          <img style="height: 180px;" src="https://download.mashaojie.cn/image/%E7%BE%A4%E4%BA%8C%E7%BB%B4%E7%A0%81.png" alt="扫码进群">
         </div>
         <div style="text-align: center; font-size: 12px;">
           <!-- <div>输入用户名、手机号和验证码即可注册和登录。</div> -->
