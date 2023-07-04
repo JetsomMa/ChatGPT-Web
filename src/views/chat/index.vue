@@ -110,7 +110,7 @@ async function onConversation() {
   let options: Chat.ConversationRequest = {}
   const lastContext = (conversationList.value[conversationList.value.length - 1] || {}).conversationOptions
 
-  if (lastContext && (querymethod.value === 'ChatGPT'))
+  if (lastContext && (querymethod.value === 'ChatGPT' || querymethod.value === 'ChatGPT16K'))
     options = { ...lastContext }
 
   addChat(
