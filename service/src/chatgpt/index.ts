@@ -136,8 +136,8 @@ async function chatReplyProcess(options: RequestOptions, is16K = false) {
     }
 
     options.completionParams = options.completionParams || {}
-    if (temperature !== 0 && !temperature)
-      temperature = 0.8
+    if (!temperature)
+      temperature = 0
 
     options.completionParams.temperature = temperature
 

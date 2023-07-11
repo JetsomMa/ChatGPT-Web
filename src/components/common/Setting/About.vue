@@ -42,11 +42,12 @@ onMounted(() => {
       请帮我推广传播
     </div>
     <ul style="font-size: 12px;">
-      <ol>Claude、New Bing和矩阵运算功能免费</ol>
+      <!-- <ol>Claude、New Bing和矩阵运算功能免费</ol>
       <ol>chatgpt功能新注册用户可免费试用一个月</ol>
       <ol>chatgpt收费每月20元人民币，包年199元每年</ol>
       <ol>画画功能包月25元，单张图0.5元[所有用户每月可免费使用5次]</ol>
-      <ol>过期用户每天可以免费chatgpt问答3次，画画1次[每月总共5次]</ol>
+      <ol>过期用户每天可以免费chatgpt问答3次，画画1次[每月总共5次]</ol> -->
+      <ol>网站将长期免费，有过充值的朋友可以找我退费</ol>
       <ol>使用中有任何问题随时可以联系我，【微信/电话：18514665919】</ol>
     </ul>
     <div style="font-size: 19px; padding: 10px 0px;">
