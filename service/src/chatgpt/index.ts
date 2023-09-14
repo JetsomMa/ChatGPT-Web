@@ -32,7 +32,8 @@ if (!isNotEmptyString(process.env.OPENAI_API_KEY) && !isNotEmptyString(process.e
   throw new Error('Missing OPENAI_API_KEY or OPENAI_ACCESS_TOKEN environment variable')
 
 let ChatGptApi: ChatGPTAPI | ChatGPTUnofficialProxyAPI
-let ChatGptApi2: ChatGPTAPI | ChatGPTUnofficialProxyAPI
+let ChatGptApi16K: ChatGPTAPI | ChatGPTUnofficialProxyAPI
+let ChatGptApi4: ChatGPTAPI | ChatGPTUnofficialProxyAPI
 
 (async () => {
 	function setModelTokens(model, options){
@@ -75,10 +76,11 @@ let ChatGptApi2: ChatGPTAPI | ChatGPTUnofficialProxyAPI
 
     setupProxy(options2)
 
-    ChatGptApi2 = new ChatGPTAPI({ ...options2 })
+    ChatGptApi16K = new ChatGPTAPI({ ...options2 })
 	}
 
   if (isNotEmptyString(process.env.OPENAI_API_KEY)) {
+		// gpt-3.5
     const OPENAI_API_MODEL = process.env.OPENAI_API_MODEL
     const model = isNotEmptyString(OPENAI_API_MODEL) ? OPENAI_API_MODEL : 'gpt-3.5-turbo'
 
@@ -87,7 +89,6 @@ let ChatGptApi2: ChatGPTAPI | ChatGPTUnofficialProxyAPI
       completionParams: { model },
       debug: true,
     }
-
 		setModelTokens(model, options)
 
     if (isNotEmptyString(OPENAI_API_BASE_URL))
@@ -96,6 +97,22 @@ let ChatGptApi2: ChatGPTAPI | ChatGPTUnofficialProxyAPI
     setupProxy(options)
 
     ChatGptApi = new ChatGPTAPI({ ...options })
+
+		// gpt-4
+		const model4 = 'gpt-4'
+		const options4: ChatGPTAPIOptions = {
+      apiKey: process.env.OPENAI_API_KEY,
+      completionParams: { model: model4 },
+      debug: true,
+    }
+
+		setModelTokens(model4, options4)
+
+    if (isNotEmptyString(OPENAI_API_BASE_URL))
+			options4.apiBaseUrl = `${OPENAI_API_BASE_URL}/v1`
+
+    setupProxy(options4)
+		ChatGptApi4 = new ChatGPTAPI({ ...options4 })
 
     apiModel = 'ChatGPTAPI'
   }
@@ -118,7 +135,7 @@ let ChatGptApi2: ChatGPTAPI | ChatGPTUnofficialProxyAPI
   }
 })()
 
-async function chatReplyProcess(options: RequestOptions, is16K = false) {
+async function chatReplyProcess(options: RequestOptions, type = "") {
   let { message, lastContext, process: processFunction, systemMessage, temperature } = options
   try {
     let options: SendMessageOptions = { timeoutMs }
@@ -141,8 +158,8 @@ async function chatReplyProcess(options: RequestOptions, is16K = false) {
 
     options.completionParams.temperature = temperature
 
-		if (is16K && ChatGptApi2) {
-			const response = await ChatGptApi2.sendMessage(message, {
+		if (type == "ChatGPT16K" && ChatGptApi16K) {
+			const response = await ChatGptApi16K.sendMessage(message, {
 				...options,
 				onProgress: (partialResponse) => {
 					processFunction && processFunction(partialResponse)
@@ -150,7 +167,16 @@ async function chatReplyProcess(options: RequestOptions, is16K = false) {
 			})
 
 			return sendResponse({ type: 'Success', data: response })
-		} else {
+		} else if (type == "ChatGPT4" && ChatGptApi4) {
+			const response = await ChatGptApi4.sendMessage(message, {
+				...options,
+				onProgress: (partialResponse) => {
+					processFunction && processFunction(partialResponse)
+				},
+			})
+
+			return sendResponse({ type: 'Success', data: response })
+		}	else {
 			const response = await ChatGptApi.sendMessage(message, {
 				...options,
 				onProgress: (partialResponse) => {
