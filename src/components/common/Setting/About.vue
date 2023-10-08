@@ -38,6 +38,7 @@ onMounted(() => {
 
 <template>
   <div style="padding: 10px 0px;">
+    <div>可用余额：{{(config || {}).balance || '-' }}</div>
     <div style="color: green; font-size: 20px; padding-bottom: 10px;">
       请帮我推广传播
     </div>

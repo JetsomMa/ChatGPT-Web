@@ -16,8 +16,11 @@ export function fetchChatAPI<T = any>(
 }
 
 export function fetchChatConfig<T = any>() {
+  const authStore = useAuthStore()
+  
   return post<T>({
     url: '/config',
+    data: { telephone: authStore.telephone },
   })
 }
 

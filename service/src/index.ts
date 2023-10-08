@@ -345,10 +345,15 @@ router.post('/chat-query', async (req, res) => {
   }
 })
 
-router.post('/config', auth, async (req, res) => {
+router.post('/config', async (req, res) => {
   try {
-    const response = await chatConfig()
-    res.send(response)
+    console.error("req.body -> ", req.body)
+    const { telephone } = req.body as PhoneCode
+    console.error("telephone -> ", telephone)
+
+    const userList = await sqlDB.select('userinfo', { where: { telephone } })
+    // const response = await chatConfig()
+    res.send({ balance: userList[0].balance })
   }
   catch (error) {
     res.send(error)
