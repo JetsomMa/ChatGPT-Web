@@ -94,7 +94,7 @@ router.post('/chat-process', [auth, limiter], async (req, res) => {
   console.error('req.body -> ', req.body)
 
   const { prompt, querymethod, options = {}, systemMessage, temperature, device, username, telephone } = req.body as RequestProps
-  const dbRecord: any = { prompt, querymethod, device, username, modeltype: 'gpt-3.5', telephone }
+  const dbRecord: any = { prompt, querymethod, device, username, modeltype: '', telephone }
   try {
     // 保存会话记录
     try {
@@ -154,7 +154,7 @@ router.post('/chat-process', [auth, limiter], async (req, res) => {
 					}
 					else if (querymethod === 'ChatGPT' || querymethod === 'ChatGPT16K') {
 						if (userinfo.chatgptday <= 0) {
-							dbRecord.conversation = 'ChatGPT功能超过每日3次免费限额，请联系管理员进行充值(包月20元，包年199元)！微信：18514665919\n![](https://chat.mashaojie.cn/download/image/%E5%8A%A0%E6%88%91%E5%A5%BD%E5%8F%8B.jpg)'
+							dbRecord.conversation = '请联系管理员进行充值！微信：18514665919\n![](https://chat.mashaojie.cn/download/image/%E5%8A%A0%E6%88%91%E5%A5%BD%E5%8F%8B.jpg)'
 							res.write(JSON.stringify({ message: dbRecord.conversation }))
 						}
 						else {
@@ -170,42 +170,52 @@ router.post('/chat-process', [auth, limiter], async (req, res) => {
 				}
 				else {
 					// 如果用户未过期
-					if (querymethod === '画画') {
-						if (userinfo.dallemonth <= 0 && userinfo.extenddalle <= 0) {
-							dbRecord.conversation = '画画功能超过每月5张免费限额，请联系管理员进行充值(包月25元，单张购买0.5元1张图)！微信：18514665919\n![](https://chat.mashaojie.cn/download/image/%E5%8A%A0%E6%88%91%E5%A5%BD%E5%8F%8B.jpg)'
-							res.write(JSON.stringify({ message: dbRecord.conversation }))
+					if(userinfo.balance <= 0) {
+						dbRecord.conversation = '您已欠费，请联系管理员充值！微信：18514665919\n![](https://chat.mashaojie.cn/download/image/%E5%8A%A0%E6%88%91%E5%A5%BD%E5%8F%8B.jpg)'
+						res.write(JSON.stringify({ message: dbRecord.conversation }))
+					} else {
+						if (querymethod === '画画') {
+							if (userinfo.dallemonth <= 0 && userinfo.extenddalle <= 0) {
+								dbRecord.conversation = '画画功能超过每月5张免费限额，请联系管理员进行充值(包月25元，单张购买0.5元1张图)！微信：18514665919\n![](https://chat.mashaojie.cn/download/image/%E5%8A%A0%E6%88%91%E5%A5%BD%E5%8F%8B.jpg)'
+								res.write(JSON.stringify({ message: dbRecord.conversation }))
+							}
+							else {
+								// if (MidjourneyQueue.length >= 1) {
+								//   res.write(JSON.stringify({ message: '画画队列已满，请稍后重试！' }))
+								// }
+								// else {
+								//   MidjourneyQueue.push({ prompt, dbRecord, res })
+
+								try {
+									if (userinfo.dallemonth > 0) {
+										userinfo.dallemonth--
+										await chatProcess(prompt, querymethod, dbRecord, res, options, systemMessage, temperature)
+										userinfo.balance = userinfo.balance - 0.5
+										sqlDB.update('userinfo', userinfo)
+									}
+									else if (userinfo.extenddalle > 0) {
+										userinfo.extenddalle--
+										await chatProcess(prompt, querymethod, dbRecord, res, options, systemMessage, temperature)
+										userinfo.balance = userinfo.balance - 0.5
+										sqlDB.update('userinfo', userinfo)
+									}
+								}
+								catch (error) {
+									throw new Error(error)
+								}
+								// finally {
+								//   MidjourneyQueue.shift()
+								// }
+								// }
+							}
 						}
 						else {
-							// if (MidjourneyQueue.length >= 1) {
-							//   res.write(JSON.stringify({ message: '画画队列已满，请稍后重试！' }))
-							// }
-							// else {
-							//   MidjourneyQueue.push({ prompt, dbRecord, res })
-
-							try {
-								if (userinfo.dallemonth > 0) {
-									userinfo.dallemonth--
-									await chatProcess(prompt, querymethod, dbRecord, res, options, systemMessage, temperature)
-									sqlDB.update('userinfo', userinfo)
-								}
-								else if (userinfo.extenddalle > 0) {
-									userinfo.extenddalle--
-									await chatProcess(prompt, querymethod, dbRecord, res, options, systemMessage, temperature)
-									sqlDB.update('userinfo', userinfo)
-								}
+							await chatProcess(prompt, querymethod, dbRecord, res, options, systemMessage, temperature)
+							if(dbRecord.tokenspay) {
+								userinfo.balance = userinfo.balance - dbRecord.tokenspay
 							}
-							catch (error) {
-								throw new Error(error)
-							}
-							// finally {
-							//   MidjourneyQueue.shift()
-							// }
-							// }
+							sqlDB.update('userinfo', userinfo)
 						}
-					}
-					else {
-						await chatProcess(prompt, querymethod, dbRecord, res, options, systemMessage, temperature)
-						sqlDB.update('userinfo', userinfo)
 					}
 				}
 			}
@@ -297,6 +307,7 @@ router.post('/chat-query', async (req, res) => {
 				})
 
 				if (myChat) {
+					console.error("myChat --> ", myChat)
 					dbRecord.conversation = myChat.text
 					dbRecord.conversationId = myChat.id
 					dbRecord.finish_reason = myChat.detail.choices[0].finish_reason

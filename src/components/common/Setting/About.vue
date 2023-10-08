@@ -47,8 +47,8 @@ onMounted(() => {
       <ol>chatgpt收费每月20元人民币，包年199元每年</ol>
       <ol>画画功能包月25元，单张图0.5元[所有用户每月可免费使用5次]</ol>
       <ol>过期用户每天可以免费chatgpt问答3次，画画1次[每月总共5次]</ol> -->
-      <ol>网站将长期免费，有过充值的朋友可以找我退费</ol>
-      <ol>使用中有任何问题随时可以联系我，【微信/电话：18514665919】</ol>
+      <!-- <ol>网站将长期免费，有过充值的朋友可以找我退费</ol> -->
+      <ol>联系网站管理获取使用权限【微信/电话：18514665919】</ol>
     </ul>
     <div style="font-size: 19px; padding: 10px 0px;">
       阅读<a href="https://blog.mashaojie.cn/9999/09/08/%E5%9B%BD%E5%86%85%E5%85%8D%E7%BF%BB%E7%9A%84ChatGPT%E5%92%8CMidjourney%E7%BD%91%E7%AB%99/" class="text-blue-500" target="_blank">网站使用指南</a>[更新于2023/05/30 13:15]
