@@ -1,34 +1,27 @@
 <script setup lang='ts'>
-import { computed, onMounted, ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { fetchChatConfig } from '@/api'
-import { useAuthStore } from '@/store'
 
-interface ConfigState {
-  timeoutMs?: number
-  reverseProxy?: string
-  apiModel?: string
-  socksProxy?: string
-  httpsProxy?: string
-  balance?: string
-}
+// interface ConfigState {
+//   timeoutMs?: number
+//   reverseProxy?: string
+//   apiModel?: string
+//   socksProxy?: string
+//   httpsProxy?: string
+//   balance?: string
+// }
 
-const authStore = useAuthStore()
+// const authStore = useAuthStore()
 
-const loading = ref(false)
+// const loading = ref(false)
 
-const config = ref<ConfigState>()
+const balance = ref(0)
 
-const isChatGPTAPI = computed<boolean>(() => !!authStore.isChatGPTAPI)
+// const isChatGPTAPI = computed<boolean>(() => !!authStore.isChatGPTAPI)
 
 async function fetchConfig() {
-  try {
-    loading.value = true
-    const { data } = await fetchChatConfig<ConfigState>()
-    config.value = data
-  }
-  finally {
-    loading.value = false
-  }
+  const data: any = await fetchChatConfig()
+  balance.value = data.balance || '-'
 }
 
 onMounted(() => {
@@ -38,7 +31,7 @@ onMounted(() => {
 
 <template>
   <div style="padding: 10px 0px;">
-    <div>可用余额：{{(config || {}).balance || '-' }}</div>
+    <div>可用余额：{{ balance }} 元(人民币)</div>
     <div style="color: green; font-size: 20px; padding-bottom: 10px;">
       请帮我推广传播
     </div>

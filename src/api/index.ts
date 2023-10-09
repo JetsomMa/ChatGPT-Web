@@ -17,7 +17,7 @@ export function fetchChatAPI<T = any>(
 
 export function fetchChatConfig<T = any>() {
   const authStore = useAuthStore()
-  
+
   return post<T>({
     url: '/config',
     data: { telephone: authStore.telephone },
@@ -58,20 +58,20 @@ export function fetchChatAPIProcess<T = any>(
   })
 }
 
-export function addImageFile({filename}: {filename: string}) {
-	const authStore = useAuthStore()
-	return post({
-		url: '/addImageFile',
-		data: { filename, telephone: authStore.telephone },
-	})
+export function addImageFile({ filename }: { filename: string }) {
+  const authStore = useAuthStore()
+  return post({
+    url: '/addImageFile',
+    data: { filename, telephone: authStore.telephone },
+  })
 }
 
 export function getImageList() {
-	const authStore = useAuthStore()
-	return post({
-		url: '/getImageList',
-		data: { telephone: authStore.telephone },
-	})
+  const authStore = useAuthStore()
+  return post({
+    url: '/getImageList',
+    data: { telephone: authStore.telephone },
+  })
 }
 
 export function fetchSession<T>() {
