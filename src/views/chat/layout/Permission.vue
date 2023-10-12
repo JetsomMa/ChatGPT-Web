@@ -125,6 +125,8 @@ function handlePress(event: KeyboardEvent) {
         <div style="text-align: center; font-size: 12px;">
           <!-- <div>输入用户名、手机号和验证码即可注册和登录。</div> -->
           <div>求推广扩散，不需要梯子。</div>
+          <div>新用户当天免费使用3.5模型5次</div>
+          <div>老用户每天免费使用3.5模型2次</div>
           <!-- <div>添加书签或手机“添加到主屏幕”，方便实用。</div> -->
           <!-- <div>openai接口有成本，6月10日起收费¥20/月。</div> -->
           <div>加我微信或进群，提供服务保障和技术分享。</div>

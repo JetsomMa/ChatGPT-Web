@@ -62,6 +62,17 @@ app.use(myMiddleware)
 //   next()
 // })
 
+function countCharacters(text) {
+  // 使用正则表达式匹配汉字和英文字符
+  const pattern = /[\u4e00-\u9fa5a-zA-Z]/g;
+  const matches = text.match(pattern);
+
+  // 统计匹配到的字符数量
+  const count = matches ? matches.length : 0;
+
+  return count;
+}
+
 async function chatProcess(prompt, querymethod, dbRecord, res, options, systemMessage, temperature) {
   prompt = prompt.trim()
 
@@ -158,8 +169,8 @@ router.post('/chat-process', [auth, limiter], async (req, res) => {
 							res.write(JSON.stringify({ message: dbRecord.conversation }))
 						}
 						else {
-							userinfo.chatgptday--
 							await chatProcess(prompt, querymethod, dbRecord, res, options, systemMessage, temperature)
+							userinfo.chatgptday--
 							sqlDB.update('userinfo', userinfo)
 						}
 					}
@@ -170,7 +181,7 @@ router.post('/chat-process', [auth, limiter], async (req, res) => {
 				}
 				else {
 					// 如果用户未过期
-					if(userinfo.balance <= 0) {
+					if(userinfo.balance <= 0 && userinfo.chatgptday <= 0) {
 						dbRecord.conversation = '您已欠费，请联系管理员充值！微信：18514665919\n![](https://chat.mashaojie.cn/download/image/%E5%8A%A0%E6%88%91%E5%A5%BD%E5%8F%8B.jpg)'
 						res.write(JSON.stringify({ message: dbRecord.conversation }))
 					} else {
@@ -210,11 +221,23 @@ router.post('/chat-process', [auth, limiter], async (req, res) => {
 							}
 						}
 						else {
-							await chatProcess(prompt, querymethod, dbRecord, res, options, systemMessage, temperature)
-							if(dbRecord.tokenspay) {
-								userinfo.balance = userinfo.balance - dbRecord.tokenspay
+							if (querymethod !== "ChatGPT" && userinfo.balance <= 0) {
+								dbRecord.conversation = '您已欠费，请联系管理员充值！微信：18514665919\n![](https://chat.mashaojie.cn/download/image/%E5%8A%A0%E6%88%91%E5%A5%BD%E5%8F%8B.jpg)'
+								res.write(JSON.stringify({ message: dbRecord.conversation }))
+							} else {
+								await chatProcess(prompt, querymethod, dbRecord, res, options, systemMessage, temperature)
+								if (userinfo.chatgptday > 0) {
+									userinfo.chatgptday--
+									dbRecord.usage = "试用"
+								} else {
+									if(dbRecord.tokenspay) {
+										userinfo.balance = userinfo.balance - dbRecord.tokenspay
+									}
+									dbRecord.usage = "付费使用"
+								}
+								sqlDB.update('userinfo', userinfo)
+								dbRecord.words = countCharacters(prompt + dbRecord.conversation)
 							}
-							sqlDB.update('userinfo', userinfo)
 						}
 					}
 				}
@@ -420,7 +443,7 @@ router.post('/verify', async (req, res) => {
           else {
             // const expired = dateFormat(getNthDayAfterToday(31), 'yyyyMMdd')
             const expired = '99999999'
-            await sqlDB.insert('userinfo', { username, telephone, password: CryptoJS.MD5(password).toString(), status: 1, remark, expired, chatgptday: 5, dallemonth: 5, dalleday: 1, extenddalle: 0 })
+            await sqlDB.insert('userinfo', { username, telephone, password: CryptoJS.MD5(password).toString(), status: 1, remark, expired, chatgptday: 5, dallemonth: 10, dalleday: 2, extenddalle: 0 })
 
             // 消息推送，用于用户激活
             try {
