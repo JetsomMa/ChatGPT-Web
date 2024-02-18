@@ -21,7 +21,7 @@ function goHome() {
           服务异常，请联系管理员修复，微信：18514665919
         </p>
         <div style="width: 100%;display: flex;justify-content: center;">
-          <img style="width: 200px; text-align: center;" src="https://chat.mashaojie.cn/download/image/%E5%8A%A0%E6%88%91%E5%A5%BD%E5%8F%8B.jpg" alt="">
+          <img style="width: 200px; text-align: center;" src="https://download.mashaojie.cn/image/%E5%8A%A0%E6%88%91%E5%A5%BD%E5%8F%8B.jpg" alt="">
         </div>
         <div class="flex items-center justify-center text-center">
           <Icon500 class="w-[300px]" />

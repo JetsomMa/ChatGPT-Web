@@ -124,13 +124,13 @@ router.post('/chat-process', [auth, limiter], async (req, res) => {
       const nowDate = dateFormat(new Date(), 'yyyyMMdd')
 			if (querymethod === "ChatGPT4" && userinfo.status !== '1') {
 				console.error('您没有使用chatgpt4.0的权限，请联系管理员，微信：18514665919')
-				dbRecord.conversation = '您没有使用chatgpt4.0的权限，请联系管理员，微信：18514665919\n![](https://chat.mashaojie.cn/download/image/%E5%8A%A0%E6%88%91%E5%A5%BD%E5%8F%8B.jpg)'
+				dbRecord.conversation = '您没有使用chatgpt4.0的权限，请联系管理员，微信：18514665919\n![](https://download.mashaojie.cn/image/%E5%8A%A0%E6%88%91%E5%A5%BD%E5%8F%8B.jpg)'
 				dbRecord.finish_reason = 'stop'
 				res.write(JSON.stringify({ message: dbRecord.conversation }))
 			} else {
 				if (process.env.AUTH_SECRET_KEY && userinfo.status === '3') {
 					console.error('用户已被禁用，请联系管理员，微信：18514665919')
-					dbRecord.conversation = '用户已被禁用，请联系管理员，微信：18514665919\n![](https://chat.mashaojie.cn/download/image/%E5%8A%A0%E6%88%91%E5%A5%BD%E5%8F%8B.jpg)'
+					dbRecord.conversation = '用户已被禁用，请联系管理员，微信：18514665919\n![](https://download.mashaojie.cn/image/%E5%8A%A0%E6%88%91%E5%A5%BD%E5%8F%8B.jpg)'
 					dbRecord.finish_reason = 'stop'
 					res.write(JSON.stringify({ message: dbRecord.conversation }))
 				}
@@ -138,7 +138,7 @@ router.post('/chat-process', [auth, limiter], async (req, res) => {
 					// 如果用户已过期
 					if (querymethod === '画画') {
 						if (userinfo.dalleday <= 0 || userinfo.dallemonth <= 0) {
-							dbRecord.conversation = '画画功能超过每日1张免费限额，请联系管理员进行充值(包月25元，单张购买0.5元1张图)！微信：18514665919\n![](https://chat.mashaojie.cn/download/image/%E5%8A%A0%E6%88%91%E5%A5%BD%E5%8F%8B.jpg)'
+							dbRecord.conversation = '画画功能超过每日1张免费限额，请联系管理员进行充值(包月25元，单张购买0.5元1张图)！微信：18514665919\n![](https://download.mashaojie.cn/image/%E5%8A%A0%E6%88%91%E5%A5%BD%E5%8F%8B.jpg)'
 							res.write(JSON.stringify({ message: dbRecord.conversation }))
 						}
 						else {
@@ -165,7 +165,7 @@ router.post('/chat-process', [auth, limiter], async (req, res) => {
 					}
 					else if (querymethod === 'ChatGPT' || querymethod === 'ChatGPT16K') {
 						if (userinfo.chatgptday <= 0) {
-							dbRecord.conversation = '请联系管理员进行充值！微信：18514665919\n![](https://chat.mashaojie.cn/download/image/%E5%8A%A0%E6%88%91%E5%A5%BD%E5%8F%8B.jpg)'
+							dbRecord.conversation = '请联系管理员进行充值！微信：18514665919\n![](https://download.mashaojie.cn/image/%E5%8A%A0%E6%88%91%E5%A5%BD%E5%8F%8B.jpg)'
 							res.write(JSON.stringify({ message: dbRecord.conversation }))
 						}
 						else {
@@ -182,12 +182,12 @@ router.post('/chat-process', [auth, limiter], async (req, res) => {
 				else {
 					// 如果用户未过期
 					if(userinfo.balance <= 0 && userinfo.chatgptday <= 0) {
-						dbRecord.conversation = '您已欠费，请联系管理员充值！微信：18514665919\n![](https://chat.mashaojie.cn/download/image/%E5%8A%A0%E6%88%91%E5%A5%BD%E5%8F%8B.jpg)'
+						dbRecord.conversation = '您已欠费，请联系管理员充值！微信：18514665919\n![](https://download.mashaojie.cn/image/%E5%8A%A0%E6%88%91%E5%A5%BD%E5%8F%8B.jpg)'
 						res.write(JSON.stringify({ message: dbRecord.conversation }))
 					} else {
 						if (querymethod === '画画') {
 							if (userinfo.dallemonth <= 0 && userinfo.extenddalle <= 0) {
-								dbRecord.conversation = '画画功能超过每月5张免费限额，请联系管理员进行充值(包月25元，单张购买0.5元1张图)！微信：18514665919\n![](https://chat.mashaojie.cn/download/image/%E5%8A%A0%E6%88%91%E5%A5%BD%E5%8F%8B.jpg)'
+								dbRecord.conversation = '画画功能超过每月5张免费限额，请联系管理员进行充值(包月25元，单张购买0.5元1张图)！微信：18514665919\n![](https://download.mashaojie.cn/image/%E5%8A%A0%E6%88%91%E5%A5%BD%E5%8F%8B.jpg)'
 								res.write(JSON.stringify({ message: dbRecord.conversation }))
 							}
 							else {
@@ -222,7 +222,7 @@ router.post('/chat-process', [auth, limiter], async (req, res) => {
 						}
 						else {
 							if (querymethod !== "ChatGPT" && userinfo.balance <= 0) {
-								dbRecord.conversation = '您已欠费，请联系管理员充值！微信：18514665919\n![](https://chat.mashaojie.cn/download/image/%E5%8A%A0%E6%88%91%E5%A5%BD%E5%8F%8B.jpg)'
+								dbRecord.conversation = '您已欠费，请联系管理员充值！微信：18514665919\n![](https://download.mashaojie.cn/image/%E5%8A%A0%E6%88%91%E5%A5%BD%E5%8F%8B.jpg)'
 								res.write(JSON.stringify({ message: dbRecord.conversation }))
 							} else {
 								await chatProcess(prompt, querymethod, dbRecord, res, options, systemMessage, temperature)
@@ -245,11 +245,11 @@ router.post('/chat-process', [auth, limiter], async (req, res) => {
     }
     else {
       console.error('用户不存在，请联系管理员，微信：18514665919！')
-      res.write(JSON.stringify({ message: '用户不存在，请联系管理员，微信：18514665919\n![](https://chat.mashaojie.cn/download/image/%E5%8A%A0%E6%88%91%E5%A5%BD%E5%8F%8B.jpg)' }))
+      res.write(JSON.stringify({ message: '用户不存在，请联系管理员，微信：18514665919\n![](https://download.mashaojie.cn/image/%E5%8A%A0%E6%88%91%E5%A5%BD%E5%8F%8B.jpg)' }))
     }
   }
   catch (error) {
-    res.write(`${JSON.stringify(error)}\n请联系管理员，微信：18514665919\n![](https://chat.mashaojie.cn/download/image/%E5%8A%A0%E6%88%91%E5%A5%BD%E5%8F%8B.jpg)`)
+    res.write(`${JSON.stringify(error)}\n请联系管理员，微信：18514665919\n![](https://download.mashaojie.cn/image/%E5%8A%A0%E6%88%91%E5%A5%BD%E5%8F%8B.jpg)`)
   }
   finally {
     try {

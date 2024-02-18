@@ -15,7 +15,7 @@ export interface UserState {
 export function defaultSetting(): UserState {
   return {
     userInfo: {
-      avatar: 'https://chat.mashaojie.cn/download/image/avatar.jpg',
+      avatar: 'https://download.mashaojie.cn/image/avatar.jpg',
       name: 'Ma Shaojie',
       description: '<a href="https://blog.mashaojie.cn/9999/09/08/%E5%9B%BD%E5%86%85%E5%85%8D%E7%BF%BB%E7%9A%84ChatGPT%E5%92%8CMidjourney%E7%BD%91%E7%AB%99/" class="text-blue-500" target="_blank" >ChatGPT使用指南</a>',
     },

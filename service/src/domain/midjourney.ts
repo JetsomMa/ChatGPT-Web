@@ -151,12 +151,12 @@ export async function replyMidjourney(prompt, dbRecord, res, chatusername = '') 
       return response.localurl
     }
     else {
-      res && res.write(`\n${JSON.stringify({ text: `图片生成失败！！！${JSON.stringify(response)}\n请联系管理员，微信：18514665919\n![](https://chat.mashaojie.cn/download/image/%E5%8A%A0%E6%88%91%E5%A5%BD%E5%8F%8B.jpg)` })}`)
+      res && res.write(`\n${JSON.stringify({ text: `图片生成失败！！！${JSON.stringify(response)}\n请联系管理员，微信：18514665919\n![](https://download.mashaojie.cn/image/%E5%8A%A0%E6%88%91%E5%A5%BD%E5%8F%8B.jpg)` })}`)
       return `error: ${JSON.stringify(response)}`
     }
   }
   catch (error) {
-    res && res.write(`\n${JSON.stringify({ text: `图片生成失败！！！${JSON.stringify(error.message)}\n请联系管理员，微信：18514665919\n![](https://chat.mashaojie.cn/download/image/%E5%8A%A0%E6%88%91%E5%A5%BD%E5%8F%8B.jpg)` })}`)
+    res && res.write(`\n${JSON.stringify({ text: `图片生成失败！！！${JSON.stringify(error.message)}\n请联系管理员，微信：18514665919\n![](https://download.mashaojie.cn/image/%E5%8A%A0%E6%88%91%E5%A5%BD%E5%8F%8B.jpg)` })}`)
     console.warn('replyMidjourney -> ', error)
     return `error: ${error.message}`
   }
