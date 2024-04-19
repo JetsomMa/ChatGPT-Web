@@ -443,7 +443,7 @@ router.post('/verify', async (req, res) => {
           else {
             // const expired = dateFormat(getNthDayAfterToday(31), 'yyyyMMdd')
             const expired = '99999999'
-            await sqlDB.insert('userinfo', { username, telephone, password: CryptoJS.MD5(password).toString(), status: 1, remark, expired, chatgptday: 5, dallemonth: 10, dalleday: 2, extenddalle: 0 })
+            await sqlDB.insert('userinfo', { username, telephone, password: CryptoJS.MD5(password).toString(), status: 1, remark, expired, chatgptday: 5, balance: 3.0, dallemonth: 10, dalleday: 2, extenddalle: 0 })
 
             // 消息推送，用于用户激活
             try {

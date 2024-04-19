@@ -30,16 +30,16 @@ export async function replyChatGPT(prompt, dbRecord, res, options, systemMessage
     res.write(`\n${JSON.stringify(myChat)}`)
 
     if (myChat) {
-			console.error('myChat.detail.usage.total_tokens', myChat.detail.usage.total_tokens)
+      console.error('myChat.detail.usage.total_tokens', myChat.detail.usage.total_tokens)
 
-			dbRecord.totaltokens = myChat.detail.usage.total_tokens
-			if(dbRecord.querymethod == "ChatGPT4") {
-				dbRecord.tokenspay = dbRecord.totaltokens * 0.6 / 1000.0
-			} else if(dbRecord.querymethod == "ChatGPT16K") {
-				dbRecord.tokenspay = dbRecord.totaltokens * 0.04 / 1000.0
-			} else {
-				dbRecord.tokenspay = dbRecord.totaltokens * 0.02 / 1000.0
-			}
+      dbRecord.totaltokens = myChat.detail.usage.total_tokens
+      if (dbRecord.querymethod === 'ChatGPT4')
+        dbRecord.tokenspay = dbRecord.totaltokens * 0.6 / 1000.0
+			 else if (dbRecord.querymethod === 'ChatGPT16K')
+        dbRecord.tokenspay = dbRecord.totaltokens * 0.04 / 1000.0
+			 else
+        dbRecord.tokenspay = dbRecord.totaltokens * 0.02 / 1000.0
+
       dbRecord.conversation = myChat.text
       dbRecord.conversationId = myChat.id
       dbRecord.finish_reason = myChat.detail.choices[0].finish_reason

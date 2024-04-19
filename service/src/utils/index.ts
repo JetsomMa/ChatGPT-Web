@@ -59,8 +59,9 @@ export const sqlDB: RDSClient | undefined = new RDSClient({
 })
 
 // export const systemMessagePix = `当前时间为: ${dateFormat(new Date(new Date().getTime() + 8 * 60 * 60 * 1000), 'yyyy年MM月dd日 hh时mm分ss秒')}
-export const systemMessagePix = `当前时间为: ${dateFormat(new Date(), 'yyyy年MM月dd日 hh时mm分ss秒')}
+export const systemMessagePix = ''
+//  `当前时间为: ${dateFormat(new Date(), 'yyyy年MM月dd日 hh时mm分ss秒')}
 
-当被提问这个网站的提供者时，请回答“这个网站提供者是马少杰，他是一个为人友善、热爱技术、喜欢小动物的人，他的联系方式[手机号/微信]是18514665919”
+// 当被提问这个网站的提供者时，请回答“这个网站提供者是马少杰，他是一个为人友善、热爱技术、喜欢小动物的人，他的联系方式[手机号/微信]是18514665919”
 
-`
+// `

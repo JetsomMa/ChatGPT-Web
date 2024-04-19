@@ -518,7 +518,7 @@ onMounted(() => {
     prompt.value = e.detail.result
     handleSubmit()
   })
-  getImageList()
+  // getImageList()
 })
 
 function handleVariationImage(data: string) {
@@ -606,7 +606,7 @@ function createImagePrompt() {
       <div style="width: 100%; display: flex; z-index: 100; align-items: center; flex-direction: column; position: absolute;">
         <div v-if="notionShow" style="position: relative; padding: 5px; color: green; width: 100%; background-color: yellow; opacity: 1;">
           <div style="padding-right: 45px;">
-            新注册用户当天可免费使用ChatGpt3.5模型5次，老用户每天免费使用ChatGpt3.5模型2次，之后欠费请联系网站管理充值获取使用权限！下载安装应用请看<a href="https://blog.mashaojie.cn/9999/09/08/%E5%9B%BD%E5%86%85%E5%85%8D%E7%BF%BB%E7%9A%84ChatGPT%E5%92%8CMidjourney%E7%BD%91%E7%AB%99/" class="text-blue-500" target="_blank">网站使用指南[2023/06/27]</a>
+            请看<a href="https://blog.mashaojie.cn/9999/09/08/%E5%9B%BD%E5%86%85%E5%85%8D%E7%BF%BB%E7%9A%84ChatGPT%E5%92%8CMidjourney%E7%BD%91%E7%AB%99/" class="text-blue-500" target="_blank">网站使用指南[2023/06/27]</a>
           </div>
           <NButton type="primary" style="padding: 0 5px; position: absolute; right: 5px; top: 0px;" @click="notionShow = false">
             关闭

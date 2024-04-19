@@ -99,7 +99,7 @@ let ChatGptApi4: ChatGPTAPI | ChatGPTUnofficialProxyAPI
     ChatGptApi = new ChatGPTAPI({ ...options })
 
 		// gpt-4
-		const model4 = 'gpt-4'
+		const model4 = 'gpt-4-turbo'
 		const options4: ChatGPTAPIOptions = {
       apiKey: process.env.OPENAI_API_KEY,
       completionParams: { model: model4 },
@@ -158,7 +158,7 @@ async function chatReplyProcess(options: RequestOptions, type = "") {
 
     options.completionParams.temperature = temperature
 
-		if (type == "ChatGPT16K" && ChatGptApi16K) {
+		if (type === "ChatGPT16K" && ChatGptApi16K) {
 			const response = await ChatGptApi16K.sendMessage(message, {
 				...options,
 				onProgress: (partialResponse) => {
@@ -167,7 +167,7 @@ async function chatReplyProcess(options: RequestOptions, type = "") {
 			})
 
 			return sendResponse({ type: 'Success', data: response })
-		} else if (type == "ChatGPT4" && ChatGptApi4) {
+		} else if (type === "ChatGPT4" && ChatGptApi4) {
 			const response = await ChatGptApi4.sendMessage(message, {
 				...options,
 				onProgress: (partialResponse) => {
